@@ -136,9 +136,15 @@ export const MarketplaceView = ({ setActiveTab }) => {
 
     safeProfiles.forEach(p => {
       if (p && (p.role === 'influencer' || p.role === 'KOL')) {
-        const key = (p.id || p.email || p.full_name || '').toString().toLowerCase().trim();
+        const cleanName = (p.full_name || '').toString().toLowerCase().trim();
+        const cleanEmail = (p.email || '').toString().toLowerCase().trim();
+        const key = cleanName ? `name:${cleanName}` : (cleanEmail ? `email:${cleanEmail}` : `id:${p.id}`);
+
         if (key && !uniqueMap.has(key)) {
           uniqueMap.set(key, p);
+        } else if (key && uniqueMap.has(key)) {
+          const existing = uniqueMap.get(key);
+          uniqueMap.set(key, { ...existing, ...p });
         }
       }
     });

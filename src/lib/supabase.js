@@ -30,18 +30,8 @@ export const dataService = {
         const { data, error } = await supabase.from('profiles').select('*');
         if (!error && Array.isArray(data)) {
           const uniqueMap = new Map();
-          
-          // First load mockEngine local profiles
-          const localProfiles = mockEngine.getProfiles();
-          if (Array.isArray(localProfiles)) {
-            localProfiles.forEach(p => {
-              if (p && (p.id || p.full_name || p.email)) {
-                uniqueMap.set(getDedupeKey(p), p);
-              }
-            });
-          }
 
-          // Overlay Supabase profiles (Supabase database takes priority and merges fields)
+          // Deduplicate pure Supabase database records strictly by full_name, email, or ID
           data.forEach(p => {
             if (p && (p.id || p.full_name || p.email)) {
               const key = getDedupeKey(p);
