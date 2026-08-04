@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { dataService } from '../../lib/supabase';
 import { Button } from '../ui/Button';
 import LogoWhite from '../../assets/Logo_White.png';
 import { 
@@ -42,6 +43,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
   const { lang, setLang, t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(true);
+  const [pendingNotificationCount, setPendingNotificationCount] = useState(0);
 
   const isFullyOnboarded = Boolean(
     isAuthenticated && 
@@ -50,6 +52,48 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
     activeTab !== 'onboarding' && 
     activeTab !== 'role-selection'
   );
+
+  // Auto-check for pending collaboration requests directed to or initiated by the user
+  useEffect(() => {
+    if (!isAuthenticated || !currentProfile?.id) {
+      setPendingNotificationCount(0);
+      return;
+    }
+
+    const checkPendingNotifications = async () => {
+      try {
+        const [collabs, rateRequests] = await Promise.all([
+          dataService.getCollaborations(),
+          dataService.getRateCardRequests()
+        ]);
+
+        const myCollabs = (Array.isArray(collabs) ? collabs : []).filter(c => 
+          (c.influencer_id === currentProfile.id || c.brand_id === currentProfile.id) && c.status === 'pending'
+        );
+
+        const myRequests = (Array.isArray(rateRequests) ? rateRequests : []).map(r => ({
+          ...r,
+          brand_id: r.requester_id
+        })).filter(r => 
+          (r.influencer_id === currentProfile.id || r.brand_id === currentProfile.id) && r.status === 'pending'
+        );
+
+        const combined = [...myCollabs, ...myRequests];
+        const uniqueMap = new Map();
+        combined.forEach(p => {
+          if (p && p.id) uniqueMap.set(p.id, p);
+        });
+
+        setPendingNotificationCount(uniqueMap.size);
+      } catch (err) {
+        console.warn('Error checking pending notifications:', err);
+      }
+    };
+
+    checkPendingNotifications();
+    const interval = setInterval(checkPendingNotifications, 10000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated, currentProfile]);
 
   const serviceSubItems = [
     { 
@@ -228,7 +272,13 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2.5 bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700/90 px-3.5 py-1.5 rounded-full shadow transition-all cursor-pointer group">
+                    <button className="flex items-center gap-2.5 bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700/90 px-3.5 py-1.5 rounded-full shadow transition-all cursor-pointer group relative">
+                      {pendingNotificationCount > 0 && (
+                        <span className="absolute -top-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-black text-white animate-pulse shadow-lg ring-2 ring-slate-950">
+                          {pendingNotificationCount}
+                        </span>
+                      )}
+
                       <div className="flex items-center gap-1.5">
                         <User className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
                         <p className="text-xs font-extrabold text-white max-w-[120px] truncate">
@@ -244,20 +294,32 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                     </button>
                   </DropdownMenuTrigger>
 
-                  <DropdownMenuContent align="right" className="w-56 p-2 space-y-1">
+                  <DropdownMenuContent align="right" className="w-64 p-2 space-y-1">
                     <DropdownMenuLabel className="pb-2 border-b border-slate-800">
                       <p className="text-xs font-extrabold text-white truncate">{currentProfile.full_name}</p>
                       <p className="text-[10px] text-slate-400 font-medium capitalize mt-0.5">Peran: {roleStyle.label}</p>
                     </DropdownMenuLabel>
 
-                    {/* Status Kolaborasi Navigation */}
+                    {/* Status Kolaborasi Navigation with Notification Badge */}
                     <DropdownMenuItem 
                       onClick={() => setActiveTab('dashboard/collaborations')}
                       active={activeTab === 'dashboard/collaborations'}
-                      className="cursor-pointer font-semibold text-slate-200 hover:text-purple-300 py-2.5"
+                      className="cursor-pointer font-semibold text-slate-200 hover:text-purple-300 py-2.5 flex items-center justify-between"
                     >
-                      <Handshake className="w-4.5 h-4.5 text-purple-400 mr-2 shrink-0" />
-                      <span>Status Kolaborasi</span>
+                      <div className="flex items-center gap-2">
+                        <Handshake className="w-4.5 h-4.5 text-purple-400 shrink-0" />
+                        <span>Status Kolaborasi</span>
+                      </div>
+
+                      {pendingNotificationCount > 0 ? (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500 text-white animate-pulse shadow-md">
+                          {pendingNotificationCount} Baru
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                          Dashboard
+                        </span>
+                      )}
                     </DropdownMenuItem>
 
                     {/* Logout Option */}
@@ -340,10 +402,15 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                   size="sm"
                   variant="outline"
                   onClick={() => { setActiveTab('dashboard/collaborations'); setMobileMenuOpen(false); }}
-                  className="text-xs font-bold gap-1 text-purple-300 border-purple-500/30"
+                  className="text-xs font-bold gap-1 text-purple-300 border-purple-500/30 relative"
                 >
                   <Handshake className="w-4 h-4" />
                   <span>Kolaborasi</span>
+                  {pendingNotificationCount > 0 && (
+                    <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-rose-500 text-white animate-pulse">
+                      {pendingNotificationCount}
+                    </span>
+                  )}
                 </Button>
 
                 <Button
