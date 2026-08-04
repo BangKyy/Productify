@@ -201,7 +201,24 @@ export const MarketplaceView = ({ setActiveTab }) => {
     return parseFloat(str) || 250000;
   };
 
-  const filteredInfluencers = (influencers || [])
+  // Deduplicate raw influencers list by email / full_name / id
+  const rawInfluencers = (() => {
+    const map = new Map();
+    (influencers || []).forEach(inf => {
+      if (inf) {
+        const key = (inf.email || inf.full_name || inf.id || '').toString().toLowerCase().trim();
+        if (key && !map.has(key)) {
+          map.set(key, inf);
+        } else if (key && map.has(key)) {
+          // Merge to keep most complete profile data
+          map.set(key, { ...map.get(key), ...inf });
+        }
+      }
+    });
+    return Array.from(map.values());
+  })();
+
+  const filteredInfluencers = rawInfluencers
     .filter(inf => {
       if (!inf) return false;
 

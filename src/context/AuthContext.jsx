@@ -427,12 +427,20 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(true);
     setPendingUser(null);
 
-    // Update local profiles list state
+    // Update local profiles list state (deduplicated by id, email, or full_name)
     setProfiles(prev => {
-      const idx = prev.findIndex(p => p.id === finalProfile.id);
+      const cleanEmail = (finalProfile.email || '').toLowerCase().trim();
+      const cleanName = (finalProfile.full_name || '').toLowerCase().trim();
+
+      const idx = prev.findIndex(p => 
+        (p.id === finalProfile.id) ||
+        (cleanEmail && p.email?.toLowerCase().trim() === cleanEmail) ||
+        (cleanName && p.full_name?.toLowerCase().trim() === cleanName)
+      );
+
       if (idx !== -1) {
         const copy = [...prev];
-        copy[idx] = finalProfile;
+        copy[idx] = { ...copy[idx], ...finalProfile };
         return copy;
       }
       return [finalProfile, ...prev];

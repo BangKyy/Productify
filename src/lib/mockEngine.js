@@ -71,9 +71,17 @@ export const mockEngine = {
   },
   updateProfile: (id, updates) => {
     const list = getItem(STORAGE_KEYS.PROFILES, []);
-    const index = list.findIndex(p => p.id === id);
+    const cleanEmail = (updates.email || '').toLowerCase().trim();
+    const cleanName = (updates.full_name || '').toLowerCase().trim();
+
+    const index = list.findIndex(p => 
+      (id && p.id === id) ||
+      (cleanEmail && p.email?.toLowerCase().trim() === cleanEmail) ||
+      (cleanName && p.full_name?.toLowerCase().trim() === cleanName)
+    );
+
     if (index !== -1) {
-      list[index] = { ...list[index], ...updates };
+      list[index] = { ...list[index], ...updates, id: id || list[index].id };
       setItem(STORAGE_KEYS.PROFILES, list);
       return list[index];
     }

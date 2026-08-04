@@ -16,6 +16,12 @@ initMockStorage();
 export const dataService = {
   // Profiles
   async getProfiles() {
+    const getDedupeKey = (p) => {
+      if (p.email && p.email.trim()) return `email:${p.email.toLowerCase().trim()}`;
+      if (p.full_name && p.full_name.trim()) return `name:${p.full_name.toLowerCase().trim()}`;
+      return `id:${p.id || p.full_name}`;
+    };
+
     if (isSupabaseConfigured && supabase) {
       try {
         const { data, error } = await supabase.from('profiles').select('*');
@@ -26,17 +32,16 @@ export const dataService = {
           const localProfiles = mockEngine.getProfiles();
           if (Array.isArray(localProfiles)) {
             localProfiles.forEach(p => {
-              if (p && (p.id || p.full_name)) {
-                const key = (p.id || p.email || p.full_name).toString().toLowerCase().trim();
-                uniqueMap.set(key, p);
+              if (p && (p.id || p.full_name || p.email)) {
+                uniqueMap.set(getDedupeKey(p), p);
               }
             });
           }
 
-          // Overlay Supabase profiles
+          // Overlay Supabase profiles (Supabase database takes priority)
           data.forEach(p => {
-            if (p && (p.id || p.full_name)) {
-              const key = (p.id || p.email || p.full_name).toString().toLowerCase().trim();
+            if (p && (p.id || p.full_name || p.email)) {
+              const key = getDedupeKey(p);
               const existing = uniqueMap.get(key);
               uniqueMap.set(key, existing ? { ...existing, ...p } : p);
             }
@@ -48,7 +53,16 @@ export const dataService = {
         console.warn('Supabase fetch profiles warning:', err);
       }
     }
-    return mockEngine.getProfiles();
+
+    const list = mockEngine.getProfiles();
+    const uniqueMap = new Map();
+    list.forEach(p => {
+      if (p && (p.id || p.full_name || p.email)) {
+        const key = getDedupeKey(p);
+        if (!uniqueMap.has(key)) uniqueMap.set(key, p);
+      }
+    });
+    return Array.from(uniqueMap.values());
   },
 
   async getAdminProfiles() {
