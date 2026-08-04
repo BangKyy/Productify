@@ -13,6 +13,8 @@ import {
   PencilSimple
 } from '@phosphor-icons/react';
 
+import { compressImageFile } from '../../lib/imageCompressor';
+
 const PRESET_IMAGES = [
   'https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&q=80&w=600',
   'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&q=80&w=600',
@@ -49,7 +51,7 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
   });
   const [submittingEdit, setSubmittingEdit] = useState(false);
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -60,21 +62,18 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
       return;
     }
 
-    const maxSizeBytes = 100 * 1024; // 100 KB
-    if (file.size > maxSizeBytes) {
-      const sizeInKB = (file.size / 1024).toFixed(1);
-      toast.error(`Ukuran gambar terlalu besar (${sizeInKB} KB). Ukuran maksimal gambar yang diizinkan adalah 100 KB.`);
-      e.target.value = '';
-      return;
-    }
+    try {
+      toast.info('Mengompresi gambar produk secara otomatis...');
+      const { dataUrl, originalSizeKB, compressedSizeKB } = await compressImageFile(file, 100, 800);
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const dataUrl = event.target.result;
       setFormData(prev => ({ ...prev, image_url: dataUrl }));
-      toast.success('Gambar produk berhasil diunggah!');
-    };
-    reader.readAsDataURL(file);
+      toast.success(`Gambar produk berhasil dikompresi (${originalSizeKB} KB → ${compressedSizeKB} KB)!`);
+    } catch (err) {
+      console.error('Error compressing image:', err);
+      toast.error(err.message || 'Gagal mengompresi gambar. Silakan coba lagi.');
+    } finally {
+      e.target.value = '';
+    }
   };
 
   // Influencer Collaboration Pitch Modal State
@@ -188,7 +187,7 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
     setEditModalOpen(true);
   };
 
-  const handleEditImageUpload = (e) => {
+  const handleEditImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -199,21 +198,18 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
       return;
     }
 
-    const maxSizeBytes = 100 * 1024; // 100 KB
-    if (file.size > maxSizeBytes) {
-      const sizeInKB = (file.size / 1024).toFixed(1);
-      toast.error(`Ukuran gambar terlalu besar (${sizeInKB} KB). Ukuran maksimal gambar yang diizinkan adalah 100 KB.`);
-      e.target.value = '';
-      return;
-    }
+    try {
+      toast.info('Mengompresi gambar produk secara otomatis...');
+      const { dataUrl, originalSizeKB, compressedSizeKB } = await compressImageFile(file, 100, 800);
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const dataUrl = event.target.result;
       setEditFormData(prev => ({ ...prev, image_url: dataUrl }));
-      toast.success('Gambar produk berhasil diperbarui!');
-    };
-    reader.readAsDataURL(file);
+      toast.success(`Gambar produk berhasil diperbarui & dikompresi (${originalSizeKB} KB → ${compressedSizeKB} KB)!`);
+    } catch (err) {
+      console.error('Error compressing image:', err);
+      toast.error(err.message || 'Gagal mengompresi gambar. Silakan coba lagi.');
+    } finally {
+      e.target.value = '';
+    }
   };
 
   const handleUpdateProduct = async (e) => {
@@ -542,7 +538,7 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
                     <span>dari perangkat Anda</span>
                   </div>
                   <p className="text-[10px] text-slate-400">
-                    Format: <strong>WebP, PNG, JPG</strong> • Ukuran Maksimal: <strong className="text-amber-400">100 KB</strong>
+                    Format: <strong>WebP, PNG, JPG</strong> • <strong className="text-emerald-400">✨ Tanpa Batasan Ukuran (Auto-Kompresi System)</strong>
                   </p>
                   <input
                     id="file-upload"
@@ -821,7 +817,7 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
                         <span>dari perangkat Anda</span>
                       </div>
                       <p className="text-[10px] text-slate-400">
-                        Format: <strong>WebP, PNG, JPG</strong> • Ukuran Maksimal: <strong className="text-amber-400">100 KB</strong>
+                        Format: <strong>WebP, PNG, JPG</strong> • <strong className="text-emerald-400">✨ Tanpa Batasan Ukuran (Auto-Kompresi System)</strong>
                       </p>
                       <input
                         id="edit-file-upload"
