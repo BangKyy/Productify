@@ -17,9 +17,12 @@ export const dataService = {
   // Profiles
   async getProfiles() {
     const getDedupeKey = (p) => {
-      if (p.email && p.email.trim()) return `email:${p.email.toLowerCase().trim()}`;
-      if (p.full_name && p.full_name.trim()) return `name:${p.full_name.toLowerCase().trim()}`;
-      return `id:${p.id || p.full_name}`;
+      if (!p) return '';
+      const cleanName = (p.full_name || '').toString().toLowerCase().trim();
+      const cleanEmail = (p.email || '').toString().toLowerCase().trim();
+      if (cleanName) return `name:${cleanName}`;
+      if (cleanEmail) return `email:${cleanEmail}`;
+      return `id:${p.id}`;
     };
 
     if (isSupabaseConfigured && supabase) {
@@ -28,7 +31,7 @@ export const dataService = {
         if (!error && Array.isArray(data)) {
           const uniqueMap = new Map();
           
-          // First load mockEngine local profiles (e.g. newly registered / updated locally)
+          // First load mockEngine local profiles
           const localProfiles = mockEngine.getProfiles();
           if (Array.isArray(localProfiles)) {
             localProfiles.forEach(p => {
@@ -38,12 +41,26 @@ export const dataService = {
             });
           }
 
-          // Overlay Supabase profiles (Supabase database takes priority)
+          // Overlay Supabase profiles (Supabase database takes priority and merges fields)
           data.forEach(p => {
             if (p && (p.id || p.full_name || p.email)) {
               const key = getDedupeKey(p);
               const existing = uniqueMap.get(key);
-              uniqueMap.set(key, existing ? { ...existing, ...p } : p);
+              if (!existing) {
+                uniqueMap.set(key, p);
+              } else {
+                uniqueMap.set(key, {
+                  ...existing,
+                  ...p,
+                  bio: p.bio || existing.bio,
+                  phone_number: p.phone_number || existing.phone_number,
+                  address: p.address || existing.address,
+                  category: p.category || existing.category,
+                  gender: p.gender || existing.gender,
+                  followers: p.followers || existing.followers,
+                  rate_cards: (Array.isArray(p.rate_cards) && p.rate_cards.length > 0) ? p.rate_cards : existing.rate_cards
+                });
+              }
             }
           });
 

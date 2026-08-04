@@ -201,17 +201,33 @@ export const MarketplaceView = ({ setActiveTab }) => {
     return parseFloat(str) || 250000;
   };
 
-  // Deduplicate raw influencers list by email / full_name / id
+  // Deduplicate raw influencers list by full_name / email / id
   const rawInfluencers = (() => {
     const map = new Map();
     (influencers || []).forEach(inf => {
-      if (inf) {
-        const key = (inf.email || inf.full_name || inf.id || '').toString().toLowerCase().trim();
-        if (key && !map.has(key)) {
+      if (inf && (inf.full_name || inf.email || inf.id)) {
+        const cleanName = (inf.full_name || '').toString().toLowerCase().trim();
+        const cleanEmail = (inf.email || '').toString().toLowerCase().trim();
+        const key = cleanName ? `name:${cleanName}` : (cleanEmail ? `email:${cleanEmail}` : `id:${inf.id}`);
+
+        if (!map.has(key)) {
           map.set(key, inf);
-        } else if (key && map.has(key)) {
+        } else {
           // Merge to keep most complete profile data
-          map.set(key, { ...map.get(key), ...inf });
+          const prev = map.get(key);
+          map.set(key, {
+            ...prev,
+            ...inf,
+            bio: inf.bio || prev.bio,
+            phone_number: inf.phone_number || prev.phone_number,
+            address: inf.address || prev.address,
+            category: inf.category || prev.category,
+            gender: inf.gender || prev.gender,
+            social_tiktok: inf.social_tiktok || prev.social_tiktok,
+            social_instagram: inf.social_instagram || prev.social_instagram,
+            social_youtube: inf.social_youtube || prev.social_youtube,
+            rate_cards: (Array.isArray(inf.rate_cards) && inf.rate_cards.length > 0) ? inf.rate_cards : prev.rate_cards
+          });
         }
       }
     });

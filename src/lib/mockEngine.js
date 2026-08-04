@@ -1,7 +1,7 @@
 import { INITIAL_PROFILES, INITIAL_PRODUCTS, INITIAL_PRESS_RELEASES, INITIAL_COLLABORATIONS } from './initialData';
 
 const STORAGE_KEYS = {
-  PROFILES: 'productify_profiles_v4',
+  PROFILES: 'productify_profiles_v5',
   PRODUCTS: 'productify_products_v2',
   PRESS_RELEASES: 'productify_press_releases_v2',
   COLLABORATIONS: 'productify_collaborations_v2',
@@ -33,6 +33,7 @@ export const clearLegacyStorage = () => {
       'productify_profiles_v1',
       'productify_profiles_v2',
       'productify_profiles_v3',
+      'productify_profiles_v4',
       'productify_products_v1',
       'productify_press_releases_v1',
       'productify_collaborations_v1'
