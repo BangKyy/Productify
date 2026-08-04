@@ -88,6 +88,13 @@ export const dataService = {
     const validRoles = ['umkm', 'influencer', 'agency', 'admin'];
     const assignedRole = validRoles.includes(updates?.role) ? updates.role : 'umkm';
 
+    const parseGender = (val) => {
+      if (!val) return 'Perempuan';
+      const s = String(val).toLowerCase().trim();
+      if (s === 'laki-laki' || s === 'male' || s === 'pria' || s === 'l') return 'Laki-Laki';
+      return 'Perempuan';
+    };
+
     const profilePayload = {
       id: id || updates?.id || targetId || `user-${Date.now()}`,
       full_name: updates.full_name || 'Pengguna PRoductify',
@@ -97,7 +104,7 @@ export const dataService = {
       phone_number: updates.phone_number || (updates.phoneNumber || ''),
       address: updates.address || '',
       category: updates.category || updates.kol_category || '',
-      gender: updates.gender || 'female',
+      gender: parseGender(updates.gender),
       followers: updates.followers || '250k',
       social_tiktok: updates.social_tiktok || '',
       social_youtube: updates.social_youtube || '',

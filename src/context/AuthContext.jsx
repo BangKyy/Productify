@@ -393,7 +393,7 @@ export const AuthProvider = ({ children }) => {
       phone_number: phoneNumber || phone_number || userToSave.phone_number || '',
       address: address || userToSave.address || 'Indonesia',
       category: category || userToSave.category || '',
-      gender: gender || userToSave.gender || 'female',
+      gender: (gender || userToSave.gender || '').toString().toLowerCase().includes('laki') ? 'Laki-Laki' : 'Perempuan',
       followers: followers || userToSave.followers || '250k',
       social_tiktok: social_tiktok || userToSave.social_tiktok || '',
       social_youtube: social_youtube || userToSave.social_youtube || '',

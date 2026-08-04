@@ -256,7 +256,9 @@ export const MarketplaceView = ({ setActiveTab }) => {
       // Gender Filter
       let matchesGender = true;
       if (filterGender !== 'ALL') {
-        matchesGender = (inf.gender || '').toLowerCase() === filterGender.toLowerCase();
+        const g = (inf.gender || '').toLowerCase();
+        const target = filterGender.toLowerCase();
+        matchesGender = g === target || (target === 'perempuan' && (g === 'female' || g === 'wanita')) || (target === 'laki-laki' && (g === 'male' || g === 'pria'));
       }
 
       return matchesSearch && matchesCat && matchesCity && matchesPrice && matchesFollowers && matchesPlatform && matchesGender;
@@ -501,7 +503,7 @@ export const MarketplaceView = ({ setActiveTab }) => {
                     </span>
                     {kol.gender && (
                       <span className="flex items-center gap-1 text-slate-400">
-                        {kol.gender.toLowerCase() === 'female'
+                        {((kol.gender || '').toLowerCase() === 'perempuan' || (kol.gender || '').toLowerCase() === 'female')
                           ? <><GenderFemale className="w-3.5 h-3.5 text-rose-400" /><span className="text-rose-300 font-semibold">Wanita</span></>
                           : <><GenderMale className="w-3.5 h-3.5 text-blue-400" /><span className="text-blue-300 font-semibold">Pria</span></>
                         }
@@ -1047,8 +1049,8 @@ export const MarketplaceView = ({ setActiveTab }) => {
                   className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500 cursor-pointer"
                 >
                   <option value="ALL">Semua Gender</option>
-                  <option value="female">Wanita (Female)</option>
-                  <option value="male">Pria (Male)</option>
+                  <option value="Perempuan">Perempuan (Wanita)</option>
+                  <option value="Laki-Laki">Laki-Laki (Pria)</option>
                 </select>
               </div>
 
@@ -1116,7 +1118,7 @@ export const MarketplaceView = ({ setActiveTab }) => {
                           <>
                             <span className="text-slate-600">•</span>
                             <div className="flex items-center gap-1 font-semibold text-[11px]">
-                              {inf.gender.toLowerCase() === 'female' ? (
+                              {((inf.gender || '').toLowerCase() === 'perempuan' || (inf.gender || '').toLowerCase() === 'female') ? (
                                 <span className="inline-flex items-center gap-1 text-rose-300">
                                   <GenderFemale className="w-3.5 h-3.5 text-rose-400" />
                                   <span>Wanita</span>

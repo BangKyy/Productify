@@ -338,7 +338,7 @@ export const OverviewView = ({ setActiveTab }) => {
                           </span>
                           {inf.gender && (
                             <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400">
-                              • {inf.gender.toLowerCase() === 'female'
+                              • {((inf.gender || '').toLowerCase() === 'perempuan' || (inf.gender || '').toLowerCase() === 'female')
                                   ? <GenderFemale className="w-3 h-3 text-rose-400" />
                                   : <GenderMale className="w-3 h-3 text-blue-400" />}
                             </span>

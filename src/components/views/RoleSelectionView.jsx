@@ -66,7 +66,7 @@ export const RoleSelectionView = ({ setActiveTab }) => {
 
   // KOL Specific Profile Fields
   const [category, setCategory] = useState('Beauty & Skincare');
-  const [gender, setGender] = useState('female');
+  const [gender, setGender] = useState('Perempuan');
   const [followers, setFollowers] = useState('250k');
   const [socialTiktok, setSocialTiktok] = useState('');
   const [socialYoutube, setSocialYoutube] = useState('');
@@ -105,7 +105,7 @@ export const RoleSelectionView = ({ setActiveTab }) => {
         phone_number: phoneNumber || '+62 812-3456-7890',
         address: address || 'Jakarta, Indonesia',
         category: selectedRole === 'influencer' ? category : '',
-        gender: selectedRole === 'influencer' ? gender : 'female',
+        gender: selectedRole === 'influencer' ? gender : 'Perempuan',
         followers: selectedRole === 'influencer' ? followers : '250k',
         social_tiktok: selectedRole === 'influencer' ? socialTiktok : '',
         social_youtube: selectedRole === 'influencer' ? socialYoutube : '',
@@ -226,8 +226,8 @@ export const RoleSelectionView = ({ setActiveTab }) => {
                 onChange={(e) => setGender(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-purple-500 cursor-pointer"
               >
-                <option value="female">Wanita (Female)</option>
-                <option value="male">Pria (Male)</option>
+                <option value="Perempuan">Perempuan (Wanita)</option>
+                <option value="Laki-Laki">Laki-Laki (Pria)</option>
               </select>
             </div>
           </div>
@@ -291,8 +291,8 @@ export const RoleSelectionView = ({ setActiveTab }) => {
                   onChange={(e) => setGender(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500 cursor-pointer"
                 >
-                  <option value="female">Wanita (Female)</option>
-                  <option value="male">Pria (Male)</option>
+                  <option value="Perempuan">Perempuan (Wanita)</option>
+                  <option value="Laki-Laki">Laki-Laki (Pria)</option>
                 </select>
               </div>
 
