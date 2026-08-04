@@ -104,7 +104,7 @@ const ROLE_WORKFLOWS = {
 
 export const OverviewView = ({ setActiveTab }) => {
   const { t } = useLanguage();
-  const { profiles } = useAuth();
+  const { profiles, isAuthenticated } = useAuth();
 
   const [products, setProducts] = useState([]);
   const [influencers, setInfluencers] = useState([]);
@@ -646,18 +646,20 @@ export const OverviewView = ({ setActiveTab }) => {
               </h3>
             </div>
 
-            <Button
-              onClick={() => setActiveTab('signup')}
-              size="sm"
-              className={`gap-2 ${
-                activeRoleWorkflow === 'umkm' ? 'bg-purple-600 hover:bg-purple-500' :
-                activeRoleWorkflow === 'influencer' ? 'bg-amber-600 hover:bg-amber-500' :
-                'bg-blue-600 hover:bg-blue-500'
-              }`}
-            >
-              <span>Daftar {activeRoleWorkflow.toUpperCase()} Sekarang</span>
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+            {!isAuthenticated && (
+              <Button
+                onClick={() => setActiveTab('signup')}
+                size="sm"
+                className={`gap-2 ${
+                  activeRoleWorkflow === 'umkm' ? 'bg-purple-600 hover:bg-purple-500' :
+                  activeRoleWorkflow === 'influencer' ? 'bg-amber-600 hover:bg-amber-500' :
+                  'bg-blue-600 hover:bg-blue-500'
+                }`}
+              >
+                <span>Daftar {activeRoleWorkflow.toUpperCase()} Sekarang</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

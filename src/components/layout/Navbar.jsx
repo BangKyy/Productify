@@ -37,10 +37,18 @@ const ROLE_BADGE_STYLE = {
 };
 
 export const Navbar = ({ activeTab, setActiveTab }) => {
-  const { currentProfile, currentRole, isAuthenticated, logoutUser } = useAuth();
+  const { currentProfile, currentRole, isAuthenticated, pendingUser, logoutUser } = useAuth();
   const { lang, setLang, t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(true);
+
+  const isFullyOnboarded = Boolean(
+    isAuthenticated && 
+    currentProfile && 
+    !pendingUser && 
+    activeTab !== 'onboarding' && 
+    activeTab !== 'role-selection'
+  );
 
   const serviceSubItems = [
     { 
@@ -200,8 +208,8 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Logged In User Profile - Dropdown Badge */}
-            {isAuthenticated && currentProfile ? (
+            {/* Logged In User Profile - Dropdown Badge (Only displayed AFTER completing onboarding profile) */}
+            {isFullyOnboarded ? (
               <div className="flex items-center gap-3 border-l border-slate-800 pl-3">
                 
                 <DropdownMenu>
@@ -250,6 +258,12 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                 </DropdownMenu>
 
               </div>
+            ) : (pendingUser || activeTab === 'onboarding' || activeTab === 'role-selection') ? (
+              <div className="flex items-center gap-2 border-l border-slate-800 pl-3">
+                <span className="text-xs font-semibold text-purple-300 bg-purple-500/10 border border-purple-500/20 px-3 py-1 rounded-full animate-pulse">
+                  Menyelesaikan Profil...
+                </span>
+              </div>
             ) : (
               <div className="flex items-center gap-2 border-l border-slate-800 pl-3">
                 <Button
@@ -292,7 +306,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
       {mobileMenuOpen && (
         <div className="md:hidden glass-card border-b border-slate-800 px-4 pt-3 pb-6 space-y-4 animate-fade-in">
           
-          {isAuthenticated && currentProfile ? (
+          {isFullyOnboarded ? (
             <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
@@ -328,6 +342,12 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                   <span>Keluar</span>
                 </Button>
               </div>
+            </div>
+          ) : (pendingUser || activeTab === 'onboarding' || activeTab === 'role-selection') ? (
+            <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 text-center">
+              <span className="text-xs font-semibold text-purple-300 bg-purple-500/10 border border-purple-500/20 px-3 py-1.5 rounded-full inline-block animate-pulse">
+                Menyelesaikan Pengisian Profil...
+              </span>
             </div>
           ) : (
             <div className="flex items-center justify-between gap-2 p-2 bg-slate-900 rounded-xl border border-slate-800">
