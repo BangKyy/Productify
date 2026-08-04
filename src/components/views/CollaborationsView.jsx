@@ -14,7 +14,9 @@ import {
   InstagramLogo,
   ChatCircleText,
   User,
-  ArrowsClockwise
+  ArrowsClockwise,
+  ArrowUpRight,
+  EnvelopeSimple
 } from '@phosphor-icons/react';
 
 const STATUS_CONFIG = {
@@ -394,7 +396,17 @@ export const CollaborationsView = () => {
                             ? 'bg-purple-500/10 text-purple-300 border-purple-500/30' 
                             : 'bg-amber-500/10 text-amber-300 border-amber-500/30'
                         }`}>
-                          {isOutgoing ? '↗️ PENGAJUAN KELUAR (Anda Mengajak Kerja Sama)' : '📩 PERMINTAAN MASUK (Rate Card Request)'}
+                          {isOutgoing ? (
+                            <>
+                              <ArrowUpRight className="w-3.5 h-3.5 text-purple-400" />
+                              <span>PENGAJUAN KELUAR (Anda Mengajak Kerja Sama)</span>
+                            </>
+                          ) : (
+                            <>
+                              <EnvelopeSimple className="w-3.5 h-3.5 text-amber-400" />
+                              <span>PERMINTAAN MASUK (Rate Card Request)</span>
+                            </>
+                          )}
                         </span>
                         <span className="text-slate-500">•</span>
                         <span className="text-slate-400 font-medium">

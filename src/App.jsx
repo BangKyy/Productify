@@ -14,6 +14,7 @@ import { LoginView } from './components/views/LoginView';
 import { SignupView } from './components/views/SignupView';
 import { RoleSelectionView } from './components/views/RoleSelectionView';
 import { ForgotPasswordView } from './components/views/ForgotPasswordView';
+import { CollaborationActivityView } from './components/views/CollaborationActivityView';
 
 // Route path mappings
 const PATH_TO_TAB = {
@@ -24,6 +25,7 @@ const PATH_TO_TAB = {
   '/login': 'login',
   '/signup': 'signup',
   '/collaboration-status': 'dashboard/collaborations',
+  '/collaboration-activity': 'collaboration-activity',
   '/products': 'products',
   '/admin': 'admin',
   '/forgot-password': 'forgot-password',
@@ -39,6 +41,7 @@ const TAB_TO_PATH = {
   'signup': '/signup',
   'collaborations': '/collaboration-status',
   'dashboard/collaborations': '/collaboration-status',
+  'collaboration-activity': '/collaboration-activity',
   'products': '/products',
   'admin': '/admin',
   'forgot-password': '/forgot-password',
@@ -110,6 +113,8 @@ function AppContent() {
       case 'collaborations':
       case 'dashboard/collaborations':
         return <DashboardCollaborationsView setActiveTab={handleTabChange} />;
+      case 'collaboration-activity':
+        return <CollaborationActivityView setActiveTab={handleTabChange} />;
       case 'admin':
         return <AdminView setActiveTab={handleTabChange} />;
       case 'login':

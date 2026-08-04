@@ -26,7 +26,8 @@ import {
   Newspaper,
   House,
   ShieldCheck,
-  Sparkle
+  Sparkle,
+  ClockCounterClockwise
 } from '@phosphor-icons/react';
 
 const ROLE_BADGE_STYLE = {
@@ -165,7 +166,20 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* 3. Moderasi Admin (hanya tampil untuk role admin) */}
+            {/* 3. Aktivitas & Riwayat Kolaborasi Publik */}
+            <button
+              onClick={() => setActiveTab('collaboration-activity')}
+              className={`px-4 py-2 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'collaboration-activity'
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md glow-purple'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
+              }`}
+            >
+              <ClockCounterClockwise className="w-3.5 h-3.5 text-amber-400" />
+              <span>Aktivitas Kolaborasi</span>
+            </button>
+
+            {/* 4. Moderasi Admin (hanya tampil untuk role admin) */}
             {currentRole === 'admin' && (
               <button
                 onClick={() => setActiveTab('admin')}
@@ -196,12 +210,12 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
               <DropdownMenuContent align="right">
                 <DropdownMenuLabel>{t('nav.language')}</DropdownMenuLabel>
                 <DropdownMenuItem onClick={() => setLang('id')} active={lang === 'id'}>
-                  <span className="text-base mr-1">🇮🇩</span>
+                  <Globe className="w-4 h-4 text-purple-400 mr-2" />
                   <span className="flex-1">Bahasa Indonesia</span>
                   {lang === 'id' && <Check className="w-3.5 h-3.5 text-purple-400" />}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setLang('en')} active={lang === 'en'}>
-                  <span className="text-base mr-1">🇬🇧</span>
+                  <Globe className="w-4 h-4 text-blue-400 mr-2" />
                   <span className="flex-1">English (US)</span>
                   {lang === 'en' && <Check className="w-3.5 h-3.5 text-purple-400" />}
                 </DropdownMenuItem>
@@ -413,7 +427,21 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
               )}
             </div>
 
-            {/* 3. Mobile Moderasi Admin */}
+            {/* 3. Mobile Aktivitas Kolaborasi */}
+            <button
+              onClick={() => {
+                setActiveTab('collaboration-activity');
+                setMobileMenuOpen(false);
+              }}
+              className={`w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium ${
+                activeTab === 'collaboration-activity' ? 'bg-purple-600 text-white font-semibold' : 'text-slate-300 hover:bg-slate-800'
+              }`}
+            >
+              <ClockCounterClockwise className="w-4 h-4 text-amber-400" />
+              <span>Aktivitas Kolaborasi</span>
+            </button>
+
+            {/* 4. Mobile Moderasi Admin */}
             {currentRole === 'admin' && (
               <button
                 onClick={() => {

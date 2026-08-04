@@ -21,7 +21,8 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   Tray,
-  PaperPlaneTilt
+  PaperPlaneTilt,
+  Lightning
 } from '@phosphor-icons/react';
 
 const STATUS_MAP = {
@@ -264,13 +265,14 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
           }`}
         >
           <Tray className="w-4 h-4 text-emerald-300" />
-          <span>📥 Permintaan Masuk (Anda Diajak)</span>
+          <span>Permintaan Masuk (Anda Diajak)</span>
           <span className="px-2.5 py-0.5 rounded-full text-[11px] bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 font-extrabold">
             {incomingList.length}
           </span>
           {pendingIncomingList.length > 0 && (
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] bg-rose-500 text-white font-black animate-pulse shadow-md">
-              {pendingIncomingList.length} Perlu Tanggapan Anda
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] bg-rose-500 text-white font-black animate-pulse shadow-md flex items-center gap-1">
+              <Lightning className="w-3.5 h-3.5" />
+              <span>{pendingIncomingList.length} Perlu Tanggapan Anda</span>
             </span>
           )}
         </button>
@@ -284,7 +286,7 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
           }`}
         >
           <PaperPlaneTilt className="w-4 h-4 text-indigo-300" />
-          <span>📤 Pengajuan Keluar (Anda Mengajak)</span>
+          <span>Pengajuan Keluar (Anda Mengajak)</span>
           <span className="px-2.5 py-0.5 rounded-full text-[11px] bg-indigo-950/60 text-indigo-300 border border-indigo-500/40 font-extrabold">
             {outgoingList.length}
           </span>
@@ -371,18 +373,19 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
                     <div className="flex flex-wrap items-center gap-2">
                       <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs">
                         <ArrowDownLeft className="w-4 h-4 text-emerald-400 shrink-0" />
-                        <span>📥 PERMINTAAN MASUK (Anda Diajak Kerja Sama)</span>
+                        <span>PERMINTAAN MASUK (Anda Diajak Kerja Sama)</span>
                       </div>
                       {collab.status === 'pending' && (
-                        <span className="bg-rose-500 text-white font-black text-[11px] px-3 py-1 rounded-full animate-pulse shadow-md">
-                          ⚡ Perlu Tanggapan & Persetujuan Anda
+                        <span className="bg-rose-500 text-white font-black text-[11px] px-3 py-1 rounded-full animate-pulse shadow-md flex items-center gap-1">
+                          <Lightning className="w-3.5 h-3.5" />
+                          <span>Perlu Tanggapan & Persetujuan Anda</span>
                         </span>
                       )}
                     </div>
                   ) : (
                     <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 font-extrabold text-xs">
                       <ArrowUpRight className="w-4 h-4 text-indigo-400 shrink-0" />
-                      <span>📤 PENGAJUAN KELUAR (Anda Mengajak Kerja Sama)</span>
+                      <span>PENGAJUAN KELUAR (Anda Mengajak Kerja Sama)</span>
                     </div>
                   )}
 

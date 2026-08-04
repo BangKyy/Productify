@@ -466,7 +466,7 @@ export const MarketplaceView = ({ setActiveTab }) => {
         notes:              rateCardForm.notes
       });
 
-      toast.success(`✅ Request Rate Card berhasil dikirim ke ${rateCardTarget?.full_name}! Influencer akan segera merespons.`);
+      toast.success(`Request Rate Card berhasil dikirim ke ${rateCardTarget?.full_name}! Influencer akan segera merespons.`);
       setRateCardDialogOpen(false);
       // Reset form
       setRateCardForm({
