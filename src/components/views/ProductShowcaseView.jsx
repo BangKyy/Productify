@@ -10,7 +10,8 @@ import {
   X, 
   Trash,
   UploadSimple,
-  PencilSimple
+  PencilSimple,
+  CurrencyCircleDollar
 } from '@phosphor-icons/react';
 
 import { compressImageFile } from '../../lib/imageCompressor';
@@ -76,15 +77,11 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
     }
   };
 
-  // Influencer Collaboration Pitch Modal State
-  const [collabModalOpen, setCollabModalOpen] = useState(false);
-  const [selectedCollabProduct, setSelectedCollabProduct] = useState(null);
-  const [collabFormData, setCollabFormData] = useState({
-    project_title: '',
-    budget: '2500000',
-    notes: ''
-  });
-  const [submittingCollab, setSubmittingCollab] = useState(false);
+  // Rate Card Request Modal State
+  const [rateCardModalOpen, setRateCardModalOpen] = useState(false);
+  const [selectedRateCardProduct, setSelectedRateCardProduct] = useState(null);
+  const [rateCardNotes, setRateCardNotes] = useState('');
+  const [submittingRateCard, setSubmittingRateCard] = useState(false);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -257,28 +254,24 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
     }
   };
 
-  const handleOpenCollabModal = (product) => {
+  const handleOpenRateCardModal = (product) => {
     if (!isAuthenticated) {
-      toast.warning('Anda wajib masuk (login) terlebih dahulu untuk mengajukan kolaborasi.');
+      toast.warning('Anda wajib masuk (login) terlebih dahulu untuk mengirimkan Request Rate Card.');
       if (setActiveTab) setActiveTab('login');
       return;
     }
 
-    if (currentRole === 'umkm') {
-      toast.warning('Akun dengan peran Brand UMKM tidak dapat mengajukan kolaborasi ke sesama Brand UMKM. Kolaborasi produk hanya dapat diajukan oleh Influencer / KOL atau Agency PR.');
+    if (currentRole === 'influencer') {
+      toast.warning('Akun dengan peran Influencer / KOL tidak perlu melakukan Request Rate Card.');
       return;
     }
 
-    setSelectedCollabProduct(product);
-    setCollabFormData({
-      project_title: `Penawaran Endorsement KOL - ${product.title}`,
-      budget: '2500000',
-      notes: `Halo Brand Owner! Saya berkeinginan untuk mempromosikan produk "${product.title}" melalui konten kreatif (Reels / TikTok / Story)...`
-    });
-    setCollabModalOpen(true);
+    setSelectedRateCardProduct(product);
+    setRateCardNotes(`Saya ingin mengajukan Request Rate Card resmi untuk produk "${product.title}".`);
+    setRateCardModalOpen(true);
   };
 
-  const handleSubmitCollab = async (e) => {
+  const handleSubmitRateCardRequest = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
       toast.warning('Sesi Anda berakhir. Silakan login kembali.');
@@ -286,37 +279,31 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
       return;
     }
 
-    if (currentRole === 'umkm') {
-      toast.error('Akses ditolak: Sesama Brand UMKM tidak dapat mengajukan kolaborasi.');
+    if (currentRole === 'influencer') {
+      toast.error('Akun Influencer / KOL tidak dapat melakukan Request Rate Card.');
       return;
     }
 
-    if (!selectedCollabProduct || !collabFormData.project_title) return;
-    setSubmittingCollab(true);
+    if (!selectedRateCardProduct) return;
+    setSubmittingRateCard(true);
 
     try {
-      const initiatorTag = currentRole === 'agency' ? 'agency' : 'influencer';
-      await dataService.addCollaboration({
-        initiator: initiatorTag,
-        brand_id: selectedCollabProduct.owner_id,
-        influencer_id: currentProfile?.id,
-        project_title: collabFormData.project_title,
-        budget: Number(collabFormData.budget) || 0,
-        status: 'pending',
-        notes: `[Initiator: ${initiatorTag}] ${collabFormData.notes || ''}`.trim()
+      await dataService.addRateCardRequest({
+        requester_id: currentProfile?.id,
+        requester_name: currentProfile?.full_name || 'Brand / Agency',
+        product_id: selectedRateCardProduct.id,
+        product_title: selectedRateCardProduct.title,
+        notes: rateCardNotes || `Request Rate Card resmi untuk produk ${selectedRateCardProduct.title}`,
+        status: 'pending'
       });
 
-      toast.success(`Pengajuan kolaborasi untuk produk "${selectedCollabProduct.title}" berhasil dikirim!`);
-      setCollabModalOpen(false);
-
-      if (setActiveTab) {
-        setActiveTab('dashboard/collaborations');
-      }
+      toast.success(`Request Rate Card untuk produk "${selectedRateCardProduct.title}" berhasil dikirim!`);
+      setRateCardModalOpen(false);
     } catch (err) {
-      console.error('Error submitting influencer collaboration pitch:', err);
-      toast.error(err.message || 'Gagal mengirim pengajuan kolaborasi. Silakan coba lagi.');
+      console.error('Error submitting rate card request:', err);
+      toast.error(err.message || 'Gagal mengirim Request Rate Card. Silakan coba lagi.');
     } finally {
-      setSubmittingCollab(false);
+      setSubmittingRateCard(false);
     }
   };
 
@@ -450,22 +437,22 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
 
                   {/* Card Footer Actions */}
                   <div className="pt-4 border-t border-slate-800/80 flex items-center justify-end gap-2">
-                    {currentRole === 'umkm' ? (
+                    {currentRole === 'influencer' ? (
                       <button
                         disabled
                         className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-500 border border-slate-700/50 text-xs font-semibold cursor-not-allowed"
-                        title="Sesama Brand UMKM tidak dapat saling mengajukan kolaborasi produk"
+                        title="Akun Influencer tidak perlu mengirim Request Rate Card ke produk"
                       >
-                        <Handshake className="w-4 h-4 opacity-50" />
-                        <span>Sesama Brand UMKM</span>
+                        <CurrencyCircleDollar className="w-4 h-4 opacity-50" />
+                        <span>KOL Influencer</span>
                       </button>
                     ) : (
                       <button
-                        onClick={() => handleOpenCollabModal(product)}
+                        onClick={() => handleOpenRateCardModal(product)}
                         className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-slate-950 border border-amber-500/30 text-xs font-bold transition-all shadow-sm cursor-pointer"
                       >
-                        <Handshake className="w-4 h-4" />
-                        <span>Ajukan Kolaborasi</span>
+                        <CurrencyCircleDollar className="w-4 h-4" />
+                        <span>Request Rate Card</span>
                       </button>
                     )}
                   </div>
@@ -644,12 +631,12 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
         </div>
       )}
 
-      {/* Modal Ajukan Kolaborasi Influencer / KOL */}
-      {collabModalOpen && selectedCollabProduct && (
+      {/* Modal Request Rate Card Produk */}
+      {rateCardModalOpen && selectedRateCardProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
           <div className="glass-card max-w-lg w-full rounded-3xl p-6 sm:p-8 space-y-6 border-amber-500/40 relative max-h-[90vh] overflow-y-auto shadow-2xl">
             <button
-              onClick={() => setCollabModalOpen(false)}
+              onClick={() => setRateCardModalOpen(false)}
               className="absolute top-6 right-6 p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white"
             >
               <X className="w-5 h-5" />
@@ -657,66 +644,42 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
 
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold">
-                <Handshake className="w-4 h-4 text-amber-400" />
-                <span>Form Pengajuan Kolaborasi Influencer</span>
+                <CurrencyCircleDollar className="w-4 h-4 text-amber-400" />
+                <span>Form Request Rate Card Produk</span>
               </div>
               <h2 className="text-xl font-extrabold text-white">
-                Ajukan Penawaran KOL Ke Brand
+                Request Rate Card Resmi
               </h2>
               <p className="text-xs text-slate-400">
-                Kirim proposal penawaran endorsement atau promosi produk ini langsung ke pemilik brand UMKM.
+                Kirimkan permintaan rincian tarif rate card dan penawaran kerja sama resmi untuk produk ini.
               </p>
             </div>
 
             {/* Target Product Summary Card */}
             <div className="flex items-center gap-3.5 p-3.5 bg-slate-900/90 rounded-2xl border border-slate-800">
               <img
-                src={selectedCollabProduct.image_url}
-                alt={selectedCollabProduct.title}
+                src={selectedRateCardProduct.image_url}
+                alt={selectedRateCardProduct.title}
                 className="w-14 h-14 rounded-xl object-cover border border-slate-700 shrink-0"
               />
               <div className="space-y-0.5 overflow-hidden">
                 <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Produk Sasaran</p>
-                <h4 className="text-sm font-extrabold text-white truncate">{selectedCollabProduct.title}</h4>
+                <h4 className="text-sm font-extrabold text-white truncate">{selectedRateCardProduct.title}</h4>
                 <p className="text-[11px] text-slate-400 truncate">
-                  Pemilik Brand: <strong className="text-slate-200">{Array.isArray(profiles) ? (profiles.find(p => p.id === selectedCollabProduct.owner_id)?.full_name || 'Brand UMKM') : 'Brand UMKM'}</strong>
+                  Pemilik Brand: <strong className="text-slate-200">{Array.isArray(profiles) ? (profiles.find(p => p.id === selectedRateCardProduct.owner_id)?.full_name || 'Brand UMKM') : 'Brand UMKM'}</strong>
                 </p>
               </div>
             </div>
 
-            <form onSubmit={handleSubmitCollab} className="space-y-4">
+            <form onSubmit={handleSubmitRateCardRequest} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">Judul Proposal / Penawaran Kampanye</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Penawaran Endorsement Instagram Reels..."
-                  value={collabFormData.project_title}
-                  onChange={(e) => setCollabFormData({ ...collabFormData, project_title: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">Penawaran Rate / Budget Kerjasama (IDR)</label>
-                <input
-                  type="number"
-                  required
-                  placeholder="2500000"
-                  value={collabFormData.budget}
-                  onChange={(e) => setCollabFormData({ ...collabFormData, budget: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">Rencana Konten & Catatan Brief (Deliverables)</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">Pesan & Catatan Request Rate Card</label>
                 <textarea
                   required
                   rows={4}
-                  placeholder="Jelaskan jenis konten, konsep promosi, estimasi audience reach, dan kesediaan mengirimkan sampel produk..."
-                  value={collabFormData.notes}
-                  onChange={(e) => setCollabFormData({ ...collabFormData, notes: e.target.value })}
+                  placeholder="Jelaskan kebutuhan kampanye, durasi promosi, atau spesifikasi rate card yang ingin Anda minta..."
+                  value={rateCardNotes}
+                  onChange={(e) => setRateCardNotes(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500"
                 />
               </div>
@@ -724,17 +687,17 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
               <div className="pt-4 flex items-center justify-end gap-3">
                 <button
                   type="button"
-                  onClick={() => setCollabModalOpen(false)}
+                  onClick={() => setRateCardModalOpen(false)}
                   className="px-5 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  disabled={submittingCollab}
+                  disabled={submittingRateCard}
                   className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 text-xs font-extrabold shadow-lg hover:shadow-amber-500/20"
                 >
-                  {submittingCollab ? 'Mengirim Proposal...' : 'Kirim Pengajuan Kolaborasi'}
+                  {submittingRateCard ? 'Mengirim Request...' : 'Kirim Request Rate Card'}
                 </button>
               </div>
             </form>

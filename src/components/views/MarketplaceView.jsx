@@ -684,17 +684,6 @@ export const MarketplaceView = ({ setActiveTab }) => {
                   </button>
                 )}
 
-                {/* Ajukan Kerja Sama — hanya tampil jika bukan influencer */}
-                {currentRole !== 'influencer' && (
-                  <Button
-                    variant="gradientAmber"
-                    className="flex-1 justify-center py-3 shadow-lg shadow-amber-500/20"
-                    onClick={() => handleOpenPropose(kol)}
-                  >
-                    <Handshake className="w-4 h-4" />
-                    <span>Ajukan Kerja Sama</span>
-                  </Button>
-                )}
               </div>
             </div>
           </div>
@@ -1262,10 +1251,10 @@ export const MarketplaceView = ({ setActiveTab }) => {
                     variant="gradientAmber"
                     size="sm"
                     className="w-full justify-center shadow-md hover:shadow-amber-500/20"
-                    onClick={() => handleOpenPropose(inf)}
+                    onClick={() => handleOpenRateCard(inf)}
                   >
-                    <Handshake className="w-4 h-4" />
-                    <span>Ajukan Kerja Sama</span>
+                    <CurrencyCircleDollar className="w-4 h-4" />
+                    <span>Request Rate Card</span>
                   </Button>
                 )}
               </CardFooter>

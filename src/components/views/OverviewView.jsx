@@ -42,17 +42,17 @@ const ROLE_WORKFLOWS = {
     },
     {
       title: '2. Pajang Product Showcase',
-      desc: 'Unggah katalog produk unggulan lengkap dengan foto beresolusi tinggi & harga penawaran.',
+      desc: 'Unggah katalog produk unggulan lengkap dengan foto beresolusi tinggi & deskripsi penawaran.',
       action: 'Tampilkan Produk di Showcase'
     },
     {
-      title: '3. Cari & Ajukan Brief KOL',
-      desc: 'Jelajahi Marketplace KOL, filter sesuai domisili/rate card, lalu kirim proposal penawaran.',
-      action: 'Request Rate Card & Brief'
+      title: '3. Request Rate Card KOL',
+      desc: 'Jelajahi Marketplace KOL, filter sesuai domisili & spesialisasi, lalu kirimkan Request Rate Card resmi.',
+      action: 'Request Rate Card Influencer'
     },
     {
       title: '4. Pantau Status Kolaborasi',
-      desc: 'Kelola persetujuan budget, revisi brief, dan laporan hasil campaign secara real-time.',
+      desc: 'Kelola persetujuan rate card, negosiasi layanan, dan progres kampanye pada menu Status Kolaborasi.',
       action: 'Kelola Dashboard Kolaborasi'
     }
   ],
@@ -68,13 +68,13 @@ const ROLE_WORKFLOWS = {
       action: 'Atur Paket Rate Card'
     },
     {
-      title: '3. Terima Tawaran Campaign',
-      desc: 'Dapatkan notifikasi pengajuan kerja sama masuk dari brand UMKM yang tertarik dengan profil Anda.',
-      action: 'Terima Proposal Kolaborasi'
+      title: '3. Terima Request Rate Card',
+      desc: 'Dapatkan notifikasi permintaan rate card & penawaran kolaborasi masuk dari brand UMKM & Agency PR.',
+      action: 'Respon Request Rate Card'
     },
     {
-      title: '4. Eksekusi Brief & Content',
-      desc: 'Kerjakan konten sesuai rincian brief brand, unggah link postingan, dan dapatkan konfirmasi penyelesaian.',
+      title: '4. Eksekusi Konten & Kampanye',
+      desc: 'Kerjakan konten sesuai kesepakatan rate card, cantumkan bukti tayang, dan selesaikan kerja sama.',
       action: 'Selesaikan Project Kolaborasi'
     }
   ],
@@ -90,9 +90,9 @@ const ROLE_WORKFLOWS = {
       action: 'Rilis Press Release Digital'
     },
     {
-      title: '3. Kurasi Produk & Influencer',
-      desc: 'Jelajahi direktori Product Showcase & Marketplace KOL untuk mencocokkan strategi campaign klien.',
-      action: 'Kurasi Brand & KOL'
+      title: '3. Request Rate Card & Kurasi KOL',
+      desc: 'Jelajahi direktori Product Showcase & Marketplace KOL untuk mengirimkan Request Rate Card skala besar.',
+      action: 'Request Rate Card & Kurasi KOL'
     },
     {
       title: '4. Moderasi & Evaluasi PR',

@@ -35,7 +35,7 @@ const TRANSLATIONS = {
       cancel: 'Batal',
       submit: 'Kirim',
       close: 'Tutup',
-      propose: 'Ajukan Kerja Sama',
+      propose: 'Request Rate Card',
       addProduct: 'Tambah Produk Baru',
       publishPR: 'Publikasikan Press Release Baru',
       status: 'Status',
