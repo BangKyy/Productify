@@ -110,8 +110,8 @@ export const SignupView = ({ setActiveTab }) => {
                 type="email"
                 placeholder="nama@email.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                onChange={(e) => setEmail(e.target.value.toLowerCase())}
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors lowercase"
               />
             </div>
           </div>
