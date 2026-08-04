@@ -4,6 +4,7 @@ const TRANSLATIONS = {
   id: {
     nav: {
       home: 'Beranda',
+      featuresServices: 'Fitur & Layanan',
       pressReleases: 'Press Release',
       products: 'Product Showcase',
       collaborations: 'Marketplace KOL',
@@ -45,6 +46,7 @@ const TRANSLATIONS = {
   en: {
     nav: {
       home: 'Home',
+      featuresServices: 'Features & Services',
       pressReleases: 'Press Releases',
       products: 'Product Showcase',
       collaborations: 'KOL Marketplace',

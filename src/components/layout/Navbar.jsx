@@ -20,7 +20,13 @@ import {
   UserPlus,
   SignOut,
   User,
-  Handshake
+  Handshake,
+  Package,
+  UsersThree,
+  Newspaper,
+  House,
+  ShieldCheck,
+  Sparkle
 } from '@phosphor-icons/react';
 
 const ROLE_BADGE_STYLE = {
@@ -34,17 +40,37 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
   const { currentProfile, currentRole, isAuthenticated, logoutUser } = useAuth();
   const { lang, setLang, t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileServicesOpen, setMobileServicesOpen] = useState(true);
 
-  // Main navigation items (Status Kolaborasi is now in User Dropdown Menu)
-  const navItems = [
-    { id: 'overview', label: t('nav.home') },
-    { id: 'press-releases', label: t('nav.pressReleases') },
-    { id: 'products', label: t('nav.products') },
-    { id: 'marketplace', label: 'Marketplace KOL' },
-    ...(currentRole === 'admin' ? [{ id: 'admin', label: t('nav.admin') }] : [])
+  const serviceSubItems = [
+    { 
+      id: 'products', 
+      label: t('nav.products'), 
+      desc: 'Katalog produk unggulan UMKM & Brand',
+      icon: Package, 
+      color: 'text-amber-400',
+      bgColor: 'bg-amber-500/10 border-amber-500/20' 
+    },
+    { 
+      id: 'marketplace', 
+      label: 'Marketplace KOL', 
+      desc: 'Direktori & pengajuan kolaborasi influencer',
+      icon: UsersThree, 
+      color: 'text-purple-400',
+      bgColor: 'bg-purple-500/10 border-purple-500/20' 
+    },
+    { 
+      id: 'press-releases', 
+      label: t('nav.pressReleases'), 
+      desc: 'Publikasi & rilis berita pers digital',
+      icon: Newspaper, 
+      color: 'text-blue-400',
+      bgColor: 'bg-blue-500/10 border-blue-500/20' 
+    }
   ];
 
   const roleStyle = ROLE_BADGE_STYLE[currentRole] || ROLE_BADGE_STYLE.umkm;
+  const isServicesActive = serviceSubItems.some(sub => sub.id === activeTab);
 
   const handleLogout = () => {
     logoutUser();
@@ -69,23 +95,82 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
           </div>
 
           {/* Clean Desktop Links Navigation */}
-          <nav className="hidden md:flex items-center gap-1 bg-slate-800/60 p-1.5 rounded-full border border-slate-700/60">
-            {navItems.map((item) => {
-              const isActive = activeTab === item.id;
-              return (
+          <nav className="hidden md:flex items-center gap-1.5 bg-slate-800/60 p-1.5 rounded-full border border-slate-700/60">
+            {/* 1. Beranda */}
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`px-4 py-2 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                activeTab === 'overview'
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md glow-purple'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
+              }`}
+            >
+              <House className="w-3.5 h-3.5" />
+              <span>{t('nav.home')}</span>
+            </button>
+
+            {/* 2. Dropdown Menu: Fitur & Layanan (Product Showcase, Marketplace KOL, Press Release) */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
-                    isActive
+                  className={`px-4 py-2 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    isServicesActive
                       ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md glow-purple'
                       : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
                   }`}
                 >
-                  {item.label}
+                  <Sparkle className={`w-3.5 h-3.5 ${isServicesActive ? 'text-amber-300' : 'text-purple-400'}`} />
+                  <span>{t('nav.featuresServices') || 'Fitur & Layanan'}</span>
+                  <CaretDown className="w-3 h-3 text-slate-400" />
                 </button>
-              );
-            })}
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="center" className="w-72 p-2 space-y-1 bg-slate-900/95 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl">
+                <DropdownMenuLabel className="px-3 py-1.5 text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
+                  Layanan Terpadu PRoductify
+                </DropdownMenuLabel>
+
+                {serviceSubItems.map((sub) => {
+                  const Icon = sub.icon;
+                  const isSubActive = activeTab === sub.id;
+                  return (
+                    <DropdownMenuItem
+                      key={sub.id}
+                      onClick={() => setActiveTab(sub.id)}
+                      active={isSubActive}
+                      className="flex items-start gap-3 p-2.5 rounded-xl cursor-pointer hover:bg-slate-800/80 transition-all group"
+                    >
+                      <div className={`p-2 rounded-lg border ${sub.bgColor} group-hover:scale-105 transition-transform shrink-0`}>
+                        <Icon className={`w-4 h-4 ${sub.color}`} />
+                      </div>
+                      <div className="space-y-0.5">
+                        <p className={`text-xs font-bold ${isSubActive ? 'text-purple-300' : 'text-white group-hover:text-purple-200'}`}>
+                          {sub.label}
+                        </p>
+                        <p className="text-[10px] text-slate-400 line-clamp-1">
+                          {sub.desc}
+                        </p>
+                      </div>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* 3. Moderasi Admin (hanya tampil untuk role admin) */}
+            {currentRole === 'admin' && (
+              <button
+                onClick={() => setActiveTab('admin')}
+                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  activeTab === 'admin'
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{t('nav.admin')}</span>
+              </button>
+            )}
           </nav>
 
           {/* Right Side Controls: Language & Logged In User Dropdown Menu */}
@@ -255,24 +340,74 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
             </div>
           )}
 
-          <div className="border-t border-slate-800 pt-3 space-y-1">
-            {navItems.map((item) => {
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium ${
-                    isActive ? 'bg-purple-600 text-white font-semibold' : 'text-slate-300 hover:bg-slate-800'
-                  }`}
-                >
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
+          <div className="border-t border-slate-800 pt-3 space-y-2">
+            {/* 1. Mobile Beranda */}
+            <button
+              onClick={() => {
+                setActiveTab('overview');
+                setMobileMenuOpen(false);
+              }}
+              className={`w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium ${
+                activeTab === 'overview' ? 'bg-purple-600 text-white font-semibold' : 'text-slate-300 hover:bg-slate-800'
+              }`}
+            >
+              <House className="w-4 h-4" />
+              <span>{t('nav.home')}</span>
+            </button>
+
+            {/* 2. Mobile Dropdown / Sub-menu: Fitur & Layanan */}
+            <div className="p-2 rounded-xl bg-slate-900/60 border border-slate-800/80 space-y-1">
+              <button
+                onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider"
+              >
+                <div className="flex items-center gap-2">
+                  <Sparkle className="w-4 h-4 text-purple-400" />
+                  <span>{t('nav.featuresServices') || 'Fitur & Layanan'}</span>
+                </div>
+                <CaretDown className={`w-3.5 h-3.5 transition-transform ${mobileServicesOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {mobileServicesOpen && (
+                <div className="space-y-1 pl-2 border-l border-slate-800 mt-1">
+                  {serviceSubItems.map(sub => {
+                    const Icon = sub.icon;
+                    const isSubActive = activeTab === sub.id;
+                    return (
+                      <button
+                        key={sub.id}
+                        onClick={() => {
+                          setActiveTab(sub.id);
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
+                          isSubActive ? 'bg-purple-600/30 text-purple-300 border border-purple-500/40' : 'text-slate-300 hover:bg-slate-800'
+                        }`}
+                      >
+                        <Icon className={`w-4 h-4 ${sub.color}`} />
+                        <span>{sub.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* 3. Mobile Moderasi Admin */}
+            {currentRole === 'admin' && (
+              <button
+                onClick={() => {
+                  setActiveTab('admin');
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium ${
+                  activeTab === 'admin' ? 'bg-emerald-600 text-white font-semibold' : 'text-slate-300 hover:bg-slate-800'
+                }`}
+              >
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>{t('nav.admin')}</span>
+              </button>
+            )}
           </div>
         </div>
       )}
