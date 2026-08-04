@@ -31,8 +31,76 @@ const PRESET_IMAGES = [
   'https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&q=80&w=600',
   'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&q=80&w=600',
   'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=600',
-  'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&q=80&w=600'
 ];
+
+const ROLE_WORKFLOWS = {
+  umkm: [
+    {
+      title: '1. Registrasi Profil UMKM',
+      desc: 'Buat akun bisnis Anda secara gratis, lengkapi identitas brand, sektor industri, dan lokasi usaha.',
+      action: 'Akses Form Registrasi UMKM'
+    },
+    {
+      title: '2. Pajang Product Showcase',
+      desc: 'Unggah katalog produk unggulan lengkap dengan foto beresolusi tinggi & harga penawaran.',
+      action: 'Tampilkan Produk di Showcase'
+    },
+    {
+      title: '3. Cari & Ajukan Brief KOL',
+      desc: 'Jelajahi Marketplace KOL, filter sesuai domisili/rate card, lalu kirim proposal penawaran.',
+      action: 'Request Rate Card & Brief'
+    },
+    {
+      title: '4. Pantau Status Kolaborasi',
+      desc: 'Kelola persetujuan budget, revisi brief, dan laporan hasil campaign secara real-time.',
+      action: 'Kelola Dashboard Kolaborasi'
+    }
+  ],
+  influencer: [
+    {
+      title: '1. Registrasi Profil KOL',
+      desc: 'Daftar sebagai Influencer, pilih kategori spesialisasi (Beauty, Tech, Fashion) & tautkan akun media sosial.',
+      action: 'Akses Form Registrasi KOL'
+    },
+    {
+      title: '2. Kelola Rate Card Resmi',
+      desc: 'Daftarkan jenis postingan (TikTok Video, IG Reels, Story, YouTube) beserta tarif harga resminya.',
+      action: 'Atur Paket Rate Card'
+    },
+    {
+      title: '3. Terima Tawaran Campaign',
+      desc: 'Dapatkan notifikasi pengajuan kerja sama masuk dari brand UMKM yang tertarik dengan profil Anda.',
+      action: 'Terima Proposal Kolaborasi'
+    },
+    {
+      title: '4. Eksekusi Brief & Content',
+      desc: 'Kerjakan konten sesuai rincian brief brand, unggah link postingan, dan dapatkan konfirmasi penyelesaian.',
+      action: 'Selesaikan Project Kolaborasi'
+    }
+  ],
+  agency: [
+    {
+      title: '1. Registrasi Agency PR',
+      desc: 'Daftarkan entitas agency PR atau media resmi Anda untuk mengelola publisitas & klien brand.',
+      action: 'Akses Form Agency PR'
+    },
+    {
+      title: '2. Terbitkan Press Release',
+      desc: 'Publikasikan siaran pers digital resmi untuk peluncuran produk atau pengumuman penting brand.',
+      action: 'Rilis Press Release Digital'
+    },
+    {
+      title: '3. Kurasi Produk & Influencer',
+      desc: 'Jelajahi direktori Product Showcase & Marketplace KOL untuk mencocokkan strategi campaign klien.',
+      action: 'Kurasi Brand & KOL'
+    },
+    {
+      title: '4. Moderasi & Evaluasi PR',
+      desc: 'Gunakan fitur moderasi dan analitik laporan kampanye untuk memastikan jangkauan berita terbit maksimal.',
+      action: 'Evaluasi Jangkauan Media'
+    }
+  ]
+};
 
 export const OverviewView = ({ setActiveTab }) => {
   const { t } = useLanguage();
@@ -42,6 +110,7 @@ export const OverviewView = ({ setActiveTab }) => {
   const [influencers, setInfluencers] = useState([]);
   const [pressReleases, setPressReleases] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeRoleWorkflow, setActiveRoleWorkflow] = useState('umkm');
 
   useEffect(() => {
     const loadHomeContent = async () => {
@@ -475,6 +544,157 @@ export const OverviewView = ({ setActiveTab }) => {
             })}
           </div>
         )}
+      </section>
+
+      {/* ========================================================================= */}
+      {/* SECTION 4: ALUR KOLABORASI 3 PENGGUNA (UMKM, Influencer, Agency PR)       */}
+      {/* ========================================================================= */}
+      <section className="space-y-8 pt-6 border-t border-slate-800/80">
+        <div className="text-center space-y-3 max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider bg-amber-500/10 px-3.5 py-1.5 rounded-full border border-amber-500/20 shadow-sm">
+            <Sparkle className="w-4 h-4 text-amber-400" /> Alur kerja & kolaborasi platform
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-black text-white">
+            Cara Mudah Berkolaborasi Sesuai Peran Anda
+          </h2>
+          <p className="text-sm text-slate-400 leading-relaxed">
+            Temukan panduan langkah demi langkah untuk memanfaatkan layanan PRoductify secara maksimal, baik sebagai pemilik bisnis UMKM, Kreator Konten/KOL, maupun Agency PR & Jurnalis Media.
+          </p>
+        </div>
+
+        {/* Dynamic Role Tab Buttons */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
+          {/* Tab 1: UMKM & Brand */}
+          <button
+            onClick={() => setActiveRoleWorkflow('umkm')}
+            className={`glass-card p-5 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-4 ${
+              activeRoleWorkflow === 'umkm'
+                ? 'border-purple-500 bg-purple-950/20 shadow-lg glow-purple scale-[1.02]'
+                : 'border-slate-800 hover:border-purple-500/40 hover:bg-slate-900/60'
+            }`}
+          >
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+              activeRoleWorkflow === 'umkm' ? 'bg-purple-600 text-white' : 'bg-purple-500/20 text-purple-400'
+            }`}>
+              <Storefront className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-purple-400 uppercase tracking-wider">Peran 01</p>
+              <h3 className="text-base font-bold text-white">UMKM & Brand</h3>
+              <p className="text-[11px] text-slate-400">Promosi produk & kolaborasi KOL</p>
+            </div>
+          </button>
+
+          {/* Tab 2: Influencer & KOL */}
+          <button
+            onClick={() => setActiveRoleWorkflow('influencer')}
+            className={`glass-card p-5 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-4 ${
+              activeRoleWorkflow === 'influencer'
+                ? 'border-amber-500 bg-amber-950/20 shadow-lg glow-amber scale-[1.02]'
+                : 'border-slate-800 hover:border-amber-500/40 hover:bg-slate-900/60'
+            }`}
+          >
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+              activeRoleWorkflow === 'influencer' ? 'bg-amber-600 text-white' : 'bg-amber-500/20 text-amber-400'
+            }`}>
+              <UsersThree className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-amber-400 uppercase tracking-wider">Peran 02</p>
+              <h3 className="text-base font-bold text-white">Influencer & KOL</h3>
+              <p className="text-[11px] text-slate-400">Monetisasi rate card & endorsement</p>
+            </div>
+          </button>
+
+          {/* Tab 3: Agency PR / Media */}
+          <button
+            onClick={() => setActiveRoleWorkflow('agency')}
+            className={`glass-card p-5 rounded-2xl border text-left transition-all cursor-pointer flex items-center gap-4 ${
+              activeRoleWorkflow === 'agency'
+                ? 'border-blue-500 bg-blue-950/20 shadow-lg glow-blue scale-[1.02]'
+                : 'border-slate-800 hover:border-blue-500/40 hover:bg-slate-900/60'
+            }`}
+          >
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+              activeRoleWorkflow === 'agency' ? 'bg-blue-600 text-white' : 'bg-blue-500/20 text-blue-400'
+            }`}>
+              <Newspaper className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-blue-400 uppercase tracking-wider">Peran 03</p>
+              <h3 className="text-base font-bold text-white">Agency PR & Media</h3>
+              <p className="text-[11px] text-slate-400">Publikasi siaran pers & kampanye PR</p>
+            </div>
+          </button>
+        </div>
+
+        {/* 4-Step Cards Grid for Selected Role */}
+        <div className="glass-card p-6 sm:p-8 rounded-3xl border-slate-800 bg-slate-900/40 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+            <div>
+              <span className={`text-xs font-extrabold uppercase px-3 py-1 rounded-full border ${
+                activeRoleWorkflow === 'umkm' ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' :
+                activeRoleWorkflow === 'influencer' ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' :
+                'bg-blue-500/20 text-blue-300 border-blue-500/40'
+              }`}>
+                Alur Kerja {activeRoleWorkflow === 'umkm' ? 'UMKM / Brand' : activeRoleWorkflow === 'influencer' ? 'Influencer / KOL' : 'Agency PR / Media'}
+              </span>
+              <h3 className="text-xl font-bold text-white mt-2">
+                {activeRoleWorkflow === 'umkm' && '4 Langkah Mudah Promosikan Bisnis & Gaet Influencer'}
+                {activeRoleWorkflow === 'influencer' && '4 Langkah Dapatkan Tawaran Endorsement & Monetisasi Profil'}
+                {activeRoleWorkflow === 'agency' && '4 Langkah Kelola Publisitas Media & Kampanye Brand'}
+              </h3>
+            </div>
+
+            <Button
+              onClick={() => setActiveTab('signup')}
+              size="sm"
+              className={`gap-2 ${
+                activeRoleWorkflow === 'umkm' ? 'bg-purple-600 hover:bg-purple-500' :
+                activeRoleWorkflow === 'influencer' ? 'bg-amber-600 hover:bg-amber-500' :
+                'bg-blue-600 hover:bg-blue-500'
+              }`}
+            >
+              <span>Daftar {activeRoleWorkflow.toUpperCase()} Sekarang</span>
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {(ROLE_WORKFLOWS[activeRoleWorkflow] || ROLE_WORKFLOWS.umkm).map((stepItem, idx) => (
+              <div
+                key={idx}
+                className="glass-card p-5 rounded-2xl border-slate-800/80 bg-slate-950/60 flex flex-col justify-between space-y-4 hover:border-slate-700 transition-all group"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className={`w-8 h-8 rounded-xl font-black text-xs flex items-center justify-center ${
+                      activeRoleWorkflow === 'umkm' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' :
+                      activeRoleWorkflow === 'influencer' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
+                      'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                    }`}>
+                      0{idx + 1}
+                    </span>
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Langkah {idx + 1}</span>
+                  </div>
+
+                  <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition-colors">
+                    {stepItem.title}
+                  </h4>
+
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    {stepItem.desc}
+                  </p>
+                </div>
+
+                <div className="pt-3 border-t border-slate-900 text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
+                  <Handshake className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                  <span className="truncate">{stepItem.action}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
     </div>
