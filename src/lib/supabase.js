@@ -122,9 +122,11 @@ export const dataService = {
 
         if (error) {
           console.error('Supabase profile upsert error:', error);
+          throw new Error(`Gagal menyimpan ke database: ${error.message || error.details || 'Akses ditolak oleh RLS Policy'}`);
         }
       } catch (err) {
         console.error('Supabase updateProfile catch error:', err);
+        throw err;
       }
     }
     return mockEngine.updateProfile(profilePayload.id, { ...updates, ...profilePayload });

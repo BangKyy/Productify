@@ -340,16 +340,6 @@ export const AuthProvider = ({ children }) => {
 
         if (data?.user) {
           userId = data.user.id;
-          // Create initial profile record in public.profiles table
-          await dataService.updateProfile(userId, {
-            id: userId,
-            full_name: fullName,
-            role: 'umkm',
-            avatar_url: '',
-            bio: '',
-            phone_number: '',
-            address: ''
-          });
         }
       } catch (e) {
         if (e.message && e.message.includes('sudah terdaftar')) throw e;
@@ -357,6 +347,8 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
+    // Do NOT create profile record with default role here.
+    // Profile record will be created ONLY when user submits onboarding form in Step 2.
     const newPending = { id: userId, full_name: fullName, email, password };
     setPendingUser(newPending);
     setIsAuthenticated(false);
@@ -384,18 +376,20 @@ export const AuthProvider = ({ children }) => {
       rate_cards
     } = onboardingData || {};
 
-    const userToSave = pendingUser || currentProfile || {
-      id: `user-${Date.now()}`,
-      full_name: 'Pengguna Baru PRoductify'
-    };
+    if (!pendingUser && !currentProfile) {
+      throw new Error('Sesi pendaftaran tidak ditemukan. Silakan lakukan pendaftaran ulang.');
+    }
+
+    const userToSave = pendingUser || currentProfile;
+    const targetRole = role || 'influencer';
 
     const profileData = {
       id: userToSave.id,
       full_name: userToSave.full_name || 'Pengguna PRoductify',
       email: userToSave.email || '',
-      role: role || 'influencer',
+      role: targetRole,
       avatar_url: avatarUrl || avatar_url || userToSave.avatar_url || '',
-      bio: bio || `Profil resmi ${role ? role.toUpperCase() : 'INFLUENCER'} di platform PRoductify.`,
+      bio: bio || `Profil resmi ${targetRole.toUpperCase()} di platform PRoductify.`,
       phone_number: phoneNumber || phone_number || userToSave.phone_number || '',
       address: address || userToSave.address || 'Indonesia',
       category: category || userToSave.category || '',
@@ -410,10 +404,18 @@ export const AuthProvider = ({ children }) => {
       rate_cards: Array.isArray(rate_cards) ? rate_cards : []
     };
 
-    const saved = await dataService.updateProfile(profileData.id, profileData);
+    // Save profile to database (Will THROW if database error / RLS rejection occurs)
+    let saved;
+    try {
+      saved = await dataService.updateProfile(profileData.id, profileData);
+    } catch (err) {
+      console.error('completeRoleOnboarding error:', err);
+      throw new Error(`Gagal menyimpan profil ${targetRole.toUpperCase()} ke database: ${err.message || 'Koneksi terganggu'}. Silakan coba lagi.`);
+    }
+
     const finalProfile = { ...profileData, ...(saved || {}) };
 
-    // Persist active profile ID and role to localStorage IMMEDIATELY
+    // Persist active profile ID and role to localStorage ONLY AFTER SUCCESSFUL DB SAVE
     if (finalProfile.id) {
       localStorage.setItem('productify_active_profile_id', finalProfile.id);
     }
@@ -425,7 +427,7 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(true);
     setPendingUser(null);
 
-    // Update local profiles list state without full reload
+    // Update local profiles list state
     setProfiles(prev => {
       const idx = prev.findIndex(p => p.id === finalProfile.id);
       if (idx !== -1) {
