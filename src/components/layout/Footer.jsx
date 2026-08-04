@@ -1,0 +1,147 @@
+import React from 'react';
+import { useAuth } from '../../context/AuthContext';
+import LogoWhite from '../../assets/Logo_White.png';
+import { 
+  InstagramLogo, 
+  LinkedinLogo, 
+  XLogo, 
+  YoutubeLogo, 
+  EnvelopeSimple,
+  ArrowUpRight 
+} from '@phosphor-icons/react';
+
+export const Footer = ({ setActiveTab }) => {
+  const { isAuthenticated } = useAuth();
+  return (
+    <footer className="bg-slate-950 border-t border-slate-800/80 pt-16 pb-12 mt-20 text-slate-400">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
+          
+          {/* Col 1: Brand Info with Logo_White.png */}
+          <div className="space-y-4 md:col-span-1">
+            <div className="flex items-center gap-3">
+              <img 
+                src={LogoWhite} 
+                alt="PRoductify Logo" 
+                className="h-9 w-auto object-contain" 
+              />
+            </div>
+            <p className="text-sm leading-relaxed text-slate-400">
+              Ekosistem Digital Public Relations terpadu yang memberdayakan UMKM, Startup, Agency Media, dan Influencer/KOL Indonesia.
+            </p>
+          </div>
+
+          {/* Col 2: Navigation Links */}
+          <div>
+            <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Navigasi Utama</h4>
+            <ul className="space-y-2.5 text-sm">
+              <li>
+                <button onClick={() => setActiveTab('overview')} className="hover:text-purple-400 transition-colors">
+                  Beranda / Overview
+                </button>
+              </li>
+              <li>
+                <button onClick={() => setActiveTab('press-releases')} className="hover:text-purple-400 transition-colors">
+                  Direktori Press Release
+                </button>
+              </li>
+              <li>
+                <button onClick={() => setActiveTab('products')} className="hover:text-purple-400 transition-colors">
+                  Product Showcase
+                </button>
+              </li>
+              <li>
+                <button onClick={() => setActiveTab('marketplace')} className="hover:text-purple-400 transition-colors">
+                  Marketplace KOL
+                </button>
+              </li>
+              {isAuthenticated && (
+                <li>
+                  <button onClick={() => setActiveTab('dashboard/collaborations')} className="hover:text-purple-400 transition-colors">
+                    Status Kolaborasi
+                  </button>
+                </li>
+              )}
+            </ul>
+          </div>
+
+          {/* Col 3: Social Media PRoductify */}
+          <div>
+            <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Sosial Media PRoductify</h4>
+            <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+              Ikuti kabar dan update siaran pers terbaru melalui saluran komunikasi resmi kami:
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noreferrer"
+                className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-purple-400 hover:border-purple-500/50 hover:scale-105 transition-all"
+                title="Instagram PRoductify"
+              >
+                <InstagramLogo className="w-5 h-5" />
+              </a>
+
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noreferrer"
+                className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-blue-400 hover:border-blue-500/50 hover:scale-105 transition-all"
+                title="LinkedIn PRoductify"
+              >
+                <LinkedinLogo className="w-5 h-5" />
+              </a>
+
+              <a
+                href="https://x.com"
+                target="_blank"
+                rel="noreferrer"
+                className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-sky-400 hover:border-sky-500/50 hover:scale-105 transition-all"
+                title="X / Twitter PRoductify"
+              >
+                <XLogo className="w-5 h-5" />
+              </a>
+
+              <a
+                href="https://youtube.com"
+                target="_blank"
+                rel="noreferrer"
+                className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-rose-400 hover:border-rose-500/50 hover:scale-105 transition-all"
+                title="YouTube PRoductify"
+              >
+                <YoutubeLogo className="w-5 h-5" />
+              </a>
+
+              <a
+                href="mailto:contact@productify.id"
+                className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-emerald-400 hover:border-emerald-500/50 hover:scale-105 transition-all"
+                title="Email Official PRoductify"
+              >
+                <EnvelopeSimple className="w-5 h-5" />
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Bottom copyright & Author watermark */}
+        <div className="border-t border-slate-800/60 pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+          <p>© 2026 PRoductify Inc. Seluruh Hak Cipta Dilindungi.</p>
+          <div className="flex items-center gap-1.5 text-slate-400 font-medium">
+            <span>Dirancang oleh</span>
+            <a
+              href="https://kyyspace.framer.website"
+              target="_blank"
+              rel="noreferrer"
+              className="text-purple-400 font-extrabold hover:text-purple-300 hover:underline inline-flex items-center gap-0.5"
+            >
+              kyy <ArrowUpRight className="w-3.5 h-3.5" />
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </footer>
+  );
+};
