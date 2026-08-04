@@ -20,16 +20,28 @@ export const dataService = {
       try {
         const { data, error } = await supabase.from('profiles').select('*');
         if (!error && Array.isArray(data)) {
-          // Strictly return Supabase database profiles, deduplicated by ID or Email/Name
           const uniqueMap = new Map();
+          
+          // First load mockEngine local profiles (e.g. newly registered / updated locally)
+          const localProfiles = mockEngine.getProfiles();
+          if (Array.isArray(localProfiles)) {
+            localProfiles.forEach(p => {
+              if (p && (p.id || p.full_name)) {
+                const key = (p.id || p.email || p.full_name).toString().toLowerCase().trim();
+                uniqueMap.set(key, p);
+              }
+            });
+          }
+
+          // Overlay Supabase profiles
           data.forEach(p => {
             if (p && (p.id || p.full_name)) {
               const key = (p.id || p.email || p.full_name).toString().toLowerCase().trim();
-              if (!uniqueMap.has(key)) {
-                uniqueMap.set(key, p);
-              }
+              const existing = uniqueMap.get(key);
+              uniqueMap.set(key, existing ? { ...existing, ...p } : p);
             }
           });
+
           return Array.from(uniqueMap.values());
         }
       } catch (err) {
@@ -77,6 +89,7 @@ export const dataService = {
     const assignedRole = validRoles.includes(updates?.role) ? updates.role : 'umkm';
 
     const profilePayload = {
+      id: id || updates?.id || targetId || `user-${Date.now()}`,
       full_name: updates.full_name || 'Pengguna PRoductify',
       role: assignedRole,
       avatar_url: updates.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250',
@@ -95,10 +108,6 @@ export const dataService = {
       rate_cards: Array.isArray(updates.rate_cards) ? updates.rate_cards : []
     };
 
-    if (targetId) {
-      profilePayload.id = targetId;
-    }
-
     if (isSupabaseConfigured && supabase && targetId) {
       try {
         const { data, error } = await supabase
@@ -107,7 +116,7 @@ export const dataService = {
           .select();
 
         if (!error && data && data.length > 0) {
-          mockEngine.updateProfile(targetId, { ...updates, ...data[0] });
+          mockEngine.updateProfile(profilePayload.id, { ...updates, ...data[0] });
           return data[0];
         }
 
@@ -118,7 +127,7 @@ export const dataService = {
         console.error('Supabase updateProfile catch error:', err);
       }
     }
-    return mockEngine.updateProfile(id, { ...updates, ...profilePayload });
+    return mockEngine.updateProfile(profilePayload.id, { ...updates, ...profilePayload });
   },
 
   // Products

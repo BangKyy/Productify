@@ -82,7 +82,8 @@ export const AuthProvider = ({ children }) => {
         // Clean location hash whenever auth state changes
         sanitizeUrlHash();
 
-        if (session?.user) {
+        // Do NOT override profile if user is currently completing signup onboarding
+        if (session?.user && !pendingUser) {
           try {
             const profile = await dataService.getProfileById(session.user.id);
             if (profile) {
@@ -99,7 +100,7 @@ export const AuthProvider = ({ children }) => {
         authListener?.subscription?.unsubscribe();
       };
     }
-  }, []);
+  }, [pendingUser]);
 
   const switchRole = (role) => {
     const target = profiles.find(p => p.role === role);
@@ -367,8 +368,10 @@ export const AuthProvider = ({ children }) => {
       role, 
       bio, 
       phoneNumber, 
+      phone_number,
       address, 
       avatarUrl,
+      avatar_url,
       category,
       gender,
       followers,
@@ -386,33 +389,54 @@ export const AuthProvider = ({ children }) => {
       full_name: 'Pengguna Baru PRoductify'
     };
 
-    // Strictly map to public.profiles table schema.
     const profileData = {
       id: userToSave.id,
       full_name: userToSave.full_name || 'Pengguna PRoductify',
-      role: role || 'umkm',
-      avatar_url: avatarUrl || userToSave.avatar_url || '',
-      bio: bio || `Profil resmi ${role ? role.toUpperCase() : 'UMKM'} di platform PRoductify.`,
-      phone_number: phoneNumber || userToSave.phone_number || '+62 812-0000-1111',
-      address: address || 'Indonesia',
-      category: category || '',
-      gender: gender || 'female',
-      followers: followers || '250k',
-      social_tiktok: social_tiktok || '',
-      social_youtube: social_youtube || '',
-      social_instagram: social_instagram || '',
-      social_x: social_x || '',
-      social_threads: social_threads || '',
-      social_linkedin: social_linkedin || '',
+      email: userToSave.email || '',
+      role: role || 'influencer',
+      avatar_url: avatarUrl || avatar_url || userToSave.avatar_url || '',
+      bio: bio || `Profil resmi ${role ? role.toUpperCase() : 'INFLUENCER'} di platform PRoductify.`,
+      phone_number: phoneNumber || phone_number || userToSave.phone_number || '',
+      address: address || userToSave.address || 'Indonesia',
+      category: category || userToSave.category || '',
+      gender: gender || userToSave.gender || 'female',
+      followers: followers || userToSave.followers || '250k',
+      social_tiktok: social_tiktok || userToSave.social_tiktok || '',
+      social_youtube: social_youtube || userToSave.social_youtube || '',
+      social_instagram: social_instagram || userToSave.social_instagram || '',
+      social_x: social_x || userToSave.social_x || '',
+      social_threads: social_threads || userToSave.social_threads || '',
+      social_linkedin: social_linkedin || userToSave.social_linkedin || '',
       rate_cards: Array.isArray(rate_cards) ? rate_cards : []
     };
 
     const saved = await dataService.updateProfile(profileData.id, profileData);
-    setCurrentProfile(saved || profileData);
+    const finalProfile = { ...profileData, ...(saved || {}) };
+
+    // Persist active profile ID and role to localStorage IMMEDIATELY
+    if (finalProfile.id) {
+      localStorage.setItem('productify_active_profile_id', finalProfile.id);
+    }
+    if (finalProfile.role) {
+      localStorage.setItem('productify_active_role', finalProfile.role);
+    }
+
+    setCurrentProfileState(finalProfile);
     setIsAuthenticated(true);
     setPendingUser(null);
-    await loadProfiles();
-    return saved || profileData;
+
+    // Update local profiles list state without full reload
+    setProfiles(prev => {
+      const idx = prev.findIndex(p => p.id === finalProfile.id);
+      if (idx !== -1) {
+        const copy = [...prev];
+        copy[idx] = finalProfile;
+        return copy;
+      }
+      return [finalProfile, ...prev];
+    });
+
+    return finalProfile;
   };
 
   return (
