@@ -518,6 +518,16 @@ export const dataService = {
     if (requesterUuid)   payload.requester_id  = requesterUuid;
     if (influencerUuid)  payload.influencer_id = influencerUuid;
 
+    // Sync payload for collaborations table so it displays in Dashboard Tracker
+    const collabSyncPayload = {
+      project_title: `Request Rate Card: ${req.product_name || req.brand_name || 'Kampanye Brand'}`,
+      budget: req.budget_range || 'Diskusi Lebih Lanjut',
+      status: 'pending',
+      notes: `[Rate Card Request] Brand: ${req.brand_name || '-'}. Objektif: ${req.campaign_objective || '-'}. Platform: ${(req.platforms || []).join(', ') || '-'}. ${req.notes || ''}`.trim()
+    };
+    if (requesterUuid) collabSyncPayload.brand_id = requesterUuid;
+    if (influencerUuid) collabSyncPayload.influencer_id = influencerUuid;
+
     if (isSupabaseConfigured && supabase) {
       try {
         const { data, error } = await supabase
@@ -530,8 +540,16 @@ export const dataService = {
           throw new Error(error.message || 'Gagal menyimpan request rate card ke Supabase.');
         }
 
+        // Also insert into collaborations table
+        try {
+          await supabase.from('collaborations').insert([collabSyncPayload]);
+        } catch (collabErr) {
+          console.warn('Sync to collaborations warning:', collabErr);
+        }
+
         if (data && data.length > 0) {
           mockEngine.addRateCardRequest(data[0]);
+          mockEngine.addCollaboration({ ...collabSyncPayload, id: 'collab-' + Date.now() });
           return data[0];
         }
       } catch (err) {
@@ -541,7 +559,12 @@ export const dataService = {
     }
 
     // Fallback: simpan ke localStorage mock
+    mockEngine.addCollaboration({ ...collabSyncPayload, id: 'collab-' + Date.now() });
     return mockEngine.addRateCardRequest(payload);
+  },
+
+  async addRateCardRequest(req) {
+    return this.createRateCardRequest(req);
   },
 
   async getRateCardRequests({ influencer_id, requester_id } = {}) {

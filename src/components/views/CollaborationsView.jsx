@@ -23,6 +23,19 @@ const STATUS_CONFIG = {
   completed: { label: 'Selesai Sempurna', bg: 'bg-blue-500/20 text-blue-300 border-blue-500/40', icon: Sparkle }
 };
 
+const formatBudgetDisplay = (budgetVal) => {
+  if (!budgetVal || budgetVal === '0') return 'Diskusi Lebih Lanjut';
+  if (typeof budgetVal === 'number') {
+    return `Rp ${budgetVal.toLocaleString('id-ID')}`;
+  }
+  const strVal = String(budgetVal).trim();
+  if (!isNaN(strVal) && !isNaN(parseFloat(strVal))) {
+    const num = Number(strVal);
+    if (num > 0) return `Rp ${num.toLocaleString('id-ID')}`;
+  }
+  return strVal;
+};
+
 export const CollaborationsView = () => {
   const { currentProfile, currentRole, profiles } = useAuth();
   const [activeSubTab, setActiveSubTab] = useState('directory'); // 'directory' | 'tracker'
@@ -42,16 +55,65 @@ export const CollaborationsView = () => {
 
   const fetchCollaborations = async () => {
     setLoading(true);
-    const data = await dataService.getCollaborations();
-    setCollaborations(data);
-    setLoading(false);
+    try {
+      const [collabs, rateRequests] = await Promise.all([
+        dataService.getCollaborations(),
+        dataService.getRateCardRequests()
+      ]);
+
+      const formattedRequests = (Array.isArray(rateRequests) ? rateRequests : []).map(r => ({
+        id: r.id,
+        project_title: `Request Rate Card: ${r.product_name || r.brand_name || 'Kampanye Brand'}`,
+        brand_name: r.brand_name || 'Brand UMKM / Agency',
+        influencer_name: Array.isArray(profiles) ? (profiles.find(p => p.id === r.influencer_id)?.full_name || 'Influencer KOL') : 'Influencer KOL',
+        brand_id: r.requester_id,
+        influencer_id: r.influencer_id,
+        budget: r.budget_range || r.budget || 'Diskusi Lebih Lanjut',
+        status: r.status || 'pending',
+        created_at: r.created_at || new Date().toISOString(),
+        notes: `[Rate Card Request] Objektif: ${r.campaign_objective || '-'}. Platform: ${(r.platforms || []).join(', ') || '-'}. ${r.notes || ''}`.trim(),
+        isRateCardRequest: true
+      }));
+
+      // Combine both sources
+      const combined = [...(Array.isArray(collabs) ? collabs : []), ...formattedRequests];
+
+      // Remove duplicates by ID
+      const uniqueMap = new Map();
+      combined.forEach(item => {
+        if (!uniqueMap.has(item.id)) {
+          uniqueMap.set(item.id, item);
+        }
+      });
+      const uniqueList = Array.from(uniqueMap.values());
+
+      // Filter based on logged-in user
+      const userFiltered = uniqueList.filter(item => {
+        if (!currentProfile) return true;
+        if (currentRole === 'admin') return true;
+        if (currentRole === 'influencer') {
+          return item.influencer_id === currentProfile.id || item.influencer_name === currentProfile.full_name;
+        } else {
+          return item.brand_id === currentProfile.id || item.brand_name === currentProfile.full_name;
+        }
+      });
+
+      // Sort newest first
+      userFiltered.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+
+      setCollaborations(userFiltered);
+    } catch (err) {
+      console.warn('Error fetching dashboard collaborations:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchCollaborations();
-  }, []);
+  }, [currentProfile?.id, currentRole]);
 
-  const influencersList = profiles.filter(p => p.role === 'influencer');
+  const influencersList = Array.isArray(profiles) ? profiles.filter(p => p.role === 'influencer') : [];
 
   const handlePropose = async (e) => {
     e.preventDefault();
@@ -76,8 +138,12 @@ export const CollaborationsView = () => {
     fetchCollaborations();
   };
 
-  const handleStatusChange = async (collabId, newStatus) => {
-    await dataService.updateCollaborationStatus(collabId, newStatus);
+  const handleStatusChange = async (collab, newStatus) => {
+    if (collab.isRateCardRequest) {
+      await dataService.updateRateCardRequestStatus(collab.id, newStatus);
+    } else {
+      await dataService.updateCollaborationStatus(collab.id, newStatus);
+    }
     fetchCollaborations();
   };
 
@@ -216,7 +282,7 @@ export const CollaborationsView = () => {
                       <div className="flex flex-wrap items-center gap-4 text-xs text-slate-300 pt-1">
                         <div>Brand: <strong className="text-purple-300">{collab.brand_name || 'Brand UMKM'}</strong></div>
                         <div>KOL: <strong className="text-amber-300">{collab.influencer_name}</strong></div>
-                        <div>Budget: <strong className="text-emerald-400">Rp {Number(collab.budget).toLocaleString('id-ID')}</strong></div>
+                        <div>Budget: <strong className="text-emerald-400">{formatBudgetDisplay(collab.budget)}</strong></div>
                       </div>
 
                       {collab.notes && (
@@ -233,14 +299,14 @@ export const CollaborationsView = () => {
                       {collab.status === 'pending' && ['influencer', 'admin'].includes(currentRole) && (
                         <>
                           <button
-                            onClick={() => handleStatusChange(collab.id, 'accepted')}
+                            onClick={() => handleStatusChange(collab, 'accepted')}
                             className="flex items-center gap-1 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all"
                           >
                             <CheckCircle className="w-4 h-4" /> Terima Ajuan
                           </button>
 
                           <button
-                            onClick={() => handleStatusChange(collab.id, 'rejected')}
+                            onClick={() => handleStatusChange(collab, 'rejected')}
                             className="flex items-center gap-1 px-4 py-2 rounded-xl bg-rose-600/80 hover:bg-rose-600 text-white text-xs font-bold transition-all"
                           >
                             <XCircle className="w-4 h-4" /> Tolak
@@ -251,7 +317,7 @@ export const CollaborationsView = () => {
                       {/* Complete action */}
                       {collab.status === 'accepted' && (
                         <button
-                          onClick={() => handleStatusChange(collab.id, 'completed')}
+                          onClick={() => handleStatusChange(collab, 'completed')}
                           className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all"
                         >
                           <Sparkle className="w-4 h-4" /> Tandai Selesai
