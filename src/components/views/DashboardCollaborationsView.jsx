@@ -233,9 +233,9 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
           </div>
           <div className="text-left text-xs">
-            <p className="text-slate-400 font-medium">Supabase Realtime Engine:</p>
+            <p className="text-slate-400 font-medium">Status Sinkronisasi Sistem:</p>
             <p className="font-bold text-emerald-300">
-              {isSupabaseConfigured ? 'Live PostgreSQL WebSocket Active' : 'Realtime Sync Active (Auto-Refresh)'}
+              {isSupabaseConfigured ? 'Terhubung Langsung (Realtime Live)' : 'Sinkronisasi Otomatis Aktif'}
             </p>
           </div>
         </div>
@@ -316,7 +316,7 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
 
       {/* Collaborations List */}
       {loading ? (
-        <div className="py-20 text-center text-slate-400">Memuat status kolaborasi Supabase...</div>
+        <div className="py-20 text-center text-slate-400">Memuat status kolaborasi...</div>
       ) : filteredCollaborations.length === 0 ? (
         <div className="py-20 text-center glass-card rounded-3xl p-8 space-y-3">
           <Handshake className="w-12 h-12 text-slate-500 mx-auto" />

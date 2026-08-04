@@ -18,7 +18,7 @@ const TRANSLATIONS = {
       admin: 'Admin Moderasi'
     },
     hero: {
-      badge: 'Ekosistem PR Digital Terintegrasi Supabase BaaS',
+      badge: 'Ekosistem PR & Influencer Marketing Terintegrasi',
       title1: 'Hubungkan',
       title2: 'Brand UMKM',
       title3: 'Jurnalis Media, &',
@@ -26,7 +26,7 @@ const TRANSLATIONS = {
       subtitle: 'PRoductify mempermudah publikasi press release digital, pembuatan showcase produk profesional, serta kolaborasi kampanye dengan KOL secara transparan.',
       publishBtn: 'Publikasikan Press Release',
       exploreKolBtn: 'Jelajahi Influencer KOL',
-      rbacTest: 'UJI COBA INTEGRASI MATRIKS AKSES (RBAC):'
+      rbacTest: 'AKSES SIMULASI PERAN:'
     },
     common: {
       search: 'Cari kata kunci...',
@@ -49,7 +49,7 @@ const TRANSLATIONS = {
       products: 'Product Showcase',
       collaborations: 'KOL Marketplace',
       admin: 'Admin Console',
-      selectRole: 'Simulate RBAC Role',
+      selectRole: 'Simulate Role Access',
       language: 'Language'
     },
     roles: {
@@ -59,7 +59,7 @@ const TRANSLATIONS = {
       admin: 'Admin Moderator'
     },
     hero: {
-      badge: 'Supabase BaaS Integrated Digital PR Ecosystem',
+      badge: 'All-in-One Digital PR & Influencer Marketing Platform',
       title1: 'Connect',
       title2: 'SMB Brands',
       title3: 'Media Journalists, &',

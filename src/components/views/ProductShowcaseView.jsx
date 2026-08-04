@@ -668,7 +668,7 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
                 Ajukan Penawaran KOL Ke Brand
               </h2>
               <p className="text-xs text-slate-400">
-                Kirim proposal penawaran endorsement atau promosi produk ini langsung ke pemilik brand UMKM. Data akan disimpan ke tabel <code className="text-amber-300 bg-slate-900 px-1.5 py-0.5 rounded">public.collaborations</code> Supabase.
+                Kirim proposal penawaran endorsement atau promosi produk ini langsung ke pemilik brand UMKM.
               </p>
             </div>
 
@@ -766,7 +766,7 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
                 Edit Informasi Produk
               </h2>
               <p className="text-xs text-slate-400">
-                Perbarui detail rincian produk unggulan UMKM Anda pada database <code className="text-indigo-300 bg-slate-900 px-1.5 py-0.5 rounded">public.products</code>.
+                Perbarui detail rincian produk unggulan UMKM Anda pada katalog platform.
               </p>
             </div>
 

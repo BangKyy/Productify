@@ -53,13 +53,13 @@ export const AdminView = ({ setActiveTab }) => {
           </p>
         </div>
 
-        {/* Database Status Badge */}
+        {/* Server Status Badge */}
         <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl glass-card border-slate-700">
-          <Database className="w-5 h-5 text-emerald-400" />
+          <ShieldCheck className="w-5 h-5 text-emerald-400" />
           <div className="text-left text-xs">
-            <p className="text-slate-400 font-medium">Status Backend (BaaS):</p>
+            <p className="text-slate-400 font-medium">Status Server Cloud:</p>
             <p className="font-bold text-emerald-300">
-              {isSupabaseConfigured ? 'Connected to Supabase PostgreSQL' : 'Interactive Mock Engine (LocalStorage)'}
+              {isSupabaseConfigured ? 'Terhubung ke Server Cloud Utama' : 'Mode Simulasi Lokal (Aktif)'}
             </p>
           </div>
         </div>
@@ -99,8 +99,8 @@ export const AdminView = ({ setActiveTab }) => {
 
         <div className="glass-card p-6 rounded-2xl border-slate-800 flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-xs text-slate-400 font-semibold">Sistem Status RLS</p>
-            <p className="text-lg font-bold text-emerald-400">AKTIF & AMAN</p>
+            <p className="text-xs text-slate-400 font-semibold">Keamanan Akses Data</p>
+            <p className="text-lg font-bold text-emerald-400">TERLINDUG & AMAN</p>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
             <ShieldCheck className="w-6 h-6" />
@@ -113,7 +113,7 @@ export const AdminView = ({ setActiveTab }) => {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-extrabold text-white">Daftar Pengguna & Verifikasi Peran (RBAC)</h2>
-            <p className="text-xs text-slate-400">Pengguna terdaftar pada tabel `public.profiles` Supabase.</p>
+            <p className="text-xs text-slate-400">Pengguna terdaftar dalam sistem verifikasi akun PRoductify.</p>
           </div>
           <span className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
             Live Audit

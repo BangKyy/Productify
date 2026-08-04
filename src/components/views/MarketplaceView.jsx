@@ -1243,7 +1243,7 @@ export const MarketplaceView = ({ setActiveTab }) => {
               Ajukan Proyek Kerjasama
             </DialogTitle>
             <DialogDescription>
-              Tawaran kampanye ini akan dikirim dan disimpan ke tabel <code className="text-amber-300 bg-slate-900 px-1.5 py-0.5 rounded">public.collaborations</code> di Supabase.
+              Tawaran kampanye ini akan dikirim langsung ke influencer KOL terkait.
             </DialogDescription>
           </DialogHeader>
 
@@ -1308,7 +1308,7 @@ export const MarketplaceView = ({ setActiveTab }) => {
                 variant="gradientAmber"
                 disabled={submitting}
               >
-                {submitting ? 'Menyimpan ke Supabase...' : 'Kirim Ajuan Kerja Sama'}
+                {submitting ? 'Mengirim pengajuan...' : 'Kirim Ajuan Kerja Sama'}
               </Button>
             </DialogFooter>
 

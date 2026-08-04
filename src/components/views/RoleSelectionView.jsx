@@ -138,7 +138,7 @@ export const RoleSelectionView = ({ setActiveTab }) => {
           Selamat Datang, <span className="text-gradient">{pendingUser?.full_name || 'Pengguna Baru'}</span>!
         </h1>
         <p className="text-sm text-slate-300 max-w-xl mx-auto">
-          Pilih peran utama Anda dalam ekosistem PRoductify. Data Anda akan disimpan ke tabel <code className="text-purple-300 bg-slate-800 px-2 py-0.5 rounded">public.profiles</code> Supabase.
+          Pilih peran utama Anda dalam ekosistem PRoductify. Informasi profil Anda akan tersimpan dengan aman pada sistem kami.
         </p>
       </div>
 

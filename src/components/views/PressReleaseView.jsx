@@ -561,7 +561,7 @@ export const PressReleaseView = ({ setActiveTab }) => {
                 Edit Press Release & Tanggal Rilis
               </h2>
               <p className="text-xs text-slate-400">
-                Memperbarui konten siaran pers akan secara otomatis mengupdate tanggal dan waktu rilis terbaru ke publik di database <code className="text-purple-300 bg-slate-900 px-1.5 py-0.5 rounded">public.press_releases</code>.
+                Memperbarui konten siaran pers akan secara otomatis mengupdate tanggal dan waktu rilis terbaru ke publik di portal berita.
               </p>
             </div>
 

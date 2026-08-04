@@ -59,10 +59,10 @@ export const ForgotPasswordView = ({ setActiveTab }) => {
 
     try {
       const updatedUser = await directResetPassword(cleanIdentifier, cleanNewPassword);
-      toast.success(`Kata sandi akun ${updatedUser.full_name} berhasil diperbarui di database! Silakan masuk.`);
+      toast.success(`Kata sandi akun ${updatedUser.full_name} berhasil diperbarui! Silakan masuk.`);
       setActiveTab('login');
     } catch (err) {
-      const msg = err.message || 'Gagal memperbarui kata sandi di database.';
+      const msg = err.message || 'Gagal memperbarui kata sandi. Silakan coba lagi.';
       setErrorMsg(msg);
       toast.error(msg);
     } finally {
@@ -84,7 +84,7 @@ export const ForgotPasswordView = ({ setActiveTab }) => {
           />
           <h1 className="text-2xl font-black text-white">Ubah Kata Sandi Akun</h1>
           <p className="text-xs text-slate-400">
-            Perbarui kata sandi Anda secara langsung ke database Supabase tanpa verifikasi email atau OTP.
+            Perbarui kata sandi akun Anda secara langsung dan aman.
           </p>
         </div>
 
@@ -183,7 +183,7 @@ export const ForgotPasswordView = ({ setActiveTab }) => {
             size="lg"
             className="w-full justify-center glow-purple mt-2"
           >
-            <span>{loading ? 'Memperbarui di Database...' : 'Simpan & Perbarui Kata Sandi'}</span>
+            <span>{loading ? 'Memperbarui Kata Sandi...' : 'Simpan & Perbarui Kata Sandi'}</span>
             <ArrowRight className="w-4 h-4" />
           </Button>
         </form>
