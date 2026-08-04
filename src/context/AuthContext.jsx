@@ -6,18 +6,54 @@ const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [profiles, setProfiles] = useState([]);
-  const [currentProfile, setCurrentProfile] = useState(null);
+  const [currentProfile, setCurrentProfileState] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [pendingUser, setPendingUser] = useState(null); // For signup -> onboarding flow
+
+  const setCurrentProfile = (profileOrFn) => {
+    setCurrentProfileState(prev => {
+      const next = typeof profileOrFn === 'function' ? profileOrFn(prev) : profileOrFn;
+      if (next && next.id) {
+        localStorage.setItem('productify_active_profile_id', next.id);
+      }
+      if (next && next.role) {
+        localStorage.setItem('productify_active_role', next.role);
+      }
+      return next;
+    });
+  };
 
   const loadProfiles = async () => {
     try {
       const data = await dataService.getProfiles();
       const safeData = Array.isArray(data) ? data : [];
       setProfiles(safeData);
+
+      const savedProfileId = localStorage.getItem('productify_active_profile_id');
+      const savedRole = localStorage.getItem('productify_active_role');
+
+      if (savedProfileId) {
+        const matched = safeData.find(p => p.id === savedProfileId);
+        if (matched) {
+          setCurrentProfileState(matched);
+          setIsAuthenticated(true);
+          return;
+        }
+      }
+
+      if (savedRole) {
+        const matchedRole = safeData.find(p => p.role === savedRole);
+        if (matchedRole) {
+          setCurrentProfileState(matchedRole);
+          setIsAuthenticated(true);
+          return;
+        }
+      }
+
       if (safeData.length > 0) {
-        setCurrentProfile(prev => prev || safeData.find(p => p.role === 'umkm') || safeData[0]);
+        const defaultProfile = safeData.find(p => p.role === 'umkm') || safeData[0];
+        setCurrentProfileState(prev => prev || defaultProfile);
       }
     } catch (err) {
       console.error('Failed to load profiles:', err);
@@ -270,6 +306,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logoutUser = async () => {
+    localStorage.removeItem('productify_active_profile_id');
+    localStorage.removeItem('productify_active_role');
     if (isSupabaseConfigured && supabaseClient) {
       try {
         await supabaseClient.auth.signOut();
@@ -277,7 +315,7 @@ export const AuthProvider = ({ children }) => {
         console.warn('Supabase auth signout error:', e);
       }
     }
-    setCurrentProfile(null);
+    setCurrentProfileState(null);
     setIsAuthenticated(false);
     setPendingUser(null);
   };
