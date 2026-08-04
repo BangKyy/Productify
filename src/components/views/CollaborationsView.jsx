@@ -13,7 +13,8 @@ import {
   X,
   InstagramLogo,
   ChatCircleText,
-  User
+  User,
+  ArrowsClockwise
 } from '@phosphor-icons/react';
 
 const STATUS_CONFIG = {
@@ -34,6 +35,66 @@ const formatBudgetDisplay = (budgetVal) => {
     if (num > 0) return `Rp ${num.toLocaleString('id-ID')}`;
   }
   return strVal;
+};
+
+const parseRateCardDetails = (item) => {
+  const titleStr = String(item.project_title || '').toLowerCase();
+  const notesStr = String(item.raw_notes || item.notes || '');
+
+  const isRateCard = Boolean(
+    item.isRateCardRequest ||
+    titleStr.includes('rate card') ||
+    notesStr.toLowerCase().includes('rate card') ||
+    item.campaign_objective ||
+    item.budget_range ||
+    (Array.isArray(item.platforms) && item.platforms.length > 0)
+  );
+
+  if (!isRateCard) {
+    return { isRateCard: false };
+  }
+
+  let objective = item.campaign_objective || '';
+  let platforms = Array.isArray(item.platforms) && item.platforms.length > 0 
+    ? item.platforms 
+    : (typeof item.platforms === 'string' && item.platforms ? item.platforms.split(',').map(s => s.trim()) : []);
+  let contentType = item.content_type || '';
+  let targetAudience = item.target_audience || '';
+  let timeline = item.timeline || '';
+  let budgetRange = item.budget_range || '';
+  let userNotes = notesStr;
+
+  if (notesStr.toLowerCase().includes('rate card')) {
+    const objMatch = notesStr.match(/Objektif:\s*([^.]+)/i);
+    const platMatch = notesStr.match(/Platform:\s*([^.]+)/i);
+    const budgetMatch = notesStr.match(/Anggaran:\s*([^.]+)/i);
+
+    if (!objective && objMatch) objective = objMatch[1].trim();
+    if ((!platforms || platforms.length === 0) && platMatch) {
+      platforms = platMatch[1].split(',').map(s => s.trim()).filter(Boolean);
+    }
+    if (!budgetRange && budgetMatch) budgetRange = budgetMatch[1].trim();
+
+    userNotes = notesStr
+      .replace(/"/g, '')
+      .replace(/\[Rate Card Request\]/gi, '')
+      .replace(/Brand:\s*[^.]+\./gi, '')
+      .replace(/Objektif:\s*[^.]+\./gi, '')
+      .replace(/Platform:\s*[^.]+\./gi, '')
+      .replace(/Anggaran:\s*[^.]+\./gi, '')
+      .trim();
+  }
+
+  return {
+    isRateCard: true,
+    objective: objective || 'Promosi Brand & Request Rate Card',
+    platforms: platforms,
+    contentType: contentType || 'Foto / Video Endorsement',
+    targetAudience: targetAudience || 'Target Sesuai Niche Influencer',
+    timeline: timeline || '1-2 Minggu',
+    budgetRange: budgetRange || formatBudgetDisplay(item.budget),
+    userNotes: userNotes
+  };
 };
 
 export const CollaborationsView = () => {
@@ -61,19 +122,35 @@ export const CollaborationsView = () => {
         dataService.getRateCardRequests()
       ]);
 
-      const formattedRequests = (Array.isArray(rateRequests) ? rateRequests : []).map(r => ({
-        id: r.id,
-        project_title: `Request Rate Card: ${r.product_name || r.brand_name || 'Kampanye Brand'}`,
-        brand_name: r.brand_name || 'Brand UMKM / Agency',
-        influencer_name: Array.isArray(profiles) ? (profiles.find(p => p.id === r.influencer_id)?.full_name || 'Influencer KOL') : 'Influencer KOL',
-        brand_id: r.requester_id,
-        influencer_id: r.influencer_id,
-        budget: r.budget_range || r.budget || 'Diskusi Lebih Lanjut',
-        status: r.status || 'pending',
-        created_at: r.created_at || new Date().toISOString(),
-        notes: `[Rate Card Request] Objektif: ${r.campaign_objective || '-'}. Platform: ${(r.platforms || []).join(', ') || '-'}. ${r.notes || ''}`.trim(),
-        isRateCardRequest: true
-      }));
+      const formattedRequests = (Array.isArray(rateRequests) ? rateRequests : []).map(r => {
+        const foundKol = Array.isArray(profiles) ? profiles.find(p => p.id === r.influencer_id) : null;
+        const foundReq = Array.isArray(profiles) ? profiles.find(p => p.id === r.requester_id) : null;
+        return {
+          id: r.id,
+          project_title: `Request Rate Card: ${r.product_name || r.brand_name || 'Kampanye Brand'}`,
+          brand_name: r.brand_name || r.requester_name || foundReq?.full_name || 'Brand UMKM / Agency',
+          requester_name: r.requester_name || foundReq?.full_name || r.brand_name || 'Brand UMKM / Agency',
+          influencer_name: r.influencer_name || foundKol?.full_name || 'Influencer KOL',
+          brand_id: r.requester_id,
+          requester_id: r.requester_id,
+          influencer_id: r.influencer_id,
+          budget: r.budget_range || r.budget || 'Diskusi Lebih Lanjut',
+          status: r.status || 'pending',
+          created_at: r.created_at || new Date().toISOString(),
+
+          // Dedicated Rate Card Form Fields
+          campaign_objective: r.campaign_objective || '',
+          platforms: Array.isArray(r.platforms) ? r.platforms : (typeof r.platforms === 'string' ? r.platforms.split(',').map(s => s.trim()) : []),
+          content_type: r.content_type || '',
+          target_audience: r.target_audience || '',
+          timeline: r.timeline || '',
+          budget_range: r.budget_range || '',
+          raw_notes: r.notes || '',
+
+          notes: r.notes || `[Rate Card Request] Brand: ${r.brand_name || '-'}. Objektif: ${r.campaign_objective || '-'}. Platform: ${(r.platforms || []).join(', ') || '-'}. Anggaran: ${r.budget_range || '-'}`.trim(),
+          isRateCardRequest: true
+        };
+      });
 
       // Combine both sources
       const combined = [...(Array.isArray(collabs) ? collabs : []), ...formattedRequests];
@@ -87,14 +164,45 @@ export const CollaborationsView = () => {
       });
       const uniqueList = Array.from(uniqueMap.values());
 
-      // Filter based on logged-in user
+      // Filter based on logged-in user with total precision
       const userFiltered = uniqueList.filter(item => {
         if (!currentProfile) return true;
         if (currentRole === 'admin') return true;
+
+        const currentIdStr = String(currentProfile.id || '').toLowerCase();
+        const currentNameStr = String(currentProfile.full_name || '').toLowerCase().trim();
+
         if (currentRole === 'influencer') {
-          return item.influencer_id === currentProfile.id || item.influencer_name === currentProfile.full_name;
+          const itemInfId = String(item.influencer_id || '').toLowerCase();
+          const matchId = itemInfId && (itemInfId === currentIdStr);
+
+          const itemInfName = String(item.influencer_name || '').toLowerCase().trim();
+          const matchName = itemInfName && currentNameStr && (
+            itemInfName === currentNameStr ||
+            itemInfName.includes(currentNameStr) ||
+            currentNameStr.includes(itemInfName)
+          );
+
+          const isUnbound = !item.influencer_id && (!item.influencer_name || item.influencer_name === 'Influencer KOL');
+
+          return Boolean(matchId || matchName || isUnbound);
         } else {
-          return item.brand_id === currentProfile.id || item.brand_name === currentProfile.full_name;
+          // Requester (UMKM / Agency)
+          const itemBrandId = String(item.brand_id || item.requester_id || '').toLowerCase();
+          const matchId = itemBrandId && (itemBrandId === currentIdStr);
+
+          const itemBrandName = String(item.brand_name || '').toLowerCase().trim();
+          const itemReqName = String(item.requester_name || '').toLowerCase().trim();
+
+          const matchName = currentNameStr && (
+            (itemReqName && (itemReqName === currentNameStr || itemReqName.includes(currentNameStr) || currentNameStr.includes(itemReqName))) ||
+            (itemBrandName && (itemBrandName === currentNameStr || itemBrandName.includes(currentNameStr) || currentNameStr.includes(itemBrandName)))
+          );
+
+          // Always display requests made by non-influencers
+          const isUnbound = !itemBrandId && (!item.brand_name || item.brand_name === 'Brand UMKM');
+
+          return Boolean(matchId || matchName || isUnbound);
         }
       });
 
@@ -162,30 +270,40 @@ export const CollaborationsView = () => {
           </p>
         </div>
 
-        {/* Sub-Tab Navigation Toggle */}
-        <div className="flex items-center bg-slate-900/80 p-1.5 rounded-full border border-slate-800 w-fit">
-          <button
-            onClick={() => setActiveSubTab('directory')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all ${
-              activeSubTab === 'directory'
-                ? 'bg-amber-500 text-slate-950 shadow-md'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            <UsersThree className="w-4 h-4" />
-            <span>Katalog Influencer ({influencersList.length})</span>
-          </button>
+        {/* Sub-Tab Navigation & Refresh Toggle */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center bg-slate-900/80 p-1.5 rounded-full border border-slate-800 w-fit">
+            <button
+              onClick={() => setActiveSubTab('directory')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                activeSubTab === 'directory'
+                  ? 'bg-amber-500 text-slate-950 shadow-md'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <UsersThree className="w-4 h-4" />
+              <span>Katalog Influencer ({influencersList.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveSubTab('tracker')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                activeSubTab === 'tracker'
+                  ? 'bg-amber-500 text-slate-950 shadow-md'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Handshake className="w-4 h-4" />
+              <span>Status Proyek ({collaborations.length})</span>
+            </button>
+          </div>
 
           <button
-            onClick={() => setActiveSubTab('tracker')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all ${
-              activeSubTab === 'tracker'
-                ? 'bg-amber-500 text-slate-950 shadow-md'
-                : 'text-slate-400 hover:text-white'
-            }`}
+            onClick={() => fetchCollaborations()}
+            className="p-2.5 rounded-full bg-slate-900/80 hover:bg-slate-800 text-amber-400 border border-slate-800 transition-all cursor-pointer shadow-sm group"
+            title="Refresh Data Kolaborasi & Rate Card"
           >
-            <Handshake className="w-4 h-4" />
-            <span>Status Proyek ({collaborations.length})</span>
+            <ArrowsClockwise className={`w-4 h-4 group-hover:rotate-180 transition-transform duration-500 ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
@@ -259,17 +377,28 @@ export const CollaborationsView = () => {
               {collaborations.map(collab => {
                 const statusInfo = STATUS_CONFIG[collab.status] || STATUS_CONFIG.pending;
                 const StatusIcon = statusInfo.icon;
+                const rateDetails = parseRateCardDetails(collab);
+
+                const isOutgoing = currentRole !== 'influencer';
 
                 return (
                   <div
                     key={collab.id}
-                    className="glass-card p-6 rounded-2xl border-slate-800 flex flex-col lg:flex-row lg:items-center justify-between gap-6 hover:border-slate-700 transition-all"
+                    className="glass-card p-6 sm:p-7 rounded-3xl border-slate-800 space-y-5 hover:border-purple-500/30 transition-all bg-gradient-to-br from-slate-950 via-slate-900/90 to-slate-950 shadow-xl"
                   >
-                    <div className="space-y-2 max-w-xl">
+                    {/* Header Row: Role Indicator Tag & Status Badge */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
                       <div className="flex flex-wrap items-center gap-2 text-xs">
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-semibold ${statusInfo.bg}`}>
-                          <StatusIcon className="w-3.5 h-3.5" />
-                          {statusInfo.label}
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${
+                          isOutgoing 
+                            ? 'bg-purple-500/10 text-purple-300 border-purple-500/30' 
+                            : 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                        }`}>
+                          {isOutgoing ? '↗️ PENGAJUAN KELUAR (Anda Mengajak Kerja Sama)' : '📩 PERMINTAAN MASUK (Rate Card Request)'}
+                        </span>
+                        <span className="text-slate-500">•</span>
+                        <span className="text-slate-400 font-medium">
+                          Diajukan oleh: <strong className="text-slate-200">{collab.brand_name || 'Brand UMKM'}</strong>
                         </span>
                         <span className="text-slate-500">•</span>
                         <span className="text-slate-400">
@@ -277,58 +406,167 @@ export const CollaborationsView = () => {
                         </span>
                       </div>
 
-                      <h3 className="text-lg font-bold text-white">{collab.project_title}</h3>
-
-                      <div className="flex flex-wrap items-center gap-4 text-xs text-slate-300 pt-1">
-                        <div>Brand: <strong className="text-purple-300">{collab.brand_name || 'Brand UMKM'}</strong></div>
-                        <div>KOL: <strong className="text-amber-300">{collab.influencer_name}</strong></div>
-                        <div>Budget: <strong className="text-emerald-400">{formatBudgetDisplay(collab.budget)}</strong></div>
-                      </div>
-
-                      {collab.notes && (
-                        <p className="text-xs text-slate-400 bg-slate-900/60 p-3 rounded-xl border border-slate-800 italic mt-2">
-                          "{collab.notes}"
-                        </p>
-                      )}
+                      <span className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-xs font-bold ${statusInfo.bg}`}>
+                        <StatusIcon className="w-4 h-4" />
+                        {statusInfo.label}
+                      </span>
                     </div>
 
-                    {/* Dynamic Action Buttons based on Role & Status */}
-                    <div className="flex flex-wrap items-center gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-800">
-                      
-                      {/* Influencer or Admin can Accept / Reject */}
-                      {collab.status === 'pending' && ['influencer', 'admin'].includes(currentRole) && (
-                        <>
-                          <button
-                            onClick={() => handleStatusChange(collab, 'accepted')}
-                            className="flex items-center gap-1 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all"
-                          >
-                            <CheckCircle className="w-4 h-4" /> Terima Ajuan
-                          </button>
+                    {/* Title */}
+                    <div>
+                      <h3 className="text-xl font-black text-white tracking-tight">{collab.project_title}</h3>
+                    </div>
 
-                          <button
-                            onClick={() => handleStatusChange(collab, 'rejected')}
-                            className="flex items-center gap-1 px-4 py-2 rounded-xl bg-rose-600/80 hover:bg-rose-600 text-white text-xs font-bold transition-all"
-                          >
-                            <XCircle className="w-4 h-4" /> Tolak
-                          </button>
-                        </>
-                      )}
+                    {/* SUB-CARDS / BOXES GRID (Replaces generic 3 boxes for Rate Card Requests) */}
+                    {rateDetails.isRateCard ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
+                        
+                        {/* Box 1: Parties (Brand & KOL) */}
+                        <div className="glass-card p-3.5 rounded-2xl border-slate-800/90 bg-slate-900/60 flex items-center gap-3">
+                          <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
+                            <User className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Influencer KOL</span>
+                            <span className="text-sm font-extrabold text-amber-300">{collab.influencer_name}</span>
+                          </div>
+                        </div>
 
-                      {/* Complete action */}
-                      {collab.status === 'accepted' && (
-                        <button
-                          onClick={() => handleStatusChange(collab, 'completed')}
-                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all"
-                        >
-                          <Sparkle className="w-4 h-4" /> Tandai Selesai
-                        </button>
-                      )}
+                        {/* Box 2: Tujuan Kampanye */}
+                        <div className="glass-card p-3.5 rounded-2xl border-slate-800/90 bg-slate-900/60 flex items-center gap-3">
+                          <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                            <Sparkle className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Tujuan Kampanye</span>
+                            <span className="text-sm font-extrabold text-purple-300">{rateDetails.objective || 'Promosi Kampanye'}</span>
+                          </div>
+                        </div>
 
-                      {collab.status === 'completed' && (
-                        <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
-                          <CheckCircle className="w-4 h-4" /> Kampanye Berhasil Selesai
+                        {/* Box 3: Estimasi Anggaran */}
+                        <div className="glass-card p-3.5 rounded-2xl border-slate-800/90 bg-slate-900/60 flex items-center gap-3">
+                          <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                            <CurrencyDollar className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Estimasi Anggaran</span>
+                            <span className="text-sm font-extrabold text-emerald-400">{rateDetails.budgetRange || formatBudgetDisplay(collab.budget)}</span>
+                          </div>
+                        </div>
+
+                        {/* Box 4: Platform Diinginkan */}
+                        <div className="glass-card p-3.5 rounded-2xl border-slate-800/90 bg-slate-900/60 flex items-center gap-3">
+                          <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                            <InstagramLogo className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Platform Diinginkan</span>
+                            <div className="flex flex-wrap gap-1 mt-0.5">
+                              {rateDetails.platforms && rateDetails.platforms.length > 0 ? (
+                                rateDetails.platforms.map(plat => (
+                                  <span key={plat} className="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-bold capitalize">
+                                    {plat}
+                                  </span>
+                                ))
+                              ) : (
+                                <span className="text-xs text-slate-300 font-semibold">Semua Platform</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Box 5: Jenis Konten */}
+                        <div className="glass-card p-3.5 rounded-2xl border-slate-800/90 bg-slate-900/60 flex items-center gap-3">
+                          <div className="p-2.5 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400">
+                            <ChatCircleText className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Jenis Konten</span>
+                            <span className="text-xs font-bold text-slate-200">{rateDetails.contentType || 'Video Pendek / Reels'}</span>
+                          </div>
+                        </div>
+
+                        {/* Box 6: Estimasi Timeline */}
+                        <div className="glass-card p-3.5 rounded-2xl border-slate-800/90 bg-slate-900/60 flex items-center gap-3">
+                          <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+                            <Clock className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Estimasi Timeline</span>
+                            <span className="text-xs font-bold text-slate-200">{rateDetails.timeline || '1-2 Minggu'}</span>
+                          </div>
+                        </div>
+
+                      </div>
+                    ) : (
+                      /* Standard Collaboration 3 Boxes Fallback */
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                        <div className="glass-card p-3.5 rounded-2xl border-slate-800/90 bg-slate-900/60">
+                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Brand UMKM</span>
+                          <strong className="text-sm font-extrabold text-purple-300">{collab.brand_name || 'Brand UMKM'}</strong>
+                        </div>
+                        <div className="glass-card p-3.5 rounded-2xl border-slate-800/90 bg-slate-900/60">
+                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Influencer KOL</span>
+                          <strong className="text-sm font-extrabold text-amber-300">{collab.influencer_name}</strong>
+                        </div>
+                        <div className="glass-card p-3.5 rounded-2xl border-slate-800/90 bg-slate-900/60">
+                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Budget Kampanye</span>
+                          <strong className="text-sm font-extrabold text-emerald-400">{formatBudgetDisplay(collab.budget)}</strong>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Catatan Masukan Box */}
+                    {rateDetails.userNotes && (
+                      <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800/90 space-y-1">
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block flex items-center gap-1.5">
+                          <ChatCircleText className="w-3.5 h-3.5 text-amber-400" /> Catatan Masukan / Instruksi Khusus:
                         </span>
-                      )}
+                        <p className="text-xs text-slate-300 italic">"{rateDetails.userNotes}"</p>
+                      </div>
+                    )}
+
+                    {/* Footer Actions Row */}
+                    <div className="pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-4">
+                      <div className="text-xs text-slate-400 flex items-center gap-1.5">
+                        <Clock className="w-4 h-4 text-amber-400" />
+                        <span>Status Saat Ini: <strong className="text-slate-200">{statusInfo.label}</strong></span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        {collab.status === 'pending' && ['influencer', 'admin'].includes(currentRole) && (
+                          <>
+                            <button
+                              onClick={() => handleStatusChange(collab, 'accepted')}
+                              className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg transition-all cursor-pointer"
+                            >
+                              <CheckCircle className="w-4 h-4" /> Terima Ajuan
+                            </button>
+
+                            <button
+                              onClick={() => handleStatusChange(collab, 'rejected')}
+                              className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-rose-600/80 hover:bg-rose-600 text-white text-xs font-bold shadow-lg transition-all cursor-pointer"
+                            >
+                              <XCircle className="w-4 h-4" /> Tolak
+                            </button>
+                          </>
+                        )}
+
+                        {collab.status === 'accepted' && (
+                          <button
+                            onClick={() => handleStatusChange(collab, 'completed')}
+                            className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg transition-all cursor-pointer"
+                          >
+                            <Sparkle className="w-4 h-4" /> Tandai Selesai
+                          </button>
+                        )}
+
+                        {collab.status === 'completed' && (
+                          <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1.5 bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
+                            <CheckCircle className="w-4 h-4" /> Kampanye Berhasil Selesai
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );

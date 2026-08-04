@@ -452,7 +452,9 @@ export const MarketplaceView = ({ setActiveTab }) => {
     try {
       await dataService.createRateCardRequest({
         requester_id:       currentProfile?.id,
+        requester_name:     currentProfile?.full_name || 'Brand / Agency',
         influencer_id:      rateCardTarget?.id,
+        influencer_name:    rateCardTarget?.full_name || '',
         brand_name:         rateCardForm.brand_name,
         product_name:       rateCardForm.product_name,
         campaign_objective: rateCardForm.campaign_objective,

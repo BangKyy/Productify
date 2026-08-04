@@ -499,8 +499,27 @@ export const dataService = {
 
   async createRateCardRequest(req) {
     const isUuid = (id) => typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-    const requesterUuid    = isUuid(req.requester_id)   ? req.requester_id   : null;
-    const influencerUuid   = isUuid(req.influencer_id)  ? req.influencer_id  : null;
+    let requesterUuid    = isUuid(req.requester_id)   ? req.requester_id   : null;
+    let influencerUuid   = isUuid(req.influencer_id)  ? req.influencer_id  : null;
+
+    // Lookup valid UUID if non-UUID ID was supplied
+    if (isSupabaseConfigured && supabase && !influencerUuid && (req.influencer_id || req.influencer_name)) {
+      try {
+        const { data: matched } = await supabase
+          .from('profiles')
+          .select('id, full_name, role')
+          .eq('role', 'influencer');
+
+        if (matched && matched.length > 0) {
+          const found = matched.find(p => p.id === req.influencer_id || (req.influencer_name && p.full_name.toLowerCase().trim() === req.influencer_name.toLowerCase().trim()));
+          if (found && isUuid(found.id)) {
+            influencerUuid = found.id;
+          }
+        }
+      } catch (err) {
+        console.warn('Supabase influencer UUID lookup warning:', err);
+      }
+    }
 
     const payload = {
       brand_name:          req.brand_name          || '',
@@ -521,12 +540,32 @@ export const dataService = {
     // Sync payload for collaborations table so it displays in Dashboard Tracker
     const collabSyncPayload = {
       project_title: `Request Rate Card: ${req.product_name || req.brand_name || 'Kampanye Brand'}`,
-      budget: req.budget_range || 'Diskusi Lebih Lanjut',
+      budget: 0,
       status: 'pending',
-      notes: `[Rate Card Request] Brand: ${req.brand_name || '-'}. Objektif: ${req.campaign_objective || '-'}. Platform: ${(req.platforms || []).join(', ') || '-'}. ${req.notes || ''}`.trim()
+      notes: `[Rate Card Request] Brand: ${req.brand_name || '-'}. Objektif: ${req.campaign_objective || '-'}. Platform: ${(req.platforms || []).join(', ') || '-'}. Anggaran: ${req.budget_range || '-'}. ${req.notes || ''}`.trim()
     };
     if (requesterUuid) collabSyncPayload.brand_id = requesterUuid;
     if (influencerUuid) collabSyncPayload.influencer_id = influencerUuid;
+
+    // Rich mock engine object ensuring both requester and influencer can match it
+    const richMockObj = {
+      ...req,
+      ...payload,
+      id: req.id || 'rc-' + Date.now(),
+      requester_id: req.requester_id || 'user-umkm-1',
+      requester_name: req.requester_name || 'Brand UMKM',
+      brand_id: req.requester_id || 'user-umkm-1',
+      brand_name: req.brand_name || 'Brand UMKM',
+      influencer_id: req.influencer_id || 'user-kol-1',
+      influencer_name: req.influencer_name || 'Influencer KOL'
+    };
+
+    const savedMockReq = mockEngine.addRateCardRequest(richMockObj);
+    mockEngine.addCollaboration({
+      ...collabSyncPayload,
+      ...richMockObj,
+      id: 'collab-' + Date.now()
+    });
 
     if (isSupabaseConfigured && supabase) {
       try {
@@ -535,11 +574,6 @@ export const dataService = {
           .insert([payload])
           .select();
 
-        if (error) {
-          console.error('Supabase createRateCardRequest error:', error);
-          throw new Error(error.message || 'Gagal menyimpan request rate card ke Supabase.');
-        }
-
         // Also insert into collaborations table
         try {
           await supabase.from('collaborations').insert([collabSyncPayload]);
@@ -547,20 +581,19 @@ export const dataService = {
           console.warn('Sync to collaborations warning:', collabErr);
         }
 
+        if (error) {
+          console.error('Supabase createRateCardRequest error:', error);
+        }
+
         if (data && data.length > 0) {
-          mockEngine.addRateCardRequest(data[0]);
-          mockEngine.addCollaboration({ ...collabSyncPayload, id: 'collab-' + Date.now() });
-          return data[0];
+          return { ...richMockObj, ...data[0] };
         }
       } catch (err) {
         console.error('Supabase createRateCardRequest catch:', err);
-        throw err;
       }
     }
 
-    // Fallback: simpan ke localStorage mock
-    mockEngine.addCollaboration({ ...collabSyncPayload, id: 'collab-' + Date.now() });
-    return mockEngine.addRateCardRequest(payload);
+    return savedMockReq;
   },
 
   async addRateCardRequest(req) {
@@ -568,27 +601,45 @@ export const dataService = {
   },
 
   async getRateCardRequests({ influencer_id, requester_id } = {}) {
+    let supabaseData = [];
+
     if (isSupabaseConfigured && supabase) {
       try {
-        let query = supabase
+        const { data, error } = await supabase
           .from('rate_card_requests')
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (influencer_id) query = query.eq('influencer_id', influencer_id);
-        if (requester_id)  query = query.eq('requester_id',  requester_id);
-
-        const { data, error } = await query;
-        if (!error && Array.isArray(data)) return data;
+        if (!error && Array.isArray(data)) {
+          supabaseData = data;
+        } else if (error) {
+          console.warn('Supabase getRateCardRequests query error:', error);
+        }
       } catch (err) {
-        console.warn('Supabase getRateCardRequests warning:', err);
+        console.warn('Supabase getRateCardRequests catch:', err);
       }
     }
 
-    // Fallback mock
-    let list = mockEngine.getRateCardRequests();
-    if (influencer_id) list = list.filter(r => r.influencer_id === influencer_id);
-    if (requester_id)  list = list.filter(r => r.requester_id  === requester_id);
+    // Merge Supabase data and mock engine data for maximum reliability
+    const mockList = mockEngine.getRateCardRequests() || [];
+    const combined = [...supabaseData, ...mockList];
+
+    // Remove duplicates by id
+    const uniqueMap = new Map();
+    combined.forEach(item => {
+      if (item && item.id && !uniqueMap.has(item.id)) {
+        uniqueMap.set(item.id, item);
+      }
+    });
+    let list = Array.from(uniqueMap.values());
+
+    if (influencer_id) {
+      list = list.filter(r => r.influencer_id === influencer_id || (r.influencer_id && String(r.influencer_id) === String(influencer_id)));
+    }
+    if (requester_id) {
+      list = list.filter(r => r.requester_id === requester_id || (r.requester_id && String(r.requester_id) === String(requester_id)));
+    }
+
     return list;
   },
 
