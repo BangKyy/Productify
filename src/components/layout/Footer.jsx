@@ -1,13 +1,13 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import LogoWhite from '../../assets/Logo_White.png';
-import { 
-  InstagramLogo, 
-  LinkedinLogo, 
-  XLogo, 
-  YoutubeLogo, 
+import {
+  InstagramLogo,
+  LinkedinLogo,
+  XLogo,
+  YoutubeLogo,
   EnvelopeSimple,
-  ArrowUpRight 
+  ArrowUpRight
 } from '@phosphor-icons/react';
 
 export const Footer = ({ setActiveTab }) => {
@@ -15,16 +15,16 @@ export const Footer = ({ setActiveTab }) => {
   return (
     <footer className="bg-slate-950 border-t border-slate-800/80 pt-16 pb-12 mt-20 text-slate-400">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
-          
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+
           {/* Col 1: Brand Info with Logo_White.png */}
-          <div className="space-y-4 md:col-span-1">
+          <div className="space-y-4 sm:col-span-2 md:col-span-1">
             <div className="flex items-center gap-3">
-              <img 
-                src={LogoWhite} 
-                alt="PRoductify Logo" 
-                className="h-9 w-auto object-contain" 
+              <img
+                src={LogoWhite}
+                alt="Productify Logo"
+                className="h-9 w-auto object-contain"
               />
             </div>
             <p className="text-sm leading-relaxed text-slate-400">
@@ -37,28 +37,28 @@ export const Footer = ({ setActiveTab }) => {
             <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Navigasi Utama</h4>
             <ul className="space-y-2.5 text-sm">
               <li>
-                <button onClick={() => setActiveTab('overview')} className="hover:text-purple-400 transition-colors">
+                <button onClick={() => setActiveTab('overview')} className="hover:text-purple-400 transition-colors cursor-pointer text-left">
                   Beranda / Overview
                 </button>
               </li>
               <li>
-                <button onClick={() => setActiveTab('press-releases')} className="hover:text-purple-400 transition-colors">
+                <button onClick={() => setActiveTab('press-releases')} className="hover:text-purple-400 transition-colors cursor-pointer text-left">
                   Direktori Press Release
                 </button>
               </li>
               <li>
-                <button onClick={() => setActiveTab('products')} className="hover:text-purple-400 transition-colors">
+                <button onClick={() => setActiveTab('products')} className="hover:text-purple-400 transition-colors cursor-pointer text-left">
                   Product Showcase
                 </button>
               </li>
               <li>
-                <button onClick={() => setActiveTab('marketplace')} className="hover:text-purple-400 transition-colors">
+                <button onClick={() => setActiveTab('marketplace')} className="hover:text-purple-400 transition-colors cursor-pointer text-left">
                   Marketplace KOL
                 </button>
               </li>
               {isAuthenticated && (
                 <li>
-                  <button onClick={() => setActiveTab('dashboard/collaborations')} className="hover:text-purple-400 transition-colors">
+                  <button onClick={() => setActiveTab('dashboard/collaborations')} className="hover:text-purple-400 transition-colors cursor-pointer text-left">
                     Status Kolaborasi
                   </button>
                 </li>
@@ -66,9 +66,31 @@ export const Footer = ({ setActiveTab }) => {
             </ul>
           </div>
 
-          {/* Col 3: Social Media PRoductify */}
+          {/* Col 3: Bantuan & Legal (NEW SECTION) */}
           <div>
-            <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Sosial Media PRoductify</h4>
+            <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Bantuan & Legal</h4>
+            <ul className="space-y-2.5 text-sm">
+              <li>
+                <button onClick={() => setActiveTab('terms')} className="hover:text-purple-400 transition-colors cursor-pointer text-left flex items-center gap-1.5">
+                  <span>Syarat & Ketentuan</span>
+                </button>
+              </li>
+              <li>
+                <button onClick={() => setActiveTab('privacy')} className="hover:text-purple-400 transition-colors cursor-pointer text-left flex items-center gap-1.5">
+                  <span>Kebijakan Privasi</span>
+                </button>
+              </li>
+              <li>
+                <button onClick={() => setActiveTab('faq')} className="hover:text-purple-400 transition-colors cursor-pointer text-left flex items-center gap-1.5">
+                  <span>FAQ (Tanya Jawab)</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* Col 4: Social Media Productify */}
+          <div>
+            <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Sosial Media Productify</h4>
             <p className="text-xs text-slate-400 mb-4 leading-relaxed">
               Ikuti kabar dan update siaran pers terbaru melalui saluran komunikasi resmi kami:
             </p>
@@ -78,7 +100,7 @@ export const Footer = ({ setActiveTab }) => {
                 target="_blank"
                 rel="noreferrer"
                 className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-purple-400 hover:border-purple-500/50 hover:scale-105 transition-all"
-                title="Instagram PRoductify"
+                title="Instagram Productify"
               >
                 <InstagramLogo className="w-5 h-5" />
               </a>
@@ -88,7 +110,7 @@ export const Footer = ({ setActiveTab }) => {
                 target="_blank"
                 rel="noreferrer"
                 className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-blue-400 hover:border-blue-500/50 hover:scale-105 transition-all"
-                title="LinkedIn PRoductify"
+                title="LinkedIn Productify"
               >
                 <LinkedinLogo className="w-5 h-5" />
               </a>
@@ -98,7 +120,7 @@ export const Footer = ({ setActiveTab }) => {
                 target="_blank"
                 rel="noreferrer"
                 className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-sky-400 hover:border-sky-500/50 hover:scale-105 transition-all"
-                title="X / Twitter PRoductify"
+                title="X / Twitter Productify"
               >
                 <XLogo className="w-5 h-5" />
               </a>
@@ -108,7 +130,7 @@ export const Footer = ({ setActiveTab }) => {
                 target="_blank"
                 rel="noreferrer"
                 className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-rose-400 hover:border-rose-500/50 hover:scale-105 transition-all"
-                title="YouTube PRoductify"
+                title="YouTube Productify"
               >
                 <YoutubeLogo className="w-5 h-5" />
               </a>
@@ -116,7 +138,7 @@ export const Footer = ({ setActiveTab }) => {
               <a
                 href="mailto:contact@productify.id"
                 className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 hover:text-emerald-400 hover:border-emerald-500/50 hover:scale-105 transition-all"
-                title="Email Official PRoductify"
+                title="Email Official Productify"
               >
                 <EnvelopeSimple className="w-5 h-5" />
               </a>
@@ -127,7 +149,7 @@ export const Footer = ({ setActiveTab }) => {
 
         {/* Bottom copyright & Author watermark */}
         <div className="border-t border-slate-800/60 pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© 2026 PRoductify Inc. Seluruh Hak Cipta Dilindungi.</p>
+          <p>© 2026 Productify. Seluruh Hak Cipta Dilindungi.</p>
           <div className="flex items-center gap-1.5 text-slate-400 font-medium">
             <span>Dirancang oleh</span>
             <a

@@ -16,13 +16,19 @@ import { RoleSelectionView } from './components/views/RoleSelectionView';
 import { ForgotPasswordView } from './components/views/ForgotPasswordView';
 import { CollaborationActivityView } from './components/views/CollaborationActivityView';
 import { AboutView } from './components/views/AboutView';
+import { UserProfileView } from './components/views/UserProfileView';
+import { TermsView } from './components/views/TermsView';
+import { PrivacyView } from './components/views/PrivacyView';
+import { FaqView } from './components/views/FaqView';
+import { CookieConsentToast } from './components/ui/CookieConsentToast';
 
 // Route path mappings
 const PATH_TO_TAB = {
   '/': 'overview',
   '/beranda': 'overview',
   '/press-releases': 'press-releases',
-  '/marketplace-influencer': 'marketplace',
+  '/influencer': 'influencer',
+  '/marketplace-influencer': 'influencer',
   '/login': 'login',
   '/signup': 'signup',
   '/collaboration-status': 'dashboard/collaborations',
@@ -30,6 +36,10 @@ const PATH_TO_TAB = {
   '/about': 'about',
   '/products': 'products',
   '/admin': 'admin',
+  '/profile': 'profile',
+  '/terms': 'terms',
+  '/privacy': 'privacy',
+  '/faq': 'faq',
   '/forgot-password': 'forgot-password',
   '/role-selection': 'role-selection',
   '/onboarding': 'role-selection'
@@ -38,7 +48,8 @@ const PATH_TO_TAB = {
 const TAB_TO_PATH = {
   'overview': '/beranda',
   'press-releases': '/press-releases',
-  'marketplace': '/marketplace-influencer',
+  'influencer': '/influencer',
+  'marketplace': '/influencer',
   'login': '/login',
   'signup': '/signup',
   'collaborations': '/collaboration-status',
@@ -47,24 +58,41 @@ const TAB_TO_PATH = {
   'about': '/about',
   'products': '/products',
   'admin': '/admin',
+  'profile': '/profile',
+  'terms': '/terms',
+  'privacy': '/privacy',
+  'faq': '/faq',
   'forgot-password': '/forgot-password',
   'role-selection': '/role-selection',
   'onboarding': '/role-selection'
 };
 
+const getTabFromPath = (path) => {
+  if (path && path.startsWith('/influencer/detail/')) {
+    return path.replace(/^\//, ''); // e.g. "influencer/detail/sarah-wijaya"
+  }
+  return PATH_TO_TAB[path] || 'overview';
+};
+
 function AppContent() {
   // Derive initial tab from current browser URL path
   const [activeTab, setActiveTabState] = useState(() => {
-    const currentPath = window.location.pathname;
-    return PATH_TO_TAB[currentPath] || 'overview';
+    return getTabFromPath(window.location.pathname);
   });
 
   // Centralized navigation handler that syncs active tab state AND browser URL history
   const handleTabChange = (newTab, options = {}) => {
-    const targetTab = newTab === 'collaborations' ? 'dashboard/collaborations' : newTab;
+    let targetTab = newTab === 'collaborations' ? 'dashboard/collaborations' : newTab;
+    if (targetTab === 'marketplace') targetTab = 'influencer';
+
     setActiveTabState(targetTab);
 
-    const targetPath = TAB_TO_PATH[targetTab] || '/beranda';
+    let targetPath = TAB_TO_PATH[targetTab];
+    if (!targetPath && targetTab.startsWith('influencer/detail/')) {
+      targetPath = `/${targetTab}`;
+    }
+    if (!targetPath) targetPath = '/beranda';
+
     if (window.location.pathname !== targetPath) {
       if (options.replace) {
         window.history.replaceState({ tab: targetTab }, '', targetPath);
@@ -75,15 +103,14 @@ function AppContent() {
   };
 
   useEffect(() => {
-    // Standardize root '/' URL path to '/beranda'
     const currentPath = window.location.pathname;
-    if (currentPath === '/' || !PATH_TO_TAB[currentPath]) {
+    if (currentPath === '/') {
       window.history.replaceState({ tab: 'overview' }, '', '/beranda');
     }
 
     // Handle browser Back / Forward buttons (popstate)
     const handlePopState = () => {
-      const matchedTab = PATH_TO_TAB[window.location.pathname] || 'overview';
+      const matchedTab = getTabFromPath(window.location.pathname);
       setActiveTabState(matchedTab);
     };
 
@@ -104,6 +131,10 @@ function AppContent() {
   }, []);
 
   const renderView = () => {
+    if (activeTab === 'marketplace' || activeTab === 'influencer' || (activeTab || '').startsWith('influencer/detail/')) {
+      return <MarketplaceView activeTab={activeTab} setActiveTab={handleTabChange} />;
+    }
+
     switch (activeTab) {
       case 'overview':
         return <OverviewView setActiveTab={handleTabChange} />;
@@ -111,8 +142,6 @@ function AppContent() {
         return <PressReleaseView setActiveTab={handleTabChange} />;
       case 'products':
         return <ProductShowcaseView setActiveTab={handleTabChange} />;
-      case 'marketplace':
-        return <MarketplaceView setActiveTab={handleTabChange} />;
       case 'collaborations':
       case 'dashboard/collaborations':
         return <DashboardCollaborationsView setActiveTab={handleTabChange} />;
@@ -122,6 +151,14 @@ function AppContent() {
         return <AboutView setActiveTab={handleTabChange} />;
       case 'admin':
         return <AdminView setActiveTab={handleTabChange} />;
+      case 'profile':
+        return <UserProfileView setActiveTab={handleTabChange} />;
+      case 'terms':
+        return <TermsView setActiveTab={handleTabChange} />;
+      case 'privacy':
+        return <PrivacyView setActiveTab={handleTabChange} />;
+      case 'faq':
+        return <FaqView setActiveTab={handleTabChange} />;
       case 'login':
         return <LoginView setActiveTab={handleTabChange} />;
       case 'signup':
@@ -145,6 +182,7 @@ function AppContent() {
         </main>
       </div>
       <Footer setActiveTab={handleTabChange} />
+      <CookieConsentToast />
     </div>
   );
 }

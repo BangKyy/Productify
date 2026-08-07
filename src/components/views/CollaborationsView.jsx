@@ -157,11 +157,14 @@ export const CollaborationsView = () => {
       // Combine both sources
       const combined = [...(Array.isArray(collabs) ? collabs : []), ...formattedRequests];
 
-      // Remove duplicates by ID
+      // Remove duplicates using getItemDedupeKey
       const uniqueMap = new Map();
       combined.forEach(item => {
-        if (!uniqueMap.has(item.id)) {
-          uniqueMap.set(item.id, item);
+        if (item) {
+          const key = getItemDedupeKey(item);
+          if (key && !uniqueMap.has(key)) {
+            uniqueMap.set(key, item);
+          }
         }
       });
       const uniqueList = Array.from(uniqueMap.values());
@@ -266,7 +269,7 @@ export const CollaborationsView = () => {
           <div className="inline-flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider">
             <UsersThree className="w-4 h-4" /> Marketplace Influencer & Campaign Tracker
           </div>
-          <h1 className="text-3xl font-extrabold text-white">Kolaborasi Influencer / KOL</h1>
+          <h1 className="text-3xl font-extrabold text-white">Kolaborasi Influencer</h1>
           <p className="text-sm text-slate-400 max-w-xl">
             Jajaki peluang kerja sama endorsement produk UMKM secara transparan dengan pelacakan status proyek riil.
           </p>

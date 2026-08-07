@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { dataService } from '../../lib/supabase';
+import { dataService, getItemDedupeKey } from '../../lib/supabase';
 import { Button } from '../ui/Button';
 import LogoWhite from '../../assets/Logo_White.png';
 import { 
@@ -34,8 +34,8 @@ import {
 
 const ROLE_BADGE_STYLE = {
   umkm: { label: 'UMKM / Brand', bg: 'bg-purple-500/20 text-purple-300 border-purple-500/40' },
-  influencer: { label: 'Influencer / KOL', bg: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
-  agency: { label: 'Agency PR', bg: 'bg-blue-500/20 text-blue-300 border-blue-500/40' },
+  influencer: { label: 'Influencer', bg: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
+  agency: { label: 'Agency', bg: 'bg-blue-500/20 text-blue-300 border-blue-500/40' },
   admin: { label: 'Admin', bg: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' }
 };
 
@@ -54,7 +54,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
     activeTab !== 'role-selection'
   );
 
-  // Auto-check for pending collaboration requests directed to or initiated by the user
+  // Auto-check for pending collaboration requests directed to the user (Incoming pending requests)
   useEffect(() => {
     if (!isAuthenticated || !currentProfile?.id) {
       setPendingNotificationCount(0);
@@ -68,24 +68,36 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
           dataService.getRateCardRequests()
         ]);
 
-        const myCollabs = (Array.isArray(collabs) ? collabs : []).filter(c => 
-          (c.influencer_id === currentProfile.id || c.brand_id === currentProfile.id) && c.status === 'pending'
-        );
-
-        const myRequests = (Array.isArray(rateRequests) ? rateRequests : []).map(r => ({
+        const formattedRequests = (Array.isArray(rateRequests) ? rateRequests : []).map(r => ({
           ...r,
-          brand_id: r.requester_id
-        })).filter(r => 
-          (r.influencer_id === currentProfile.id || r.brand_id === currentProfile.id) && r.status === 'pending'
-        );
+          brand_id: r.requester_id || r.brand_id,
+          isRateCardRequest: true
+        }));
 
-        const combined = [...myCollabs, ...myRequests];
+        const combined = [...(Array.isArray(collabs) ? collabs : []), ...formattedRequests];
+
         const uniqueMap = new Map();
         combined.forEach(p => {
-          if (p && p.id) uniqueMap.set(p.id, p);
+          if (p) {
+            const key = getItemDedupeKey(p);
+            if (key && !uniqueMap.has(key)) {
+              uniqueMap.set(key, p);
+            }
+          }
         });
 
-        setPendingNotificationCount(uniqueMap.size);
+        const myPendingCollabs = Array.from(uniqueMap.values()).filter(c => {
+          if (!c || c.status !== 'pending') return false;
+
+          const isUserInvolved = 
+            c.influencer_id === currentProfile.id || 
+            c.brand_id === currentProfile.id || 
+            c.requester_id === currentProfile.id;
+
+          return isUserInvolved;
+        });
+
+        setPendingNotificationCount(myPendingCollabs.length);
       } catch (err) {
         console.warn('Error checking pending notifications:', err);
       }
@@ -107,7 +119,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
     },
     { 
       id: 'marketplace', 
-      label: 'Marketplace KOL', 
+      label: 'Influencer', 
       desc: 'Direktori & pengajuan kolaborasi influencer',
       icon: UsersThree, 
       color: 'text-purple-400',
@@ -124,7 +136,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
   ];
 
   const roleStyle = ROLE_BADGE_STYLE[currentRole] || ROLE_BADGE_STYLE.umkm;
-  const isServicesActive = serviceSubItems.some(sub => sub.id === activeTab);
+  const isServicesActive = serviceSubItems.some(sub => sub.id === activeTab) || activeTab === 'influencer' || (activeTab || '').startsWith('influencer/detail/');
 
   const handleLogout = () => {
     logoutUser();
@@ -143,7 +155,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
           >
             <img 
               src={LogoWhite} 
-              alt="PRoductify Logo" 
+              alt="Productify Logo" 
               className="h-10 w-auto object-contain group-hover:scale-105 transition-transform" 
             />
           </div>
@@ -179,7 +191,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
 
               <DropdownMenuContent align="center" className="w-72 p-2 space-y-1 bg-slate-900/95 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl">
                 <DropdownMenuLabel className="px-3 py-1.5 text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
-                  Layanan Terpadu PRoductify
+                  Layanan Terpadu Productify
                 </DropdownMenuLabel>
 
                 {serviceSubItems.map((sub) => {
@@ -221,7 +233,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
               <span>Aktivitas Kolaborasi</span>
             </button>
 
-            {/* 4. Tentang PRoductify (Tentang & Mengapa Memilih PRoductify) */}
+            {/* 4. Tentang Productify (Tentang & Mengapa Memilih Productify) */}
             <button
               onClick={() => setActiveTab('about')}
               className={`px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
@@ -308,6 +320,21 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                       <p className="text-xs font-extrabold text-white truncate">{currentProfile.full_name}</p>
                       <p className="text-[10px] text-slate-400 font-medium capitalize mt-0.5">Peran: {roleStyle.label}</p>
                     </DropdownMenuLabel>
+
+                    {/* Manajemen Profil Saya Navigation */}
+                    <DropdownMenuItem 
+                      onClick={() => setActiveTab('profile')}
+                      active={activeTab === 'profile'}
+                      className="cursor-pointer font-semibold text-slate-200 hover:text-purple-300 py-2.5 flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2">
+                        <User className="w-4.5 h-4.5 text-purple-400 shrink-0" />
+                        <span>Manajemen Profil Saya</span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                        Profil
+                      </span>
+                    </DropdownMenuItem>
 
                     {/* Status Kolaborasi Navigation with Notification Badge */}
                     <DropdownMenuItem 
@@ -405,8 +432,18 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                 </div>
               </div>
 
-              {/* Mobile quick actions for Status Kolaborasi and Logout */}
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800">
+              {/* Mobile quick actions for Profil, Status Kolaborasi and Logout */}
+              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => { setActiveTab('profile'); setMobileMenuOpen(false); }}
+                  className="text-xs font-bold gap-1 text-slate-200 border-slate-700"
+                >
+                  <User className="w-4 h-4 text-purple-400" />
+                  <span>Profil</span>
+                </Button>
+
                 <Button
                   size="sm"
                   variant="outline"
@@ -512,7 +549,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
               <span>Aktivitas Kolaborasi</span>
             </button>
 
-            {/* 4. Mobile Tentang PRoductify */}
+            {/* 4. Mobile Tentang Productify */}
             <button
               onClick={() => {
                 setActiveTab('about');
@@ -522,7 +559,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                 activeTab === 'about' ? 'bg-purple-600 text-white font-semibold' : 'text-slate-300 hover:bg-slate-800'
               }`}
             >
-              <span>Tentang PRoductify</span>
+              <span>Tentang Productify</span>
             </button>
 
             {/* 5. Mobile Moderasi Admin */}

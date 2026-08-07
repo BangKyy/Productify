@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { dataService, isSupabaseConfigured } from '../lib/supabase';
 import { supabaseClient } from '../lib/supabase/client';
+import { setSessionCookie, hasValidSessionCookie, clearSessionCookie } from '../lib/cookies';
+import { useToast } from './ToastContext';
 
 const AuthContext = createContext(null);
 
@@ -11,11 +13,14 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [pendingUser, setPendingUser] = useState(null); // For signup -> onboarding flow
 
+  const toastContext = useToast();
+
   const setCurrentProfile = (profileOrFn) => {
     setCurrentProfileState(prev => {
       const next = typeof profileOrFn === 'function' ? profileOrFn(prev) : profileOrFn;
       if (next && next.id) {
         localStorage.setItem('productify_active_profile_id', next.id);
+        setSessionCookie(next.id);
       }
       if (next && next.role) {
         localStorage.setItem('productify_active_role', next.role);
@@ -32,8 +37,22 @@ export const AuthProvider = ({ children }) => {
 
       const savedProfileId = localStorage.getItem('productify_active_profile_id');
       const savedRole = localStorage.getItem('productify_active_role');
+      const sessionValid = hasValidSessionCookie();
 
-      if (savedProfileId) {
+      // If user was saved in localStorage but 24-hour session cookie has expired, auto-logout
+      if ((savedProfileId || savedRole) && !sessionValid) {
+        localStorage.removeItem('productify_active_profile_id');
+        localStorage.removeItem('productify_active_role');
+        clearSessionCookie();
+        setCurrentProfileState(null);
+        setIsAuthenticated(false);
+        if (toastContext?.toast) {
+          toastContext.toast.warning('Sesi login Anda telah berakhir (24 jam). Silakan login kembali.');
+        }
+        return;
+      }
+
+      if (sessionValid && savedProfileId) {
         const matched = safeData.find(p => p.id === savedProfileId);
         if (matched) {
           setCurrentProfileState(matched);
@@ -42,7 +61,7 @@ export const AuthProvider = ({ children }) => {
         }
       }
 
-      if (savedRole) {
+      if (sessionValid && savedRole) {
         const matchedRole = safeData.find(p => p.role === savedRole);
         if (matchedRole) {
           setCurrentProfileState(matchedRole);
@@ -102,6 +121,34 @@ export const AuthProvider = ({ children }) => {
     }
   }, [pendingUser]);
 
+  // Periodic check for 24-hour cookie session expiration
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const checkSessionExpiry = () => {
+      if (!hasValidSessionCookie()) {
+        logoutUser();
+        if (toastContext?.toast) {
+          toastContext.toast.warning('Sesi login Anda telah berakhir (24 jam). Silakan login kembali.');
+        }
+      }
+    };
+
+    const interval = setInterval(checkSessionExpiry, 30000);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkSessionExpiry();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isAuthenticated]);
+
   const switchRole = (role) => {
     const target = profiles.find(p => p.role === role);
     if (target) {
@@ -159,6 +206,7 @@ export const AuthProvider = ({ children }) => {
 
           setCurrentProfile(profile);
           setIsAuthenticated(true);
+          setSessionCookie(profile.id);
           setPendingUser(null);
           return profile;
         }
@@ -181,6 +229,7 @@ export const AuthProvider = ({ children }) => {
       if (!expectedUserPass || password === expectedUserPass) {
         setCurrentProfile(matchedProfile);
         setIsAuthenticated(true);
+        setSessionCookie(matchedProfile.id);
         setPendingUser(null);
         return matchedProfile;
       }
@@ -254,6 +303,7 @@ export const AuthProvider = ({ children }) => {
 
     setCurrentProfile(activeAdminSession);
     setIsAuthenticated(true);
+    setSessionCookie(activeAdminSession.id);
     return activeAdminSession;
   };
 
@@ -309,6 +359,7 @@ export const AuthProvider = ({ children }) => {
   const logoutUser = async () => {
     localStorage.removeItem('productify_active_profile_id');
     localStorage.removeItem('productify_active_role');
+    clearSessionCookie();
     if (isSupabaseConfigured && supabaseClient) {
       try {
         await supabaseClient.auth.signOut();
@@ -385,11 +436,11 @@ export const AuthProvider = ({ children }) => {
 
     const profileData = {
       id: userToSave.id,
-      full_name: userToSave.full_name || 'Pengguna PRoductify',
+      full_name: userToSave.full_name || 'Pengguna Productify',
       email: userToSave.email || '',
       role: targetRole,
       avatar_url: avatarUrl || avatar_url || userToSave.avatar_url || '',
-      bio: bio || `Profil resmi ${targetRole.toUpperCase()} di platform PRoductify.`,
+      bio: bio || `Profil resmi ${targetRole.toUpperCase()} di platform Productify.`,
       phone_number: phoneNumber || phone_number || userToSave.phone_number || '',
       address: address || userToSave.address || 'Indonesia',
       category: category || userToSave.category || '',
@@ -418,6 +469,7 @@ export const AuthProvider = ({ children }) => {
     // Persist active profile ID and role to localStorage ONLY AFTER SUCCESSFUL DB SAVE
     if (finalProfile.id) {
       localStorage.setItem('productify_active_profile_id', finalProfile.id);
+      setSessionCookie(finalProfile.id);
     }
     if (finalProfile.role) {
       localStorage.setItem('productify_active_role', finalProfile.role);

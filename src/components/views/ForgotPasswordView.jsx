@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Breadcrumb } from '../ui/Breadcrumb';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { sanitizeInput, validatePasswordStrength } from '../../lib/security';
@@ -71,7 +72,10 @@ export const ForgotPasswordView = ({ setActiveTab }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto py-12 px-4">
+    <div className="max-w-md mx-auto py-8 px-4 space-y-6">
+      <div className="flex justify-center">
+        <Breadcrumb items={[{ label: 'Masuk Akun', tab: 'login' }, { label: 'Lupa Kata Sandi', icon: Lock }]} setActiveTab={setActiveTab} />
+      </div>
       <div className="glass-card rounded-3xl p-8 border-slate-800 space-y-6 shadow-2xl relative overflow-hidden">
         
         <div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl pointer-events-none"></div>
@@ -79,7 +83,7 @@ export const ForgotPasswordView = ({ setActiveTab }) => {
         <div className="text-center space-y-3">
           <img 
             src={LogoWhite} 
-            alt="PRoductify Logo" 
+            alt="Productify Logo" 
             className="h-12 w-auto object-contain mx-auto" 
           />
           <h1 className="text-2xl font-black text-white">Ubah Kata Sandi Akun</h1>

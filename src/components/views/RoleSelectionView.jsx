@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
+import { Breadcrumb } from '../ui/Breadcrumb';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Button } from '../ui/Button';
-import { 
-  Storefront, 
-  UsersThree, 
-  Newspaper, 
-  CheckCircle, 
-  ArrowRight, 
+import {
+  Storefront,
+  UsersThree,
+  Newspaper,
+  CheckCircle,
+  ArrowRight,
   Sparkle,
   Phone,
   MapPin,
@@ -35,7 +36,7 @@ const ROLE_CARDS = [
   },
   {
     id: 'influencer',
-    title: 'Influencer / KOL',
+    title: 'Influencer',
     subtitle: 'Content Creator, Beauty/Lifestyle Blogger & KOL',
     description: 'Tampilkan portofolio rate card, terima tawaran endorsement dari brand UMKM, dan kelola proyek kolaborasi.',
     bg: 'border-amber-500/40 hover:border-amber-500 bg-amber-500/10',
@@ -45,7 +46,7 @@ const ROLE_CARDS = [
   },
   {
     id: 'agency',
-    title: 'Agency PR / Media',
+    title: 'Agency',
     subtitle: 'Agensi Public Relations & Jurnalis Berita',
     description: 'Akses direktori press release UMKM nasional, fasilitasi pendampingan publikasi, dan terbitkan artikel PR.',
     bg: 'border-blue-500/40 hover:border-blue-500 bg-blue-500/10',
@@ -54,6 +55,28 @@ const ROLE_CARDS = [
     color: 'text-blue-400'
   }
 ];
+
+const formatIndonesianPhone = (input) => {
+  if (!input) return '';
+  let digits = input.replace(/\D/g, '');
+
+  if (digits.startsWith('62')) {
+    digits = digits.slice(2);
+  } else if (digits.startsWith('0')) {
+    digits = digits.slice(1);
+  }
+
+  digits = digits.slice(0, 12);
+
+  if (digits.length === 0) return '';
+  const part1 = digits.slice(0, 3);
+  const part2 = digits.slice(3, 7);
+  const part3 = digits.slice(7, 12);
+
+  if (part3) return `${part1}-${part2}-${part3}`;
+  if (part2) return `${part1}-${part2}`;
+  return part1;
+};
 
 export const RoleSelectionView = ({ setActiveTab }) => {
   const { pendingUser, completeRoleOnboarding } = useAuth();
@@ -94,15 +117,21 @@ export const RoleSelectionView = ({ setActiveTab }) => {
     setRateCards(updated);
   };
 
+  const handlePhoneChange = (e) => {
+    const formatted = formatIndonesianPhone(e.target.value);
+    setPhoneNumber(formatted);
+  };
+
   const handleComplete = async (e) => {
     e.preventDefault();
     setSubmitting(true);
+    const fullPhone = phoneNumber ? `+62 ${phoneNumber}` : '+62 821-4062-7334';
     try {
       await completeRoleOnboarding({
         role: selectedRole,
-        bio: bio || `Profil resmi ${selectedRole.toUpperCase()} di platform PRoductify.`,
-        phoneNumber: phoneNumber || '+62 812-3456-7890',
-        phone_number: phoneNumber || '+62 812-3456-7890',
+        bio: bio || `Profil resmi ${selectedRole.toUpperCase()} di platform Productify.`,
+        phoneNumber: fullPhone,
+        phone_number: fullPhone,
         address: address || 'Jakarta, Indonesia',
         category: selectedRole === 'influencer' ? category : '',
         gender: selectedRole === 'influencer' ? gender : 'Perempuan',
@@ -127,8 +156,13 @@ export const RoleSelectionView = ({ setActiveTab }) => {
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 space-y-8">
-      
-      {/* Onboarding Header */}
+
+      {/* Breadcrumb Navigation */}
+      <div className="flex justify-center">
+        <Breadcrumb items={[{ label: 'Pilihan Peran & Onboarding', icon: Sparkle }]} setActiveTab={setActiveTab} />
+      </div>
+
+      {/* Hero Header */}
       <div className="text-center space-y-3">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-bold">
           <Sparkle weight="fill" className="w-4 h-4 text-purple-400" />
@@ -138,12 +172,12 @@ export const RoleSelectionView = ({ setActiveTab }) => {
           Selamat Datang, <span className="text-gradient">{pendingUser?.full_name || 'Pengguna Baru'}</span>!
         </h1>
         <p className="text-sm text-slate-300 max-w-xl mx-auto">
-          Pilih peran utama Anda dalam ekosistem PRoductify. Informasi profil Anda akan tersimpan dengan aman pada sistem kami.
+          Pilih peran utama Anda dalam ekosistem Productify. Informasi profil Anda akan tersimpan dengan aman pada sistem kami.
         </p>
       </div>
 
       <form onSubmit={handleComplete} className="space-y-8">
-        
+
         {/* Role Selection Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {ROLE_CARDS.map(card => {
@@ -154,9 +188,8 @@ export const RoleSelectionView = ({ setActiveTab }) => {
               <div
                 key={card.id}
                 onClick={() => setSelectedRole(card.id)}
-                className={`glass-card p-6 rounded-3xl border transition-all cursor-pointer flex flex-col justify-between space-y-4 relative ${
-                  isSelected ? card.selectedBg : card.bg
-                }`}
+                className={`glass-card p-6 rounded-3xl border transition-all cursor-pointer flex flex-col justify-between space-y-4 relative ${isSelected ? card.selectedBg : card.bg
+                  }`}
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -187,18 +220,21 @@ export const RoleSelectionView = ({ setActiveTab }) => {
         {/* Additional Profile Info Section */}
         <div className="glass-card rounded-3xl p-6 sm:p-8 border-slate-800 space-y-4">
           <h3 className="text-lg font-bold text-white">Lengkapi Informasi Profil ({selectedRole.toUpperCase()})</h3>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">Nomor Telepon / WhatsApp</label>
-              <div className="relative">
-                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <div className="relative flex items-center">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400 pointer-events-none" />
+                <span className="absolute left-9 top-1/2 -translate-y-1/2 text-xs font-extrabold text-purple-300 border-r border-slate-700 pr-2 select-none">
+                  +62
+                </span>
                 <input
                   type="text"
-                  placeholder="+62 812-3456-7890"
+                  placeholder="821-4062-7334"
                   value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-purple-500"
+                  onChange={handlePhoneChange}
+                  className="w-full pl-20 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-purple-500 font-mono tracking-wide placeholder:text-slate-500"
                 />
               </div>
             </div>
@@ -209,7 +245,7 @@ export const RoleSelectionView = ({ setActiveTab }) => {
                 <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Jakarta Selatan, Indonesia"
+                  placeholder="Surabaya, Jawa Timur"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-purple-500"
@@ -226,8 +262,8 @@ export const RoleSelectionView = ({ setActiveTab }) => {
                 onChange={(e) => setGender(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-purple-500 cursor-pointer"
               >
-                <option value="Perempuan">Perempuan (Wanita)</option>
-                <option value="Laki-Laki">Laki-Laki (Pria)</option>
+                <option value="Perempuan">Perempuan</option>
+                <option value="Laki-Laki">Laki-Laki</option>
               </select>
             </div>
           </div>
@@ -291,8 +327,8 @@ export const RoleSelectionView = ({ setActiveTab }) => {
                   onChange={(e) => setGender(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-amber-500 cursor-pointer"
                 >
-                  <option value="Perempuan">Perempuan (Wanita)</option>
-                  <option value="Laki-Laki">Laki-Laki (Pria)</option>
+                  <option value="Perempuan">Perempuan</option>
+                  <option value="Laki-Laki">Laki-Laki</option>
                 </select>
               </div>
 

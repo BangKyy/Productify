@@ -16,13 +16,21 @@ import {
   Handshake, 
   Globe, 
   Quotes,
-  Star
+  Star,
+  Info
 } from '@phosphor-icons/react';
+
+import { Breadcrumb } from '../ui/Breadcrumb';
 
 export const AboutView = ({ setActiveTab }) => {
   return (
-    <div className="space-y-12 pb-12">
+    <div className="space-y-12 max-w-7xl mx-auto pb-16">
       
+      {/* Breadcrumb Navigation */}
+      <div>
+        <Breadcrumb items={[{ label: 'Tentang Kami', icon: Info }]} setActiveTab={setActiveTab} />
+      </div>
+
       {/* 🚀 Hero Banner Section */}
       <div className="relative overflow-hidden rounded-3xl p-8 sm:p-12 glass-card border-slate-800 bg-gradient-to-br from-slate-950 via-slate-900 to-purple-950/40">
         <div className="absolute top-0 right-0 -mt-16 -mr-16 w-96 h-96 bg-purple-500/15 rounded-full blur-3xl pointer-events-none" />
@@ -34,11 +42,11 @@ export const AboutView = ({ setActiveTab }) => {
           </div>
 
           <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-            Tentang <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-amber-300 to-indigo-400">PRoductify</span>
+            Tentang <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-amber-300 to-indigo-400">Productify</span>
           </h1>
 
           <p className="text-base sm:text-lg text-slate-300 leading-relaxed">
-            PRoductify adalah ekosistem digital perintis yang dirancang untuk menjembatani **Brand UMKM**, **Agency Public Relations**, dan **Influencer KOL** di seluruh Indonesia. Kami merevolusi cara kerja kolaborasi promosi menjadi lebih terstruktur, transparan, dan efisien.
+            Productify adalah ekosistem digital perintis yang dirancang untuk menjembatani **Brand UMKM**, **Agency**, dan **Influencer** di seluruh Indonesia. Kami merevolusi cara kerja kolaborasi promosi menjadi lebih terstruktur, transparan, dan efisien.
           </p>
 
           {/* Core Vision & Mission Cards */}
@@ -64,11 +72,11 @@ export const AboutView = ({ setActiveTab }) => {
         </div>
       </div>
 
-      {/* 🏛️ SECTION 1: Apa Itu PRoductify? (3 Pilar Utama) */}
+      {/* 🏛️ SECTION 1: Apa Itu Productify? (3 Pilar Utama) */}
       <div className="space-y-6">
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <span className="text-xs font-bold text-amber-400 uppercase tracking-widest block">Ekosistem 3-in-1</span>
-          <h2 className="text-3xl font-black text-white tracking-tight">Apa Saja yang Disediakan PRoductify?</h2>
+          <h2 className="text-3xl font-black text-white tracking-tight">Apa Saja yang Disediakan Productify?</h2>
           <p className="text-xs text-slate-400">
             Tiga pilar layanan utama yang terintegrasi secara lancar dalam satu sistem dashboard.
           </p>
@@ -116,13 +124,13 @@ export const AboutView = ({ setActiveTab }) => {
         </div>
       </div>
 
-      {/* 🏆 SECTION 2: Mengapa Memilih PRoductify? (Keunggulan Utama) */}
+      {/* 🏆 SECTION 2: Mengapa Memilih Productify? (Keunggulan Utama) */}
       <div className="space-y-8 pt-4">
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <span className="text-xs font-bold text-purple-400 uppercase tracking-widest block">Keunggulan Platform</span>
-          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">Mengapa Memilih PRoductify?</h2>
+          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">Mengapa Memilih Productify?</h2>
           <p className="text-xs text-slate-400">
-            6 alasan utama mengapa ribuan Brand UMKM, Agency, dan Influencer memilih PRoductify sebagai mitra pertumbuhan bisnis.
+            6 alasan utama mengapa ribuan Brand UMKM, Agency, dan Influencer memilih Productify sebagai mitra pertumbuhan bisnis.
           </p>
         </div>
 
@@ -210,16 +218,16 @@ export const AboutView = ({ setActiveTab }) => {
           </div>
 
           <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-2">
-            <span className="text-xs font-bold text-amber-300 uppercase tracking-wider block">Untuk Influencer / KOL</span>
+            <span className="text-xs font-bold text-amber-300 uppercase tracking-wider block">Untuk Influencer</span>
             <p className="text-xs text-slate-300 leading-relaxed">
               Sajikan rate card profesional, terima tawaran endorsement dari brand terpercaya, dan kembangkan portofolio kampanye Anda.
             </p>
           </div>
 
           <div className="p-5 rounded-2xl bg-blue-500/10 border border-blue-500/20 space-y-2">
-            <span className="text-xs font-bold text-blue-300 uppercase tracking-wider block">Untuk Agency PR</span>
+            <span className="text-xs font-bold text-blue-300 uppercase tracking-wider block">Untuk Agency</span>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Kelola kampanye rilis pers digital, koordinasikan talent KOL, dan dapatkan laporan perkembangan secara terstruktur.
+              Kelola kampanye rilis pers digital, koordinasikan talent, dan dapatkan laporan perkembangan secara terstruktur.
             </p>
           </div>
         </div>
@@ -228,7 +236,7 @@ export const AboutView = ({ setActiveTab }) => {
       {/* 📣 Call-To-Action Banner Footer */}
       <div className="glass-card p-8 sm:p-10 rounded-3xl border-slate-800 bg-gradient-to-r from-purple-900/60 via-slate-900 to-indigo-900/60 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
         <div className="space-y-2 text-center md:text-left">
-          <h3 className="text-2xl font-black text-white">Siap Memulai Kolaborasi di PRoductify?</h3>
+          <h3 className="text-2xl font-black text-white">Siap Memulai Kolaborasi di Productify?</h3>
           <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
             Bergabunglah dengan komunitas pengusaha dan kreator konten Indonesia. Daftarkan akun Anda atau jelajahi marketplace sekarang!
           </p>

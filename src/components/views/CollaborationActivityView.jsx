@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Breadcrumb } from '../ui/Breadcrumb';
 import { useAuth } from '../../context/AuthContext';
-import { dataService } from '../../lib/supabase';
+import { dataService, getItemDedupeKey } from '../../lib/supabase';
 import { 
   UsersThree, 
   Handshake, 
@@ -147,11 +148,14 @@ export const CollaborationActivityView = ({ setActiveTab }) => {
 
       const combined = [...(Array.isArray(collabs) ? collabs : []), ...formattedRequests];
 
-      // Remove duplicates by ID
+      // Remove duplicates using getItemDedupeKey
       const uniqueMap = new Map();
       combined.forEach(item => {
-        if (item && item.id && !uniqueMap.has(item.id)) {
-          uniqueMap.set(item.id, item);
+        if (item) {
+          const key = getItemDedupeKey(item);
+          if (key && !uniqueMap.has(key)) {
+            uniqueMap.set(key, item);
+          }
         }
       });
 
@@ -197,6 +201,11 @@ export const CollaborationActivityView = ({ setActiveTab }) => {
   return (
     <div className="space-y-8">
       
+      {/* Breadcrumb Navigation */}
+      <div>
+        <Breadcrumb items={[{ label: 'Aktivitas Komunitas', icon: Clock }]} setActiveTab={setActiveTab} />
+      </div>
+
       {/* 🚀 Hero Header Banner */}
       <div className="relative overflow-hidden rounded-3xl p-8 sm:p-10 glass-card border-slate-800 bg-gradient-to-br from-slate-950 via-slate-900 to-purple-950/40">
         <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -205,7 +214,7 @@ export const CollaborationActivityView = ({ setActiveTab }) => {
         <div className="relative z-10 space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30 text-xs font-extrabold uppercase tracking-wider">
-              <Clock className="w-4 h-4 text-amber-400" /> Transparansi Komunitas PRoductify
+              <Clock className="w-4 h-4 text-amber-400" /> Transparansi Komunitas Productify
             </div>
 
             <button
@@ -353,7 +362,7 @@ export const CollaborationActivityView = ({ setActiveTab }) => {
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
                   <div className="flex flex-wrap items-center gap-2 text-xs">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30 text-xs font-bold uppercase tracking-wider">
-                      <ShieldCheck className="w-3.5 h-3.5 text-purple-400" /> Terverifikasi Sistem PRoductify
+                      <ShieldCheck className="w-3.5 h-3.5 text-purple-400" /> Terverifikasi Sistem Productify
                     </span>
                     <span className="text-slate-500">•</span>
                     <span className="text-slate-400 font-medium">

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Breadcrumb } from '../ui/Breadcrumb';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { isSupabaseConfigured } from '../../lib/supabase';
@@ -41,13 +42,18 @@ export const AdminView = ({ setActiveTab }) => {
   return (
     <div className="space-y-8">
 
+      {/* Breadcrumb Navigation */}
+      <div>
+        <Breadcrumb items={[{ label: 'Konsol Admin', icon: ShieldCheck }]} setActiveTab={setActiveTab} />
+      </div>
+
       {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-8 rounded-3xl glass-card border-slate-800">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
             <ShieldCheck className="w-4 h-4" /> Moderasi Platform & Audit Keamanan
           </div>
-          <h1 className="text-3xl font-extrabold text-white">Konsol Admin PRoductify</h1>
+          <h1 className="text-3xl font-extrabold text-white">Konsol Admin Productify</h1>
           <p className="text-sm text-slate-400 max-w-xl">
             Kelola verifikasi akun pengguna, moderasi konten press release, serta pantau performa ekosistem PR digital.
           </p>
@@ -113,7 +119,7 @@ export const AdminView = ({ setActiveTab }) => {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-extrabold text-white">Daftar Pengguna & Verifikasi Peran (RBAC)</h2>
-            <p className="text-xs text-slate-400">Pengguna terdaftar dalam sistem verifikasi akun PRoductify.</p>
+            <p className="text-xs text-slate-400">Pengguna terdaftar dalam sistem verifikasi akun Productify.</p>
           </div>
           <span className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
             Live Audit

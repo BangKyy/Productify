@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Breadcrumb } from '../ui/Breadcrumb';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { dataService } from '../../lib/supabase';
@@ -51,6 +52,8 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
     image_url: PRESET_IMAGES[0]
   });
   const [submittingEdit, setSubmittingEdit] = useState(false);
+  const [uploadedAddImageInfo, setUploadedAddImageInfo] = useState(null);
+  const [uploadedEditImageInfo, setUploadedEditImageInfo] = useState(null);
 
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -68,6 +71,11 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
       const { dataUrl, originalSizeKB, compressedSizeKB } = await compressImageFile(file, 100, 800);
 
       setFormData(prev => ({ ...prev, image_url: dataUrl }));
+      setUploadedAddImageInfo({
+        name: file.name,
+        originalSizeKB,
+        compressedSizeKB
+      });
       toast.success(`Gambar produk berhasil dikompresi (${originalSizeKB} KB → ${compressedSizeKB} KB)!`);
     } catch (err) {
       console.error('Error compressing image:', err);
@@ -75,6 +83,12 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
     } finally {
       e.target.value = '';
     }
+  };
+
+  const handleRemoveAddPhoto = () => {
+    setUploadedAddImageInfo(null);
+    setFormData(prev => ({ ...prev, image_url: PRESET_IMAGES[0] }));
+    toast.info('Gambar terunggah dibatalkan. Tampilan unggah berkas dikembalikan.');
   };
 
   // Influencer Collaboration Pitch Modal State
@@ -204,6 +218,11 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
       const { dataUrl, originalSizeKB, compressedSizeKB } = await compressImageFile(file, 100, 800);
 
       setEditFormData(prev => ({ ...prev, image_url: dataUrl }));
+      setUploadedEditImageInfo({
+        name: file.name,
+        originalSizeKB,
+        compressedSizeKB
+      });
       toast.success(`Gambar produk berhasil diperbarui & dikompresi (${originalSizeKB} KB → ${compressedSizeKB} KB)!`);
     } catch (err) {
       console.error('Error compressing image:', err);
@@ -211,6 +230,12 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
     } finally {
       e.target.value = '';
     }
+  };
+
+  const handleRemoveEditPhoto = () => {
+    setUploadedEditImageInfo(null);
+    setEditFormData(prev => ({ ...prev, image_url: PRESET_IMAGES[0] }));
+    toast.info('Gambar terunggah dibatalkan. Tampilan unggah berkas dikembalikan.');
   };
 
   const handleUpdateProduct = async (e) => {
@@ -324,6 +349,11 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
   return (
     <div className="space-y-8">
       
+      {/* Breadcrumb Navigation */}
+      <div>
+        <Breadcrumb items={[{ label: 'Product Showcase', icon: Storefront }]} setActiveTab={setActiveTab} />
+      </div>
+
       {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-8 rounded-3xl glass-card border-slate-800">
         <div className="space-y-2">
@@ -450,17 +480,8 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
                   </div>
 
                   {/* Card Footer Actions */}
-                  <div className="pt-4 border-t border-slate-800/80 flex items-center justify-end gap-2">
-                    {currentRole === 'umkm' ? (
-                      <button
-                        disabled
-                        className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-500 border border-slate-700/50 text-xs font-semibold cursor-not-allowed"
-                        title="Sesama Brand UMKM tidak dapat saling mengajukan kerja sama produk"
-                      >
-                        <Handshake className="w-4 h-4 opacity-50" />
-                        <span>Sesama Brand UMKM</span>
-                      </button>
-                    ) : (
+                  {currentRole !== 'umkm' && (
+                    <div className="pt-4 border-t border-slate-800/80 flex items-center justify-end gap-2">
                       <button
                         onClick={() => handleOpenCollabModal(product)}
                         className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-slate-950 border border-amber-500/30 text-xs font-bold transition-all shadow-sm cursor-pointer"
@@ -468,8 +489,8 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
                         <Handshake className="w-4 h-4" />
                         <span>Kerja Sama KOL</span>
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -529,87 +550,68 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
               <div className="space-y-3">
                 <label className="block text-xs font-semibold text-slate-300">Gambar Sampul Produk</label>
 
-                {/* Upload File Input Area */}
-                <div className="p-4 rounded-2xl bg-slate-900 border border-dashed border-indigo-500/40 hover:border-indigo-500 transition-all text-center space-y-2">
-                  <UploadSimple className="w-7 h-7 text-indigo-400 mx-auto" />
-                  <div className="text-xs text-slate-300">
-                    <label htmlFor="file-upload" className="font-extrabold text-indigo-400 hover:text-indigo-300 cursor-pointer underline mr-1">
-                      Pilih & Unggah Berkas Gambar
-                    </label>
-                    <span>dari perangkat Anda</span>
-                  </div>
-                  <p className="text-[10px] text-slate-400">
-                    Format: <strong>WebP, PNG, JPG</strong> • <strong className="text-emerald-400">✨ Tanpa Batasan Ukuran (Auto-Kompresi System)</strong>
-                  </p>
-                  <input
-                    id="file-upload"
-                    type="file"
-                    accept="image/webp, image/jpeg, image/jpg, image/png"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                </div>
-
-                {/* Optional URL Input */}
-                <div>
-                  <label className="block text-[11px] font-medium text-slate-400 mb-1">
-                    Atau tempelkan URL Gambar (Opsional):
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="https://... (Opsional)"
-                    value={formData.image_url.startsWith('data:') ? '' : formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value.trim() })}
-                    className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-
-                {/* Live Image Preview & Source Badge */}
-                {formData.image_url && (
-                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/90 border border-slate-800">
-                    <div className="flex items-center gap-3">
+                {formData.image_url.startsWith('data:') || uploadedAddImageInfo ? (
+                  /* Preview Card of Uploaded Image (Hides Dropzone input) */
+                  <div className="p-4 rounded-2xl bg-slate-900/90 border border-indigo-500/40 flex items-center justify-between gap-4 shadow-lg">
+                    <div className="flex items-center gap-3.5 min-w-0">
                       <img
                         src={formData.image_url}
-                        alt="Pratinjau"
-                        className="w-14 h-14 rounded-lg object-cover border border-slate-700 shrink-0 bg-slate-950"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = PRESET_IMAGES[0];
-                        }}
+                        alt="Gambar produk terunggah"
+                        className="w-16 h-16 rounded-2xl object-cover border-2 border-indigo-500/50 shadow-md shrink-0 bg-slate-950"
                       />
-                      <div className="text-[11px] text-slate-300 space-y-0.5">
-                        <p className="font-bold text-white">Pratinjau Gambar Produk</p>
-                        <p className="text-[10px] text-emerald-400 font-semibold">
-                          {formData.image_url.startsWith('data:') ? '✓ Berkas Gambar Diunggah (<=100KB)' : '✓ Link URL / Sample Gambar'}
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            ✓ Gambar Terunggah
+                          </span>
+                          {uploadedAddImageInfo?.compressedSizeKB && (
+                            <span className="text-[10px] text-slate-400 font-medium">
+                              ({uploadedAddImageInfo.compressedSizeKB} KB)
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs font-bold text-white truncate">
+                          {uploadedAddImageInfo?.name || 'Berkas Gambar Produk Custom'}
+                        </p>
+                        <p className="text-[11px] text-slate-400">
+                          Gambar ini akan digunakan sebagai foto sampul produk Anda.
                         </p>
                       </div>
                     </div>
 
+                    {/* Hapus Gambar Button */}
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, image_url: PRESET_IMAGES[0] })}
-                      className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-semibold transition-colors"
-                      title="Kembalikan ke sampel awal"
+                      onClick={handleRemoveAddPhoto}
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-500/10 text-rose-300 border border-rose-500/30 hover:bg-rose-500/20 text-xs font-bold transition-all cursor-pointer shrink-0"
+                      title="Hapus / Batal Unggah Gambar"
                     >
-                      Reset
+                      <Trash className="w-4 h-4 text-rose-400" />
+                      <span>Hapus Gambar</span>
                     </button>
                   </div>
-                )}
-
-                <p className="text-[11px] text-slate-400 font-medium">Atau pilih gambar sampel cepat:</p>
-                <div className="flex gap-2 mt-1">
-                  {PRESET_IMAGES.map((imgUrl, idx) => (
-                    <img
-                      key={idx}
-                      src={imgUrl}
-                      alt="Sample"
-                      onClick={() => setFormData({ ...formData, image_url: imgUrl })}
-                      className={`w-12 h-12 rounded-lg object-cover cursor-pointer border-2 transition-all ${
-                        formData.image_url === imgUrl ? 'border-indigo-500 scale-105' : 'border-transparent opacity-60 hover:opacity-100'
-                      }`}
+                ) : (
+                  /* File Upload Dropzone (Displayed when NO uploaded image exists) */
+                  <div className="p-4 rounded-2xl bg-slate-900 border border-dashed border-indigo-500/40 hover:border-indigo-500 transition-all text-center space-y-2 cursor-pointer">
+                    <UploadSimple className="w-7 h-7 text-indigo-400 mx-auto animate-bounce" />
+                    <div className="text-xs text-slate-300">
+                      <label htmlFor="file-upload" className="font-extrabold text-indigo-400 hover:text-indigo-300 cursor-pointer underline mr-1">
+                        Pilih & Unggah Berkas Gambar
+                      </label>
+                      <span>dari perangkat Anda</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400">
+                      Format: <strong>WebP, PNG, JPG</strong> • <strong className="text-emerald-400">✨ Auto-Kompresi System</strong>
+                    </p>
+                    <input
+                      id="file-upload"
+                      type="file"
+                      accept="image/webp, image/jpeg, image/jpg, image/png"
+                      onChange={handleImageUpload}
+                      className="hidden"
                     />
-                  ))}
-                </div>
+                  </div>
+                )}
               </div>
 
               <div>

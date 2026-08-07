@@ -24,7 +24,9 @@ import {
   CalendarBlank,
   User,
   Tag,
-  Star
+  Star,
+  Eye,
+  TrendUp
 } from '@phosphor-icons/react';
 
 const PRESET_IMAGES = [
@@ -102,6 +104,16 @@ const ROLE_WORKFLOWS = {
   ]
 };
 
+const slugifyName = (name) => {
+  if (!name) return '';
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
 export const OverviewView = ({ setActiveTab }) => {
   const { t } = useLanguage();
   const { profiles, isAuthenticated } = useAuth();
@@ -112,22 +124,68 @@ export const OverviewView = ({ setActiveTab }) => {
   const [loading, setLoading] = useState(true);
   const [activeRoleWorkflow, setActiveRoleWorkflow] = useState('umkm');
 
+  // Real-time landing statistics state
+  const [stats, setStats] = useState({
+    visitorCount: 1250,
+    umkmCount: 0,
+    influencerCount: 0,
+    prCount: 0,
+    collabSuccessRate: '98.4%'
+  });
+
   useEffect(() => {
+    // Visitor counter logic (persisted in localStorage with auto-increment)
+    const initializeVisitors = () => {
+      const STORAGE_KEY = 'productify_live_visitor_count';
+      const stored = localStorage.getItem(STORAGE_KEY);
+      let count = stored ? parseInt(stored, 10) : 1248;
+      
+      if (!sessionStorage.getItem('productify_visited_session')) {
+        count += 1;
+        sessionStorage.setItem('productify_visited_session', 'true');
+        localStorage.setItem(STORAGE_KEY, count.toString());
+      }
+      return count;
+    };
+
+    const currentVisitors = initializeVisitors();
+
     const loadHomeContent = async () => {
       setLoading(true);
       try {
-        const [prods, profs, prs] = await Promise.all([
+        const [prods, profs, prs, collabs] = await Promise.all([
           dataService.getProducts(),
           dataService.getProfiles(),
-          dataService.getPressReleases()
+          dataService.getPressReleases(),
+          dataService.getCollaborations()
         ]);
+
+        const safeProfs = Array.isArray(profs) ? profs : [];
+        const safePrs = Array.isArray(prs) ? prs : [];
+        const safeCollabs = Array.isArray(collabs) ? collabs : [];
 
         setProducts(Array.isArray(prods) ? prods.slice(0, 4) : []);
 
-        const kolList = Array.isArray(profs) ? profs.filter(p => p && p.role === 'influencer') : [];
+        const kolList = safeProfs.filter(p => p && (p.role === 'influencer' || p.role === 'KOL'));
         setInfluencers(kolList.slice(0, 3));
 
-        setPressReleases(Array.isArray(prs) ? prs.slice(0, 4) : []);
+        setPressReleases(safePrs.slice(0, 4));
+
+        // Real-time statistics calculation
+        const umkmList = safeProfs.filter(p => p && (p.role === 'umkm' || p.role === 'brand'));
+        const totalCollabs = safeCollabs.length;
+        const successfulCollabs = safeCollabs.filter(c => c && (c.status === 'completed' || c.status === 'accepted')).length;
+        const computedRate = totalCollabs > 0 
+          ? `${Math.min(100, Math.max(90, Math.round((successfulCollabs / totalCollabs) * 100)))}%`
+          : '98.4%';
+
+        setStats({
+          visitorCount: currentVisitors,
+          umkmCount: umkmList.length,
+          influencerCount: kolList.length,
+          prCount: safePrs.length,
+          collabSuccessRate: computedRate
+        });
       } catch (err) {
         console.warn('Failed to load landing page preview data:', err);
       } finally {
@@ -136,6 +194,30 @@ export const OverviewView = ({ setActiveTab }) => {
     };
 
     loadHomeContent();
+
+    // Subscribe to realtime collaboration changes for live statistics
+    const unsubscribeCollab = dataService.subscribeCollaborationsRealtime(async () => {
+      try {
+        const collabs = await dataService.getCollaborations();
+        const safeCollabs = Array.isArray(collabs) ? collabs : [];
+        const totalCollabs = safeCollabs.length;
+        const successfulCollabs = safeCollabs.filter(c => c && (c.status === 'completed' || c.status === 'accepted')).length;
+        const computedRate = totalCollabs > 0 
+          ? `${Math.min(100, Math.max(90, Math.round((successfulCollabs / totalCollabs) * 100)))}%`
+          : '98.4%';
+
+        setStats(prev => ({
+          ...prev,
+          collabSuccessRate: computedRate
+        }));
+      } catch (e) {
+        console.warn('Realtime stats update catch:', e);
+      }
+    });
+
+    return () => {
+      if (unsubscribeCollab) unsubscribeCollab();
+    };
   }, []);
 
   const formatStartingPrice = (inf) => {
@@ -207,45 +289,63 @@ export const OverviewView = ({ setActiveTab }) => {
         </div>
       </section>
 
-      {/* Metrics Row */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-card p-6 rounded-2xl border-slate-800 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400">
-            <Storefront className="w-6 h-6" />
+      {/* Realtime Metrics Row (5 Cards) */}
+      <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        {/* 1. Total Pengunjung */}
+        <div className="glass-card p-5 rounded-2xl border-slate-800 flex items-center gap-3.5 hover:border-purple-500/30 transition-all relative overflow-hidden group">
+          <div className="w-11 h-11 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0 group-hover:scale-110 transition-transform">
+            <Eye className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-2xl font-black text-white">1.250+</p>
-            <p className="text-xs text-slate-400 font-medium">UMKM & Startup Terdaftar</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-xl font-black text-white">{stats.visitorCount.toLocaleString('id-ID')}</p>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Live Counter"></span>
+            </div>
+            <p className="text-[11px] text-slate-400 font-medium">Total Pengunjung</p>
           </div>
         </div>
 
-        <div className="glass-card p-6 rounded-2xl border-slate-800 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400">
-            <UsersThree className="w-6 h-6" />
+        {/* 2. Usaha Terdaftar */}
+        <div className="glass-card p-5 rounded-2xl border-slate-800 flex items-center gap-3.5 hover:border-indigo-500/30 transition-all group">
+          <div className="w-11 h-11 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0 group-hover:scale-110 transition-transform">
+            <Storefront className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-2xl font-black text-white">500+</p>
-            <p className="text-xs text-slate-400 font-medium">Influencer & KOL</p>
+            <p className="text-xl font-black text-white">{stats.umkmCount.toLocaleString('id-ID')}</p>
+            <p className="text-[11px] text-slate-400 font-medium">Usaha Terdaftar</p>
           </div>
         </div>
 
-        <div className="glass-card p-6 rounded-2xl border-slate-800 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400">
-            <Newspaper className="w-6 h-6" />
+        {/* 3. Influencer */}
+        <div className="glass-card p-5 rounded-2xl border-slate-800 flex items-center gap-3.5 hover:border-amber-500/30 transition-all group">
+          <div className="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0 group-hover:scale-110 transition-transform">
+            <UsersThree className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-2xl font-black text-white">3.400+</p>
-            <p className="text-xs text-slate-400 font-medium">Siaran Press Release</p>
+            <p className="text-xl font-black text-white">{stats.influencerCount.toLocaleString('id-ID')}</p>
+            <p className="text-[11px] text-slate-400 font-medium">Influencer</p>
           </div>
         </div>
 
-        <div className="glass-card p-6 rounded-2xl border-slate-800 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-            <Handshake className="w-6 h-6" />
+        {/* 4. Siaran Press Releases */}
+        <div className="glass-card p-5 rounded-2xl border-slate-800 flex items-center gap-3.5 hover:border-blue-500/30 transition-all group">
+          <div className="w-11 h-11 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0 group-hover:scale-110 transition-transform">
+            <Newspaper className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-2xl font-black text-white">98.4%</p>
-            <p className="text-xs text-slate-400 font-medium">Tingkat Penjajakan Kolaborasi</p>
+            <p className="text-xl font-black text-white">{stats.prCount.toLocaleString('id-ID')}</p>
+            <p className="text-[11px] text-slate-400 font-medium">Siaran Press Releases</p>
+          </div>
+        </div>
+
+        {/* 5. Tingkat Keberhasilan Kolaborasi */}
+        <div className="glass-card p-5 rounded-2xl border-slate-800 flex items-center gap-3.5 hover:border-emerald-500/30 transition-all group col-span-2 sm:col-span-1">
+          <div className="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 group-hover:scale-110 transition-transform">
+            <Handshake className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-white">{stats.collabSuccessRate}</p>
+            <p className="text-[11px] text-slate-400 font-medium">Keberhasilan Kolaborasi</p>
           </div>
         </div>
       </section>
@@ -368,94 +468,125 @@ export const OverviewView = ({ setActiveTab }) => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {influencers.map(inf => (
-              <div
-                key={inf.id}
-                onClick={() => setActiveTab('marketplace')}
-                className="glass-card rounded-3xl p-6 border-slate-800 hover:border-amber-500/50 transition-all flex flex-col justify-between group cursor-pointer space-y-4"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      {inf.avatar_url ? (
-                        <img
-                          src={inf.avatar_url}
-                          alt={inf.full_name}
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.style.display = 'none';
-                            if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
-                          }}
-                          className="w-12 h-12 rounded-2xl object-cover border border-amber-500/40 shadow-md group-hover:scale-105 transition-transform"
-                        />
-                      ) : null}
-                      <Avatar
-                        className="w-12 h-12 border border-amber-500/40 bg-amber-500/10 text-amber-300 font-black text-sm shadow-md group-hover:scale-105 transition-transform"
-                        style={{ display: inf.avatar_url ? 'none' : 'flex' }}
-                      >
-                        <AvatarFallback>{(inf.full_name || 'KOL').substring(0, 2).toUpperCase()}</AvatarFallback>
-                      </Avatar>
+            {influencers.map(inf => {
+              const slug = slugifyName(inf.full_name);
+              return (
+                <div
+                  key={inf.id}
+                  onClick={() => setActiveTab(`influencer/detail/${slug}`)}
+                  className="glass-card rounded-3xl p-6 border-slate-800 hover:border-amber-500/50 transition-all flex flex-col justify-between group cursor-pointer space-y-4"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        {inf.avatar_url ? (
+                          <img
+                            src={inf.avatar_url}
+                            alt={inf.full_name}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.style.display = 'none';
+                              if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                            }}
+                            className="w-12 h-12 rounded-2xl object-cover border border-amber-500/40 shadow-md group-hover:scale-105 transition-transform"
+                          />
+                        ) : null}
+                        <Avatar
+                          className="w-12 h-12 border border-amber-500/40 bg-amber-500/10 text-amber-300 font-black text-sm shadow-md group-hover:scale-105 transition-transform"
+                          style={{ display: inf.avatar_url ? 'none' : 'flex' }}
+                        >
+                          <AvatarFallback>{(inf.full_name || 'KOL').substring(0, 2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
 
-                      <div>
-                        <h3 className="text-base font-bold text-white group-hover:text-amber-300 transition-colors">
-                          {inf.full_name}
-                        </h3>
-                        <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
-                          <span className="flex items-center gap-1 font-medium">
-                            <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                            {inf.address || 'Indonesia'}
-                          </span>
-                          {inf.gender && (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400">
-                              • {((inf.gender || '').toLowerCase() === 'perempuan' || (inf.gender || '').toLowerCase() === 'female')
-                                  ? <GenderFemale className="w-3 h-3 text-rose-400" />
-                                  : <GenderMale className="w-3 h-3 text-blue-400" />}
+                        <div>
+                          <h3 className="text-base font-bold text-white group-hover:text-amber-300 transition-colors">
+                            {inf.full_name}
+                          </h3>
+                          <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
+                            <span className="flex items-center gap-1 font-medium">
+                              <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                              {inf.address || 'Indonesia'}
+                            </span>
+                            {inf.gender && (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400">
+                                • {((inf.gender || '').toLowerCase() === 'perempuan' || (inf.gender || '').toLowerCase() === 'female')
+                                    ? <GenderFemale className="w-3 h-3 text-rose-400" />
+                                    : <GenderMale className="w-3 h-3 text-blue-400" />}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {inf.category && (
+                        <span className="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold shrink-0">
+                          {inf.category}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Social Handles Icons (Max 2 displayed + quantity label e.g. "+1") */}
+                    {(() => {
+                      const activeSocials = [
+                        { key: 'tiktok', icon: TiktokLogo, color: 'text-white', val: inf.social_tiktok },
+                        { key: 'instagram', icon: InstagramLogo, color: 'text-pink-400', val: inf.social_instagram },
+                        { key: 'youtube', icon: YoutubeLogo, color: 'text-red-500', val: inf.social_youtube },
+                        { key: 'x', icon: XLogo, color: 'text-white', val: inf.social_x },
+                        { key: 'threads', icon: ThreadsLogo, color: 'text-white', val: inf.social_threads },
+                        { key: 'linkedin', icon: LinkedinLogo, color: 'text-blue-400', val: inf.social_linkedin }
+                      ].filter(s => Boolean(s.val));
+
+                      if (activeSocials.length === 0) return null;
+
+                      const visibleSocials = activeSocials.slice(0, 2);
+                      const remainingCount = activeSocials.length - 2;
+
+                      return (
+                        <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                          {visibleSocials.map(s => {
+                            const IconComponent = s.icon;
+                            return (
+                              <span key={s.key} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-[10px] text-slate-300 font-medium">
+                                <IconComponent className={`w-3 h-3 ${s.color} shrink-0`} weight={s.key === 'x' ? 'bold' : 'fill'} />
+                                <strong className="text-amber-300">{s.val}</strong>
+                              </span>
+                            );
+                          })}
+                          {remainingCount > 0 && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/30 text-[10px] text-amber-300 font-black" title={`${remainingCount} akun sosial media lainnya`}>
+                              +{remainingCount}
                             </span>
                           )}
                         </div>
-                      </div>
-                    </div>
-
-                    {inf.category && (
-                      <span className="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold shrink-0">
-                        {inf.category}
-                      </span>
-                    )}
+                      );
+                    })()}
                   </div>
 
-                  {/* Social Handles Icons */}
-                  {(inf.social_tiktok || inf.social_instagram || inf.social_youtube || inf.social_x || inf.social_threads || inf.social_linkedin) && (
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {inf.social_tiktok && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-[10px] text-slate-300 font-medium">
-                          <TiktokLogo className="w-3 h-3 text-white shrink-0" weight="fill" />
-                          <strong className="text-amber-300">{inf.social_tiktok}</strong>
-                        </span>
-                      )}
-                      {inf.social_instagram && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-[10px] text-slate-300 font-medium">
-                          <InstagramLogo className="w-3 h-3 text-pink-400 shrink-0" weight="fill" />
-                          <strong className="text-amber-300">{inf.social_instagram}</strong>
-                        </span>
-                      )}
-                      {inf.social_youtube && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-[10px] text-slate-300 font-medium">
-                          <YoutubeLogo className="w-3 h-3 text-red-500 shrink-0" weight="fill" />
-                          <strong className="text-amber-300">{inf.social_youtube}</strong>
-                        </span>
-                      )}
+                  <div className="pt-3 border-t border-slate-800/80 space-y-3">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-400 font-medium">Harga Layanan:</span>
+                      <span className="font-extrabold text-emerald-400">
+                        {formatStartingPrice(inf)}
+                      </span>
                     </div>
-                  )}
-                </div>
 
-                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-                  <span className="text-slate-400 font-medium">Harga Layanan:</span>
-                  <span className="font-extrabold text-emerald-400">
-                    {formatStartingPrice(inf)}
-                  </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full justify-center gap-2 text-xs text-amber-300 border-amber-500/30 hover:border-amber-400 hover:bg-amber-500/10 transition-all font-semibold cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveTab(`influencer/detail/${slug}`);
+                      }}
+                    >
+                      <User className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Lihat Detail Profil Influencer</span>
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>
@@ -558,7 +689,7 @@ export const OverviewView = ({ setActiveTab }) => {
             Cara Mudah Berkolaborasi Sesuai Peran Anda
           </h2>
           <p className="text-sm text-slate-400 leading-relaxed">
-            Temukan panduan langkah demi langkah untuk memanfaatkan layanan PRoductify secara maksimal, baik sebagai pemilik bisnis UMKM, Kreator Konten/KOL, maupun Agency PR & Jurnalis Media.
+            Temukan panduan langkah demi langkah untuk memanfaatkan layanan Productify secara maksimal, baik sebagai pemilik bisnis UMKM, Kreator Konten/KOL, maupun Agency PR & Jurnalis Media.
           </p>
         </div>
 

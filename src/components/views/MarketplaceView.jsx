@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Breadcrumb } from '../ui/Breadcrumb';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { dataService } from '../../lib/supabase';
@@ -35,7 +36,17 @@ import {
   Star
 } from '@phosphor-icons/react';
 
-export const MarketplaceView = ({ setActiveTab }) => {
+export const slugifyName = (name) => {
+  if (!name) return '';
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
+export const MarketplaceView = ({ activeTab, setActiveTab }) => {
   const { currentProfile, currentRole, isAuthenticated, profiles } = useAuth();
   const { toast } = useToast();
   const [influencers, setInfluencers] = useState([]);
@@ -94,6 +105,69 @@ export const MarketplaceView = ({ setActiveTab }) => {
     };
     loadCollaborations();
   }, []);
+
+  // Deduplicate raw influencers list by full_name / email / id
+  const rawInfluencers = useMemo(() => {
+    const safeProfiles = Array.isArray(profiles) ? profiles : [];
+    const sourceList = (influencers && influencers.length > 0) ? influencers : safeProfiles.filter(p => p && (p.role === 'influencer' || p.role === 'KOL'));
+
+    const map = new Map();
+    sourceList.forEach(inf => {
+      if (inf && (inf.full_name || inf.email || inf.id)) {
+        const cleanName = (inf.full_name || '').toString().toLowerCase().trim();
+        const cleanEmail = (inf.email || '').toString().toLowerCase().trim();
+        const key = cleanName ? `name:${cleanName}` : (cleanEmail ? `email:${cleanEmail}` : `id:${inf.id}`);
+
+        if (!map.has(key)) {
+          map.set(key, inf);
+        } else {
+          const prev = map.get(key);
+          map.set(key, {
+            ...prev,
+            ...inf,
+            bio: inf.bio || prev.bio,
+            phone_number: inf.phone_number || prev.phone_number,
+            address: inf.address || prev.address,
+            category: inf.category || prev.category,
+            gender: inf.gender || prev.gender,
+            social_tiktok: inf.social_tiktok || prev.social_tiktok,
+            social_instagram: inf.social_instagram || prev.social_instagram,
+            social_youtube: inf.social_youtube || prev.social_youtube,
+            rate_cards: (Array.isArray(inf.rate_cards) && inf.rate_cards.length > 0) ? inf.rate_cards : prev.rate_cards
+          });
+        }
+      }
+    });
+    return Array.from(map.values());
+  }, [influencers, profiles]);
+
+  useEffect(() => {
+    if (activeTab && activeTab.startsWith('influencer/detail/')) {
+      const slug = activeTab.replace('influencer/detail/', '');
+      const match = rawInfluencers.find(inf => slugifyName(inf.full_name) === slug);
+      if (match) {
+        setSelectedKOL(match);
+      }
+    } else if (activeTab === 'influencer' || activeTab === 'marketplace') {
+      setSelectedKOL(null);
+    }
+  }, [activeTab, rawInfluencers]);
+
+  const handleOpenDetail = (inf) => {
+    const slug = slugifyName(inf.full_name);
+    if (setActiveTab) {
+      setActiveTab(`influencer/detail/${slug}`);
+    } else {
+      setSelectedKOL(inf);
+    }
+  };
+
+  const handleBackToDirectory = () => {
+    if (setActiveTab) {
+      setActiveTab('influencer');
+    }
+    setSelectedKOL(null);
+  };
 
   const getInfluencerCollabCount = (infId) => {
     if (!infId || !Array.isArray(allCollaborations)) return 0;
@@ -207,39 +281,6 @@ export const MarketplaceView = ({ setActiveTab }) => {
     return parseFloat(str) || 250000;
   };
 
-  // Deduplicate raw influencers list by full_name / email / id
-  const rawInfluencers = (() => {
-    const map = new Map();
-    (influencers || []).forEach(inf => {
-      if (inf && (inf.full_name || inf.email || inf.id)) {
-        const cleanName = (inf.full_name || '').toString().toLowerCase().trim();
-        const cleanEmail = (inf.email || '').toString().toLowerCase().trim();
-        const key = cleanName ? `name:${cleanName}` : (cleanEmail ? `email:${cleanEmail}` : `id:${inf.id}`);
-
-        if (!map.has(key)) {
-          map.set(key, inf);
-        } else {
-          // Merge to keep most complete profile data
-          const prev = map.get(key);
-          map.set(key, {
-            ...prev,
-            ...inf,
-            bio: inf.bio || prev.bio,
-            phone_number: inf.phone_number || prev.phone_number,
-            address: inf.address || prev.address,
-            category: inf.category || prev.category,
-            gender: inf.gender || prev.gender,
-            social_tiktok: inf.social_tiktok || prev.social_tiktok,
-            social_instagram: inf.social_instagram || prev.social_instagram,
-            social_youtube: inf.social_youtube || prev.social_youtube,
-            rate_cards: (Array.isArray(inf.rate_cards) && inf.rate_cards.length > 0) ? inf.rate_cards : prev.rate_cards
-          });
-        }
-      }
-    });
-    return Array.from(map.values());
-  })();
-
   const filteredInfluencers = rawInfluencers
     .filter(inf => {
       if (!inf) return false;
@@ -326,12 +367,12 @@ export const MarketplaceView = ({ setActiveTab }) => {
     }
 
     if (currentRole === 'influencer') {
-      toast.warning('Akun dengan peran Influencer / KOL tidak dapat mengajukan kerja sama ke sesama Influencer. Kolaborasi di Marketplace KOL hanya dapat diajukan oleh Brand UMKM atau Agency PR.');
+      toast.warning('Akun dengan peran Influencer tidak dapat mengajukan kerja sama ke sesama Influencer. Kolaborasi di Marketplace KOL hanya dapat diajukan oleh Brand UMKM atau Agency.');
       return;
     }
 
     if (!['umkm', 'agency', 'admin'].includes(currentRole)) {
-      toast.error('Pengajuan kolaborasi KOL hanya dapat dikirim oleh peran UMKM / Brand, Agency PR, atau Admin.');
+      toast.error('Pengajuan kolaborasi KOL hanya dapat dikirim oleh peran UMKM / Brand, Agency, atau Admin.');
       return;
     }
 
@@ -348,12 +389,12 @@ export const MarketplaceView = ({ setActiveTab }) => {
     }
 
     if (currentRole === 'influencer') {
-      toast.error('Akses ditolak: Sesama Influencer / KOL tidak dapat mengajukan kerja sama.');
+      toast.error('Akses ditolak: Sesama Influencer tidak dapat mengajukan kerja sama.');
       return;
     }
 
     if (!['umkm', 'agency', 'admin'].includes(currentRole)) {
-      toast.error('Akses ditolak: Hanya akun UMKM, Agency PR, atau Admin yang dapat mengirim ajuan kolaborasi.');
+      toast.error('Akses ditolak: Hanya akun UMKM, Agency, atau Admin yang dapat mengirim ajuan kolaborasi.');
       return;
     }
 
@@ -499,11 +540,11 @@ export const MarketplaceView = ({ setActiveTab }) => {
         
         {/* Back Button */}
         <button
-          onClick={() => setSelectedKOL(null)}
+          onClick={handleBackToDirectory}
           className="flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-white transition-colors group cursor-pointer"
         >
           <ArrowLeft className="w-5 h-5 text-amber-400 group-hover:text-amber-300 transition-colors" />
-          <span>Kembali ke Marketplace KOL</span>
+          <span>Kembali ke Direktori Influencer</span>
         </button>
 
         {/* Hero Profile Card */}
@@ -545,8 +586,8 @@ export const MarketplaceView = ({ setActiveTab }) => {
                     {kol.gender && (
                       <span className="flex items-center gap-1 text-slate-400">
                         {((kol.gender || '').toLowerCase() === 'perempuan' || (kol.gender || '').toLowerCase() === 'female')
-                          ? <><GenderFemale className="w-3.5 h-3.5 text-rose-400" /><span className="text-rose-300 font-semibold">Wanita</span></>
-                          : <><GenderMale className="w-3.5 h-3.5 text-blue-400" /><span className="text-blue-300 font-semibold">Pria</span></>
+                          ? <><GenderFemale className="w-3.5 h-3.5 text-rose-400" /><span className="text-rose-300 font-semibold">Perempuan</span></>
+                          : <><GenderMale className="w-3.5 h-3.5 text-blue-400" /><span className="text-blue-300 font-semibold">Laki-Laki</span></>
                         }
                       </span>
                     )}
@@ -877,13 +918,18 @@ export const MarketplaceView = ({ setActiveTab }) => {
   return (
     <div className="space-y-8 pb-12">
       
+      {/* Breadcrumb Navigation */}
+      <div>
+        <Breadcrumb items={[{ label: 'Marketplace KOL', icon: UsersThree }]} setActiveTab={setActiveTab} />
+      </div>
+
       {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-8 rounded-3xl glass-card border-slate-800">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider">
-            <UsersThree className="w-4 h-4" /> Marketplace Influencer & Content Creator
+            <UsersThree className="w-4 h-4" /> Direktori Influencer & Content Creator
           </div>
-          <h1 className="text-3xl font-extrabold text-white">KOL Talent Directory (/marketplace)</h1>
+          <h1 className="text-3xl font-extrabold text-white">Direktori Influencer (/influencer)</h1>
           <p className="text-sm text-slate-400 max-w-xl">
             Temukan Influencer & Content Creator terbaik untuk mempromosikan produk UMKM Anda secara profesional.
           </p>
@@ -1079,8 +1125,8 @@ export const MarketplaceView = ({ setActiveTab }) => {
                   className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-500 cursor-pointer"
                 >
                   <option value="ALL">Semua Gender</option>
-                  <option value="Perempuan">Perempuan (Wanita)</option>
-                  <option value="Laki-Laki">Laki-Laki (Pria)</option>
+                  <option value="Perempuan">Perempuan</option>
+                  <option value="Laki-Laki">Laki-Laki</option>
                 </select>
               </div>
 
@@ -1102,7 +1148,7 @@ export const MarketplaceView = ({ setActiveTab }) => {
             <Card
               key={inf.id}
               className="flex flex-col justify-between group hover:border-amber-500/50 transition-all cursor-pointer"
-              onClick={() => setSelectedKOL(inf)}
+              onClick={() => handleOpenDetail(inf)}
             >
               
               <CardHeader className="space-y-4">
@@ -1151,12 +1197,12 @@ export const MarketplaceView = ({ setActiveTab }) => {
                               {((inf.gender || '').toLowerCase() === 'perempuan' || (inf.gender || '').toLowerCase() === 'female') ? (
                                 <span className="inline-flex items-center gap-1 text-rose-300">
                                   <GenderFemale className="w-3.5 h-3.5 text-rose-400" />
-                                  <span>Wanita</span>
+                                  <span>Perempuan</span>
                                 </span>
                               ) : (
                                 <span className="inline-flex items-center gap-1 text-blue-300">
                                   <GenderMale className="w-3.5 h-3.5 text-blue-400" />
-                                  <span>Pria</span>
+                                  <span>Laki-Laki</span>
                                 </span>
                               )}
                             </div>
@@ -1173,47 +1219,41 @@ export const MarketplaceView = ({ setActiveTab }) => {
                   )}
                 </div>
 
-                {/* 4. Sosial Media */}
-                {(inf.social_tiktok || inf.social_instagram || inf.social_youtube || inf.social_x || inf.social_threads || inf.social_linkedin) && (
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {inf.social_tiktok && (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-slate-300 font-medium">
-                        <TiktokLogo className="w-3.5 h-3.5 text-white shrink-0" weight="fill" />
-                        <strong className="text-amber-300">{inf.social_tiktok}</strong>
-                      </span>
-                    )}
-                    {inf.social_instagram && (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-slate-300 font-medium">
-                        <InstagramLogo className="w-3.5 h-3.5 text-pink-400 shrink-0" weight="fill" />
-                        <strong className="text-amber-300">{inf.social_instagram}</strong>
-                      </span>
-                    )}
-                    {inf.social_youtube && (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-slate-300 font-medium">
-                        <YoutubeLogo className="w-3.5 h-3.5 text-red-500 shrink-0" weight="fill" />
-                        <strong className="text-amber-300">{inf.social_youtube}</strong>
-                      </span>
-                    )}
-                    {inf.social_x && (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-slate-300 font-medium">
-                        <XLogo className="w-3.5 h-3.5 text-white shrink-0" weight="bold" />
-                        <strong className="text-amber-300">{inf.social_x}</strong>
-                      </span>
-                    )}
-                    {inf.social_threads && (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-slate-300 font-medium">
-                        <ThreadsLogo className="w-3.5 h-3.5 text-white shrink-0" weight="fill" />
-                        <strong className="text-amber-300">{inf.social_threads}</strong>
-                      </span>
-                    )}
-                    {inf.social_linkedin && (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-slate-300 font-medium">
-                        <LinkedinLogo className="w-3.5 h-3.5 text-blue-400 shrink-0" weight="fill" />
-                        <strong className="text-amber-300">{inf.social_linkedin}</strong>
-                      </span>
-                    )}
-                  </div>
-                )}
+                {/* 4. Sosial Media (Max 2 displayed + quantity label e.g. "+1") */}
+                {(() => {
+                  const activeSocials = [
+                    { key: 'tiktok', icon: TiktokLogo, color: 'text-white', val: inf.social_tiktok },
+                    { key: 'instagram', icon: InstagramLogo, color: 'text-pink-400', val: inf.social_instagram },
+                    { key: 'youtube', icon: YoutubeLogo, color: 'text-red-500', val: inf.social_youtube },
+                    { key: 'x', icon: XLogo, color: 'text-white', val: inf.social_x },
+                    { key: 'threads', icon: ThreadsLogo, color: 'text-white', val: inf.social_threads },
+                    { key: 'linkedin', icon: LinkedinLogo, color: 'text-blue-400', val: inf.social_linkedin }
+                  ].filter(s => Boolean(s.val));
+
+                  if (activeSocials.length === 0) return null;
+
+                  const visibleSocials = activeSocials.slice(0, 2);
+                  const remainingCount = activeSocials.length - 2;
+
+                  return (
+                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                      {visibleSocials.map(s => {
+                        const IconComponent = s.icon;
+                        return (
+                          <span key={s.key} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-slate-300 font-medium">
+                            <IconComponent className={`w-3.5 h-3.5 ${s.color} shrink-0`} weight={s.key === 'x' ? 'bold' : 'fill'} />
+                            <strong className="text-amber-300">{s.val}</strong>
+                          </span>
+                        );
+                      })}
+                      {remainingCount > 0 && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[10px] text-amber-300 font-black" title={`${remainingCount} akun sosial media lainnya`}>
+                          +{remainingCount}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })()}
               </CardHeader>
 
               <CardContent className="space-y-2.5 pt-1">
@@ -1242,7 +1282,7 @@ export const MarketplaceView = ({ setActiveTab }) => {
                   variant="outline"
                   size="sm"
                   className="w-full justify-center text-xs text-amber-300 border-slate-700 hover:border-amber-500/50 hover:bg-amber-500/10"
-                  onClick={() => setSelectedKOL(inf)}
+                  onClick={() => handleOpenDetail(inf)}
                 >
                   <User className="w-4 h-4 text-amber-400" />
                   <span>Lihat Detail Profil</span>

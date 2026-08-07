@@ -10,8 +10,37 @@ export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
 
-// Initialize local storage mock data on module load
-initMockStorage();
+export const getItemDedupeKey = (item) => {
+  if (!item) return '';
+
+  const notesStr = String(item.notes || item.raw_notes || '');
+  const matchRcId = notesStr.match(/\[RateCardReqID:\s*([^\]]+)\]/i);
+  if (matchRcId && matchRcId[1]) {
+    return `rcr:${matchRcId[1].trim()}`;
+  }
+
+  const brand = item.brand_id || item.requester_id || '';
+  const inf = item.influencer_id || '';
+  const title = (item.project_title || item.product_name || '').replace(/^Request Rate Card:\s*/i, '').toLowerCase().trim();
+
+  // If this item is a Rate Card Request or linked synced collaboration, deduplicate by composite brand + influencer + product/title
+  if (
+    item.isRateCardRequest ||
+    title.includes('rate card') ||
+    notesStr.toLowerCase().includes('rate card') ||
+    item.campaign_objective
+  ) {
+    if (brand && inf) {
+      return `rcr_composite:${brand}_${inf}_${title}`;
+    }
+  }
+
+  if (item.id) {
+    return `id:${item.id}`;
+  }
+
+  return `composite:${brand}_${inf}_${title}`;
+};
 
 export const dataService = {
   // Profiles
@@ -118,7 +147,7 @@ export const dataService = {
 
     const profilePayload = {
       id: id || updates?.id || targetId || `user-${Date.now()}`,
-      full_name: updates.full_name || 'Pengguna PRoductify',
+      full_name: updates.full_name || 'Pengguna Productify',
       role: assignedRole,
       avatar_url: updates.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250',
       bio: updates.bio || '',
@@ -521,6 +550,8 @@ export const dataService = {
       }
     }
 
+    const rcrBaseId = req.id || 'rcr-' + Date.now();
+
     const payload = {
       brand_name:          req.brand_name          || '',
       product_name:        req.product_name         || '',
@@ -530,7 +561,7 @@ export const dataService = {
       target_audience:     req.target_audience      || '',
       timeline:            req.timeline             || '',
       budget_range:        req.budget_range         || '',
-      notes:               req.notes                || '',
+      notes:               `[RateCardReqID: ${rcrBaseId}] ${req.notes || ''}`.trim(),
       status:              'pending'
     };
 
@@ -542,7 +573,7 @@ export const dataService = {
       project_title: `Request Rate Card: ${req.product_name || req.brand_name || 'Kampanye Brand'}`,
       budget: 0,
       status: 'pending',
-      notes: `[Rate Card Request] Brand: ${req.brand_name || '-'}. Objektif: ${req.campaign_objective || '-'}. Platform: ${(req.platforms || []).join(', ') || '-'}. Anggaran: ${req.budget_range || '-'}. ${req.notes || ''}`.trim()
+      notes: `[Rate Card Request] [RateCardReqID: ${rcrBaseId}] Brand: ${req.brand_name || '-'}. Objektif: ${req.campaign_objective || '-'}. Platform: ${(req.platforms || []).join(', ') || '-'}. Anggaran: ${req.budget_range || '-'}. ${req.notes || ''}`.trim()
     };
     if (requesterUuid) collabSyncPayload.brand_id = requesterUuid;
     if (influencerUuid) collabSyncPayload.influencer_id = influencerUuid;
@@ -551,7 +582,7 @@ export const dataService = {
     const richMockObj = {
       ...req,
       ...payload,
-      id: req.id || 'rc-' + Date.now(),
+      id: rcrBaseId,
       requester_id: req.requester_id || 'user-umkm-1',
       requester_name: req.requester_name || 'Brand UMKM',
       brand_id: req.requester_id || 'user-umkm-1',
@@ -560,13 +591,6 @@ export const dataService = {
       influencer_name: req.influencer_name || 'Influencer KOL'
     };
 
-    const savedMockReq = mockEngine.addRateCardRequest(richMockObj);
-    mockEngine.addCollaboration({
-      ...collabSyncPayload,
-      ...richMockObj,
-      id: 'collab-' + Date.now()
-    });
-
     if (isSupabaseConfigured && supabase) {
       try {
         const { data, error } = await supabase
@@ -574,24 +598,31 @@ export const dataService = {
           .insert([payload])
           .select();
 
-        // Also insert into collaborations table
-        try {
-          await supabase.from('collaborations').insert([collabSyncPayload]);
-        } catch (collabErr) {
-          console.warn('Sync to collaborations warning:', collabErr);
+        if (data && data.length > 0) {
+          const insertedRcr = data[0];
+          collabSyncPayload.notes = `[Rate Card Request] [RateCardReqID: ${insertedRcr.id}] Brand: ${req.brand_name || '-'}. Objektif: ${req.campaign_objective || '-'}. Platform: ${(req.platforms || []).join(', ') || '-'}. Anggaran: ${req.budget_range || '-'}. ${req.notes || ''}`.trim();
+          try {
+            await supabase.from('collaborations').insert([collabSyncPayload]);
+          } catch (collabErr) {
+            console.warn('Sync to collaborations warning:', collabErr);
+          }
+          return { ...richMockObj, ...insertedRcr };
         }
 
         if (error) {
           console.error('Supabase createRateCardRequest error:', error);
         }
-
-        if (data && data.length > 0) {
-          return { ...richMockObj, ...data[0] };
-        }
       } catch (err) {
         console.error('Supabase createRateCardRequest catch:', err);
       }
     }
+
+    const savedMockReq = mockEngine.addRateCardRequest(richMockObj);
+    mockEngine.addCollaboration({
+      ...collabSyncPayload,
+      ...richMockObj,
+      id: 'collab-sync-' + rcrBaseId
+    });
 
     return savedMockReq;
   },
@@ -602,6 +633,7 @@ export const dataService = {
 
   async getRateCardRequests({ influencer_id, requester_id } = {}) {
     let supabaseData = [];
+    let fetchedSupabaseSuccess = false;
 
     if (isSupabaseConfigured && supabase) {
       try {
@@ -612,6 +644,7 @@ export const dataService = {
 
         if (!error && Array.isArray(data)) {
           supabaseData = data;
+          fetchedSupabaseSuccess = true;
         } else if (error) {
           console.warn('Supabase getRateCardRequests query error:', error);
         }
@@ -620,15 +653,18 @@ export const dataService = {
       }
     }
 
-    // Merge Supabase data and mock engine data for maximum reliability
-    const mockList = mockEngine.getRateCardRequests() || [];
-    const combined = [...supabaseData, ...mockList];
+    const combined = (fetchedSupabaseSuccess && supabaseData.length > 0)
+      ? supabaseData
+      : (mockEngine.getRateCardRequests() || []);
 
-    // Remove duplicates by id
+    // Remove duplicates using getItemDedupeKey
     const uniqueMap = new Map();
     combined.forEach(item => {
-      if (item && item.id && !uniqueMap.has(item.id)) {
-        uniqueMap.set(item.id, item);
+      if (item) {
+        const key = getItemDedupeKey(item);
+        if (key && !uniqueMap.has(key)) {
+          uniqueMap.set(key, item);
+        }
       }
     });
     let list = Array.from(uniqueMap.values());

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { dataService, isSupabaseConfigured } from '../../lib/supabase';
+import { dataService, isSupabaseConfigured, getItemDedupeKey } from '../../lib/supabase';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
@@ -24,6 +24,7 @@ import {
   PaperPlaneTilt,
   Lightning
 } from '@phosphor-icons/react';
+import { Breadcrumb } from '../ui/Breadcrumb';
 
 const STATUS_MAP = {
   pending: { label: 'Menunggu Persetujuan', variant: 'amber', icon: Clock },
@@ -45,7 +46,17 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
     setLoading(true);
     try {
       const data = await dataService.getCollaborations();
-      setCollaborations(Array.isArray(data) ? data : []);
+      const rawList = Array.isArray(data) ? data : [];
+      const uniqueMap = new Map();
+      rawList.forEach(item => {
+        if (item) {
+          const key = getItemDedupeKey(item);
+          if (key && !uniqueMap.has(key)) {
+            uniqueMap.set(key, item);
+          }
+        }
+      });
+      setCollaborations(Array.from(uniqueMap.values()));
     } catch (err) {
       console.warn('Failed to fetch collaborations:', err);
       setCollaborations([]);
@@ -213,6 +224,11 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
   return (
     <div className="space-y-8 pb-12">
       
+      {/* Breadcrumb Navigation */}
+      <div>
+        <Breadcrumb items={[{ label: 'Status Kolaborasi', icon: Handshake }]} setActiveTab={setActiveTab} />
+      </div>
+
       {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-8 rounded-3xl glass-card border-slate-800">
         <div className="space-y-2">

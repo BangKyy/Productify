@@ -16,7 +16,11 @@ import {
   Trash
 } from '@phosphor-icons/react';
 
+import { Breadcrumb } from '../ui/Breadcrumb';
+
 export const PressReleaseView = ({ setActiveTab }) => {
+  // ...
+
   const { profiles, currentProfile, currentRole, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [pressReleases, setPressReleases] = useState([]);
@@ -90,7 +94,7 @@ export const PressReleaseView = ({ setActiveTab }) => {
     }
 
     if (!['agency', 'admin'].includes(currentRole)) {
-      toast.error('Hanya akun ber-peran Agency PR atau Admin yang berhak menerbitkan Siaran Pers.');
+      toast.error('Hanya akun ber-peran Agency atau Admin yang berhak menerbitkan Siaran Pers.');
       return;
     }
 
@@ -106,7 +110,7 @@ export const PressReleaseView = ({ setActiveTab }) => {
     }
 
     if (!['agency', 'admin'].includes(currentRole)) {
-      toast.error('Akses ditolak: Hanya Agency PR atau Admin yang dapat menerbitkan Siaran Pers.');
+      toast.error('Akses ditolak: Hanya Agency atau Admin yang dapat menerbitkan Siaran Pers.');
       return;
     }
 
@@ -227,6 +231,11 @@ export const PressReleaseView = ({ setActiveTab }) => {
   return (
     <div className="space-y-8">
       
+      {/* Breadcrumb Navigation */}
+      <div>
+        <Breadcrumb items={[{ label: 'Direktori Press Release', icon: Newspaper }]} setActiveTab={setActiveTab} />
+      </div>
+
       {/* Header Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-8 rounded-3xl glass-card border-slate-800">
         <div className="space-y-2">
@@ -480,7 +489,7 @@ export const PressReleaseView = ({ setActiveTab }) => {
                 Publikasi Siaran Pers Baru
               </h2>
               <p className="text-xs text-slate-400">
-                Siaran pers Anda akan langsung diterbitkan ke direktori PRoductify dan dapat diakses oleh jurnalis media.
+                Siaran pers Anda akan langsung diterbitkan ke direktori Productify dan dapat diakses oleh jurnalis media.
               </p>
             </div>
 

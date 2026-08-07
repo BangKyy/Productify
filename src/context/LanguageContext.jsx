@@ -7,15 +7,15 @@ const TRANSLATIONS = {
       featuresServices: 'Fitur & Layanan',
       pressReleases: 'Press Release',
       products: 'Product Showcase',
-      collaborations: 'Marketplace KOL',
+      collaborations: 'Influencer',
       admin: 'Moderasi Admin',
       selectRole: 'Simulasi Peran RBAC',
       language: 'Bahasa'
     },
     roles: {
       umkm: 'UMKM / Brand',
-      influencer: 'Influencer / KOL',
-      agency: 'Agency / Media',
+      influencer: 'Influencer',
+      agency: 'Agency',
       admin: 'Admin Moderasi'
     },
     hero: {
@@ -24,9 +24,9 @@ const TRANSLATIONS = {
       title2: 'Brand UMKM',
       title3: 'Jurnalis Media, &',
       title4: 'Influencer',
-      subtitle: 'PRoductify mempermudah publikasi press release digital, pembuatan showcase produk profesional, serta kolaborasi kampanye dengan KOL secara transparan.',
+      subtitle: 'Productify mempermudah publikasi press release digital, pembuatan showcase produk profesional, serta kolaborasi kampanye dengan KOL secara transparan.',
       publishBtn: 'Publikasikan Press Release',
-      exploreKolBtn: 'Jelajahi Influencer KOL',
+      exploreKolBtn: 'Jelajahi Influencer',
       rbacTest: 'AKSES SIMULASI PERAN:'
     },
     common: {
@@ -49,15 +49,15 @@ const TRANSLATIONS = {
       featuresServices: 'Features & Services',
       pressReleases: 'Press Releases',
       products: 'Product Showcase',
-      collaborations: 'KOL Marketplace',
+      collaborations: 'Influencer',
       admin: 'Admin Console',
       selectRole: 'Simulate Role Access',
       language: 'Language'
     },
     roles: {
       umkm: 'SMB / Brand',
-      influencer: 'Influencer / KOL',
-      agency: 'Agency / Media',
+      influencer: 'Influencer',
+      agency: 'Agency',
       admin: 'Admin Moderator'
     },
     hero: {
@@ -66,7 +66,7 @@ const TRANSLATIONS = {
       title2: 'SMB Brands',
       title3: 'Media Journalists, &',
       title4: 'Influencers',
-      subtitle: 'PRoductify streamlines digital press release publishing, professional product showcases, and transparent influencer marketing collaborations.',
+      subtitle: 'Productify streamlines digital press release publishing, professional product showcases, and transparent influencer marketing collaborations.',
       publishBtn: 'Publish Press Release',
       exploreKolBtn: 'Explore KOL Influencers',
       rbacTest: 'TEST ACCESS CONTROL MATRIX (RBAC):'
