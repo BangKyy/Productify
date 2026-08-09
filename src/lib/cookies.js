@@ -1,5 +1,5 @@
 /**
- * Cookie Helper Utilities for Productify
+ * Cookie Helper Utilities for PRoductify
  * Handles session cookies with 24-hour expiration and cookie consent state.
  */
 

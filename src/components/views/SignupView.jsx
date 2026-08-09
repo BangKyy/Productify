@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
-import { UserPlus } from '@phosphor-icons/react';
-import { Breadcrumb } from '../ui/Breadcrumb';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { sanitizeInput, validatePasswordStrength } from '../../lib/security';
@@ -9,7 +7,7 @@ import LogoWhite from '../../assets/Logo_White.png';
 import { User, Envelope, Lock, ArrowRight, WarningCircle, Eye, EyeSlash, CheckCircle, XCircle } from '@phosphor-icons/react';
 
 export const SignupView = ({ setActiveTab }) => {
-  const { signupUser } = useAuth();
+  const { signupUser, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -19,6 +17,16 @@ export const SignupView = ({ setActiveTab }) => {
   const [loading, setLoading] = useState(false);
 
   const pwdStatus = validatePasswordStrength(password);
+
+  // Guard: redirect logged-in users away from signup page
+  useEffect(() => {
+    if (isAuthenticated) {
+      toast.info('Anda sudah memiliki akun aktif. Dialihkan ke halaman utama.');
+      if (setActiveTab) setActiveTab('overview');
+    }
+  });
+
+  if (isAuthenticated) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -65,10 +73,7 @@ export const SignupView = ({ setActiveTab }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto py-8 px-4 space-y-6">
-      <div className="flex justify-center">
-        <Breadcrumb items={[{ label: 'Daftar Akun Baru', icon: UserPlus }]} setActiveTab={setActiveTab} />
-      </div>
+    <div className="max-w-md mx-auto py-12 px-4">
       <div className="glass-card rounded-3xl p-8 border-slate-800 space-y-6 shadow-2xl relative overflow-hidden">
         
         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/10 rounded-full blur-2xl pointer-events-none"></div>
@@ -76,10 +81,10 @@ export const SignupView = ({ setActiveTab }) => {
         <div className="text-center space-y-3">
           <img 
             src={LogoWhite} 
-            alt="Productify Logo" 
+            alt="PRoductify Logo" 
             className="h-12 w-auto object-contain mx-auto" 
           />
-          <h1 className="text-2xl font-black text-white">Buat Akun Productify</h1>
+          <h1 className="text-2xl font-black text-white">Buat Akun PRoductify</h1>
           <p className="text-xs text-slate-400">
             Bergabunglah dengan ribuan UMKM, Agency, dan Influencer di Indonesia.
           </p>

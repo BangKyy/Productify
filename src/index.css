@@ -2,7 +2,60 @@
 
 @layer base {
   :root {
-    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    --font-sans: 'Poppins', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    --font-poppins: 'Poppins', sans-serif;
+
+    /* Figma Color Tokens - Primary */
+    --color-primary-main: #5859DF;
+    --color-primary-surface: #F5F5FF;
+    --color-primary-border: #DFE0F3;
+    --color-primary-hover: #3334CC;
+    --color-primary-pressed: #24248F;
+    --color-primary-focus: #4C4DDC;
+
+    /* Figma Color Tokens - Warning */
+    --color-warning-main: #FFD33C;
+    --color-warning-surface: #FFF6D8;
+    --color-warning-border: #FFF0BE;
+    --color-warning-hover: #FFC80A;
+    --color-warning-pressed: #D6A600;
+    --color-warning-focus: #FFD33C;
+
+    /* Figma Color Tokens - Success */
+    --color-success-main: #50CD89;
+    --color-success-surface: #F2FFF8;
+    --color-success-border: #C5EED8;
+    --color-success-hover: #46B277;
+    --color-success-pressed: #28593F;
+    --color-success-focus: #50CD89;
+
+    /* Figma Color Tokens - Info */
+    --color-info-main: #7239EA;
+    --color-info-surface: #F6F2FF;
+    --color-info-border: #D0BDF8;
+    --color-info-hover: #6633D1;
+    --color-info-pressed: #3F2478;
+    --color-info-focus: #7239EA;
+
+    /* Figma Color Tokens - Error */
+    --color-error-main: #F14141;
+    --color-error-surface: #FFF2F6;
+    --color-error-border: #FAC0CE;
+    --color-error-hover: #D93A61;
+    --color-error-pressed: #802A3F;
+    --color-error-focus: #F1416C;
+
+    /* Figma Color Tokens - Neutrals */
+    --color-neutral-10: #FFFFFF;
+    --color-neutral-20: #F5F5F5;
+    --color-neutral-30: #EDEDED;
+    --color-neutral-40: #D6D6D6;
+    --color-neutral-50: #C2C2C2;
+    --color-neutral-60: #878787;
+    --color-neutral-70: #5F5F5F;
+    --color-neutral-80: #383838;
+    --color-neutral-90: #242424;
+    --color-neutral-100: #101010;
   }
 
   body {
@@ -10,6 +63,7 @@
     background-color: #0f172a;
     color: #f8fafc;
     overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   /* Global Cursor Pointer Enforcement for all CTAs, buttons, links, and interactive elements */
@@ -26,12 +80,132 @@
   }
 }
 
+/* ========================================================================= */
+/* FIGMA DESIGN SYSTEM TYPOGRAPHY HELPERS                                     */
+/* ========================================================================= */
+.font-poppins {
+  font-family: var(--font-poppins);
+}
+
+.text-heading-4xl-bold {
+  font-family: var(--font-poppins);
+  font-weight: 700;
+  font-size: 72px;
+  line-height: 74px;
+  letter-spacing: -0.002em;
+}
+
+.text-heading-3xl {
+  font-family: var(--font-poppins);
+  font-weight: 600;
+  font-size: 56px;
+  line-height: 64px;
+  letter-spacing: -0.002em;
+}
+
+.text-heading-2xl {
+  font-family: var(--font-poppins);
+  font-weight: 600;
+  font-size: 36px;
+  line-height: 48px;
+  letter-spacing: -0.002em;
+}
+
+.text-heading-xl-medium {
+  font-family: var(--font-poppins);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.002em;
+}
+
+.text-heading-xl {
+  font-family: var(--font-poppins);
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 32px;
+  letter-spacing: -0.002em;
+}
+
+.text-heading-lg {
+  font-family: var(--font-poppins);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 30px;
+  letter-spacing: -0.002em;
+}
+
+.text-heading-md {
+  font-family: var(--font-poppins);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 28px;
+  letter-spacing: -0.002em;
+}
+
+.text-heading-sm {
+  font-family: var(--font-poppins);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.002em;
+}
+
+.text-heading-xs {
+  font-family: var(--font-poppins);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.002em;
+}
+
+.text-body-lg {
+  font-family: var(--font-poppins);
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 28px;
+  letter-spacing: -0.002em;
+}
+
+.text-body-md {
+  font-family: var(--font-poppins);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.002em;
+}
+
+.text-body-sm {
+  font-family: var(--font-poppins);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.002em;
+}
+
+.text-body-xs {
+  font-family: var(--font-poppins);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: -0.002em;
+}
+
+.text-body-xs-2 {
+  font-family: var(--font-poppins);
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 16px;
+  letter-spacing: -0.002em;
+}
+
 /* Custom Utilities for Glassmorphism & Visual Aesthetics */
 .glass-card {
   background: rgba(30, 41, 59, 0.7);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .glass-nav {
@@ -39,24 +213,42 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #a855f7 0%, #6366f1 50%, #3b82f6 100%);
+  background: linear-gradient(135deg, #a855f7 0%, #5859df 50%, #3b82f6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .bg-gradient-glow {
-  background: radial-gradient(circle at 50% -20%, rgba(168, 85, 247, 0.25) 0%, rgba(99, 102, 241, 0.15) 35%, rgba(15, 23, 42, 0) 70%);
+  background: radial-gradient(circle at 50% -20%, rgba(88, 89, 223, 0.25) 0%, rgba(114, 57, 234, 0.15) 35%, rgba(15, 23, 42, 0) 70%);
 }
 
 .glow-purple {
-  box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.35);
+  box-shadow: 0 0 25px -5px rgba(88, 89, 223, 0.4);
 }
 
 .glow-blue {
   box-shadow: 0 0 25px -5px rgba(59, 130, 246, 0.35);
+}
+
+/* Figma Primary Button Helper Class */
+.btn-primary-figma {
+  background-color: var(--color-primary-main);
+  color: #ffffff;
+  transition: all 0.2s ease-in-out;
+}
+.btn-primary-figma:hover {
+  background-color: var(--color-primary-hover);
+}
+.btn-primary-figma:active {
+  background-color: var(--color-primary-pressed);
+}
+.btn-primary-figma:focus-visible {
+  outline: 2px solid var(--color-primary-focus);
+  outline-offset: 2px;
 }
 
 /* Scrollbar customization */
@@ -73,3 +265,18 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #475569;
 }
+
+/* Hide scrollbar indicator for horizontal scroll containers */
+.no-scrollbar::-webkit-scrollbar,
+.hide-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar,
+.hide-scrollbar {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}
+

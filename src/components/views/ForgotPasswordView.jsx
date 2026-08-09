@@ -83,7 +83,7 @@ export const ForgotPasswordView = ({ setActiveTab }) => {
         <div className="text-center space-y-3">
           <img 
             src={LogoWhite} 
-            alt="Productify Logo" 
+            alt="PRoductify Logo" 
             className="h-12 w-auto object-contain mx-auto" 
           />
           <h1 className="text-2xl font-black text-white">Ubah Kata Sandi Akun</h1>
@@ -191,17 +191,6 @@ export const ForgotPasswordView = ({ setActiveTab }) => {
             <ArrowRight className="w-4 h-4" />
           </Button>
         </form>
-
-        <div className="pt-4 border-t border-slate-800/80 text-center text-xs text-slate-400">
-          <button
-            onClick={() => setActiveTab('login')}
-            className="text-purple-400 font-bold hover:underline inline-flex items-center gap-1.5 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Kembali ke Halaman Masuk</span>
-          </button>
-        </div>
-
       </div>
     </div>
   );

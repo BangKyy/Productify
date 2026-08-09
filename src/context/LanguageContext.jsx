@@ -24,7 +24,7 @@ const TRANSLATIONS = {
       title2: 'Brand UMKM',
       title3: 'Jurnalis Media, &',
       title4: 'Influencer',
-      subtitle: 'Productify mempermudah publikasi press release digital, pembuatan showcase produk profesional, serta kolaborasi kampanye dengan KOL secara transparan.',
+      subtitle: 'PRoductify mempermudah publikasi press release digital, pembuatan showcase produk profesional, serta kolaborasi kampanye dengan KOL secara transparan.',
       publishBtn: 'Publikasikan Press Release',
       exploreKolBtn: 'Jelajahi Influencer',
       rbacTest: 'AKSES SIMULASI PERAN:'
@@ -66,7 +66,7 @@ const TRANSLATIONS = {
       title2: 'SMB Brands',
       title3: 'Media Journalists, &',
       title4: 'Influencers',
-      subtitle: 'Productify streamlines digital press release publishing, professional product showcases, and transparent influencer marketing collaborations.',
+      subtitle: 'PRoductify streamlines digital press release publishing, professional product showcases, and transparent influencer marketing collaborations.',
       publishBtn: 'Publish Press Release',
       exploreKolBtn: 'Explore KOL Influencers',
       rbacTest: 'TEST ACCESS CONTROL MATRIX (RBAC):'

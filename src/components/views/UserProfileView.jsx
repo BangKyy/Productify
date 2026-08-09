@@ -4,6 +4,7 @@ import { useToast } from '../../context/ToastContext';
 import { dataService } from '../../lib/supabase';
 import { sanitizeInput } from '../../lib/security';
 import { compressImageFile } from '../../lib/imageCompressor';
+import { BottomSheetSelect } from '../ui/BottomSheetSelect';
 import { Avatar, AvatarFallback } from '../ui/Avatar';
 import { 
   User, 
@@ -31,16 +32,19 @@ import {
 
 // Exactly 2 default photo template presets: 1 Male (Cowo) and 1 Female (Cewe)
 const PRESET_AVATARS = [
-  {
-    id: 'male',
-    label: 'Laki-Laki',
-    url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250'
-  },
-  {
-    id: 'female',
-    label: 'Perempuan',
-    url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250'
-  }
+  { id: 'male_1', label: 'Laki-Laki (Official)', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300' },
+  { id: 'female_1', label: 'Perempuan (Official)', url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=300' }
+];
+
+const PROFILE_CATEGORY_OPTIONS = [
+  { value: 'Beauty & Skincare', label: 'Beauty & Skincare' },
+  { value: 'Fashion & Lifestyle', label: 'Fashion & Lifestyle' },
+  { value: 'Food & Beverage', label: 'Food & Beverage' },
+  { value: 'Tech & Gadgets', label: 'Tech & Gadgets' },
+  { value: 'Fitness & Health', label: 'Fitness & Health' },
+  { value: 'Travel & Gaming', label: 'Travel & Gaming' },
+  { value: 'Parenting & Family', label: 'Parenting & Family' },
+  { value: 'Education & Finance', label: 'Education & Finance' },
 ];
 
 export const formatIndonesianPhone = (input) => {
@@ -74,18 +78,19 @@ export const UserProfileView = ({ setActiveTab }) => {
   });
 
   const toggleEditSection = (sectionKey) => {
-    setEditingSections(prev => {
-      const nextState = !prev[sectionKey];
-      if (nextState) {
-        toast.info('Mode edit diaktifkan untuk section ini.');
-      } else {
-        toast.success("Perubahan section diterapkan pada tampilan. Tekan 'Simpan Perubahan' di paling bawah untuk menyimpan ke database.");
-      }
-      return {
-        ...prev,
-        [sectionKey]: nextState
-      };
-    });
+    const isCurrentlyEditing = editingSections[sectionKey];
+    const nextState = !isCurrentlyEditing;
+
+    if (nextState) {
+      toast.info('Mode edit diaktifkan untuk section ini.');
+    } else {
+      toast.success("Perubahan section diterapkan pada tampilan. Tekan 'Simpan Perubahan' di paling bawah untuk menyimpan ke database.");
+    }
+
+    setEditingSections(prev => ({
+      ...prev,
+      [sectionKey]: nextState
+    }));
   };
 
   const [fullName, setFullName] = useState('');
@@ -357,12 +362,13 @@ export const UserProfileView = ({ setActiveTab }) => {
         
         {/* SECTION 1: Identitas Utama & Kontak */}
         <div className="glass-card p-6 sm:p-8 rounded-3xl border-slate-800 space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-            <div className="space-y-1">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <User className="w-5 h-5 text-purple-400" /> Identitas Utama & Kontak
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-800 pb-4">
+            <div className="space-y-1 min-w-0">
+              <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                <User className="w-5 h-5 text-purple-400 shrink-0" />
+                <span>Identitas Utama & Kontak</span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 leading-relaxed">
                 Informasi dasar profil akun yang terhubung dengan tabel public.profiles.
               </p>
             </div>
@@ -371,7 +377,7 @@ export const UserProfileView = ({ setActiveTab }) => {
             <button
               type="button"
               onClick={() => toggleEditSection('section1')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+              className={`inline-flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border shrink-0 w-full sm:w-auto ${
                 editingSections.section1
                   ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
                   : 'bg-purple-500/10 text-purple-300 border-purple-500/30 hover:bg-purple-500/20'
@@ -379,12 +385,12 @@ export const UserProfileView = ({ setActiveTab }) => {
             >
               {editingSections.section1 ? (
                 <>
-                  <CheckCircle className="w-4 h-4 text-emerald-400" />
+                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
                   <span>Selesai Edit</span>
                 </>
               ) : (
                 <>
-                  <PencilSimple className="w-4 h-4 text-purple-400" />
+                  <PencilSimple className="w-4 h-4 text-purple-400 shrink-0" />
                   <span>Edit Section</span>
                 </>
               )}
@@ -588,12 +594,13 @@ export const UserProfileView = ({ setActiveTab }) => {
 
         {/* SECTION 2: Peran RBAC & Bio */}
         <div className="glass-card p-6 sm:p-8 rounded-3xl border-slate-800 space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-            <div className="space-y-1">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Briefcase className="w-5 h-5 text-amber-400" /> Peran RBAC & Deskripsi Profil
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-800 pb-4">
+            <div className="space-y-1 min-w-0">
+              <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                <Briefcase className="w-5 h-5 text-amber-400 shrink-0" />
+                <span>Peran RBAC & Deskripsi Profil</span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 leading-relaxed">
                 Opsi peran akun utama Anda yang tersimpan di public.profiles.
               </p>
             </div>
@@ -602,7 +609,7 @@ export const UserProfileView = ({ setActiveTab }) => {
             <button
               type="button"
               onClick={() => toggleEditSection('section2')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+              className={`inline-flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border shrink-0 w-full sm:w-auto ${
                 editingSections.section2
                   ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
                   : 'bg-amber-500/10 text-amber-300 border-amber-500/30 hover:bg-amber-500/20'
@@ -610,12 +617,12 @@ export const UserProfileView = ({ setActiveTab }) => {
             >
               {editingSections.section2 ? (
                 <>
-                  <CheckCircle className="w-4 h-4 text-emerald-400" />
+                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
                   <span>Selesai Edit</span>
                 </>
               ) : (
                 <>
-                  <PencilSimple className="w-4 h-4 text-amber-400" />
+                  <PencilSimple className="w-4 h-4 text-amber-400 shrink-0" />
                   <span>Edit Section</span>
                 </>
               )}
@@ -698,26 +705,19 @@ export const UserProfileView = ({ setActiveTab }) => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
               <div>
                 <label className="block text-xs font-semibold text-amber-300 mb-1">Kategori Spesialisasi</label>
-                <select
-                  disabled={!editingSections.section2}
+                <BottomSheetSelect
+                  title="Pilih Kategori Spesialisasi"
+                  options={PROFILE_CATEGORY_OPTIONS}
                   value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className={`w-full px-3 py-2 rounded-xl text-xs ${
+                  onChange={(val) => setCategory(val)}
+                  disabled={!editingSections.section2}
+                  placeholder="-- Pilih Kategori --"
+                  triggerClassName={`w-full ${
                     !editingSections.section2
-                      ? 'bg-slate-950 border border-slate-800 text-slate-400 cursor-not-allowed'
-                      : 'bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-amber-500'
+                      ? 'bg-slate-950 border-slate-800 text-slate-400 cursor-not-allowed'
+                      : 'bg-slate-900 border-slate-700 text-white'
                   }`}
-                >
-                  <option value="">-- Pilih Kategori --</option>
-                  <option value="Beauty & Skincare">Beauty & Skincare</option>
-                  <option value="Fashion & Lifestyle">Fashion & Lifestyle</option>
-                  <option value="Food & Beverage">Food & Beverage</option>
-                  <option value="Tech & Gadgets">Tech & Gadgets</option>
-                  <option value="Fitness & Health">Fitness & Health</option>
-                  <option value="Travel & Gaming">Travel & Gaming</option>
-                  <option value="Parenting & Family">Parenting & Family</option>
-                  <option value="Education & Finance">Education & Finance</option>
-                </select>
+                />
               </div>
 
               <div>
@@ -770,12 +770,13 @@ export const UserProfileView = ({ setActiveTab }) => {
 
         {/* SECTION 3: Media Sosial */}
         <div className="glass-card p-6 sm:p-8 rounded-3xl border-slate-800 space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-            <div className="space-y-1">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <TiktokLogo className="w-5 h-5 text-indigo-400" /> Tautan Media Sosial Resmi
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-800 pb-4">
+            <div className="space-y-1 min-w-0">
+              <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                <TiktokLogo className="w-5 h-5 text-indigo-400 shrink-0" />
+                <span>Tautan Media Sosial Resmi</span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 leading-relaxed">
                 Tautan media sosial resmi yang tersimpan di public.profiles.
               </p>
             </div>
@@ -784,7 +785,7 @@ export const UserProfileView = ({ setActiveTab }) => {
             <button
               type="button"
               onClick={() => toggleEditSection('section3')}
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+              className={`inline-flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border shrink-0 w-full sm:w-auto ${
                 editingSections.section3
                   ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
                   : 'bg-blue-500/10 text-blue-300 border-blue-500/30 hover:bg-blue-500/20'
@@ -792,19 +793,19 @@ export const UserProfileView = ({ setActiveTab }) => {
             >
               {editingSections.section3 ? (
                 <>
-                  <CheckCircle className="w-4 h-4 text-emerald-400" />
+                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
                   <span>Selesai Edit</span>
                 </>
               ) : (
                 <>
-                  <PencilSimple className="w-4 h-4 text-blue-400" />
+                  <PencilSimple className="w-4 h-4 text-blue-400 shrink-0" />
                   <span>Edit Section</span>
                 </>
               )}
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* TikTok */}
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
@@ -922,11 +923,11 @@ export const UserProfileView = ({ setActiveTab }) => {
         </div>
 
         {/* Sole Bottom CTA Save Button Representing All Sections */}
-        <div className="flex flex-col items-end gap-2 pt-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-2">
           <button
             type="submit"
             disabled={saving || !isSaveEnabled}
-            className={`flex items-center gap-2 px-8 py-3.5 rounded-2xl font-bold text-sm shadow-xl transition-all ${
+            className={`flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 rounded-2xl font-bold text-xs sm:text-sm shadow-xl transition-all w-full sm:w-auto ${
               saving || !isSaveEnabled
                 ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/60 shadow-none'
                 : 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:shadow-emerald-500/25 hover:scale-105 cursor-pointer'

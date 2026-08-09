@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { sanitizeInput, validatePasswordStrength } from '../../lib/security';
 import { Button } from '../ui/Button';
 import LogoWhite from '../../assets/Logo_White.png';
-import { User, EnvelopeSimple, Lock, ArrowRight, WarningCircle, Eye, EyeSlash, CheckCircle, XCircle, Key } from '@phosphor-icons/react';
-import { Breadcrumb } from '../ui/Breadcrumb';
+import { User, EnvelopeSimple, Lock, ArrowRight, WarningCircle, Eye, EyeSlash, CheckCircle, XCircle } from '@phosphor-icons/react';
 
 export const LoginView = ({ setActiveTab }) => {
-  const { loginUser, loginAdminUser } = useAuth();
+  const { loginUser, loginAdminUser, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [identifier, setIdentifier] = useState('');
@@ -18,6 +17,17 @@ export const LoginView = ({ setActiveTab }) => {
   const [loading, setLoading] = useState(false);
 
   const pwdStatus = validatePasswordStrength(password);
+
+  // Guard: redirect logged-in users away from login page
+  useEffect(() => {
+    if (isAuthenticated) {
+      toast.info('Anda sudah masuk. Dialihkan ke halaman utama.');
+      if (setActiveTab) setActiveTab('overview');
+    }
+  });
+
+  if (isAuthenticated) return null;
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -89,10 +99,7 @@ export const LoginView = ({ setActiveTab }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto py-8 px-4 space-y-6">
-      <div className="flex justify-center">
-        <Breadcrumb items={[{ label: isAdminMode ? 'Masuk Admin' : 'Masuk Akun', icon: Key }]} setActiveTab={setActiveTab} />
-      </div>
+    <div className="max-w-md mx-auto py-12 px-4">
       <div className="glass-card rounded-3xl p-8 border-slate-800 space-y-6 shadow-2xl relative overflow-hidden">
         
         <div className="absolute top-0 right-0 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl pointer-events-none"></div>
@@ -100,15 +107,15 @@ export const LoginView = ({ setActiveTab }) => {
         <div className="text-center space-y-3">
           <img 
             src={LogoWhite} 
-            alt="Productify Logo" 
+            alt="PRoductify Logo" 
             className="h-12 w-auto object-contain mx-auto" 
           />
           <h1 className="text-2xl font-black text-white">
-            {isAdminMode ? 'Masuk Sebagai Admin' : 'Masuk Akun Productify'}
+            {isAdminMode ? 'Masuk Sebagai Admin' : 'Masuk Akun PRoductify'}
           </h1>
           <p className="text-xs text-slate-400">
             {isAdminMode 
-              ? 'Akses konsol verifikasi administrator platform Productify.' 
+              ? 'Akses konsol verifikasi administrator platform PRoductify.' 
               : 'Akses dashboard ekosistem PR digital dan kelola portofolio akun kamu.'}
           </p>
         </div>
@@ -144,7 +151,7 @@ export const LoginView = ({ setActiveTab }) => {
             </div>
             {!isAdminMode && (
               <p className="text-[10px] text-slate-500 mt-1">
-                Masukkan alamat email terdaftar akun Productify kamu.
+                Masukkan alamat email terdaftar akun PRoductify kamu.
               </p>
             )}
           </div>

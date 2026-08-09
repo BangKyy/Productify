@@ -2,7 +2,7 @@ import React from 'react';
 import { House, CaretRight } from '@phosphor-icons/react';
 
 /**
- * Breadcrumb Component for Productify
+ * Breadcrumb Component for PRoductify
  * 
  * Props:
  * - items: Array of objects [{ label: string, tab?: string, icon?: ReactComponent }]

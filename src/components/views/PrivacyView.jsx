@@ -19,16 +19,8 @@ export const PrivacyView = ({ setActiveTab }) => {
       
       {/* Breadcrumb Navigation & Header Banner */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
+        <div>
           <Breadcrumb items={[{ label: 'Kebijakan Privasi', icon: ShieldCheck }]} setActiveTab={setActiveTab} />
-          
-          <button
-            onClick={() => setActiveTab('overview')}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-semibold text-slate-300 hover:text-white hover:border-slate-700 transition-all cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Kembali</span>
-          </button>
         </div>
 
         <div className="glass-card p-8 rounded-3xl border-slate-800 bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950/30 relative overflow-hidden shadow-2xl">
@@ -42,7 +34,7 @@ export const PrivacyView = ({ setActiveTab }) => {
 
             <h1 className="text-3xl sm:text-4xl font-black text-white">Kebijakan Privasi</h1>
             <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
-              Komitmen utama Productify dalam melindungi privasi, data pribadi, dan informasi kontak bisnis seluruh pengguna ekosistem digital kami.
+              Komitmen utama PRoductify dalam melindungi privasi, data pribadi, dan informasi kontak bisnis seluruh pengguna ekosistem digital kami.
             </p>
 
             <div className="pt-2 flex items-center gap-4 text-xs text-slate-500 font-medium">
@@ -65,7 +57,7 @@ export const PrivacyView = ({ setActiveTab }) => {
           </h2>
           <div className="text-xs sm:text-sm text-slate-300 leading-relaxed space-y-2">
             <p>
-              Saat Anda mendaftar atau mengelola profil di Productify, kami mengumpulkan informasi terbatas yang diperlukan untuk pengoperasian platform:
+              Saat Anda mendaftar atau mengelola profil di PRoductify, kami mengumpulkan informasi terbatas yang diperlukan untuk pengoperasian platform:
             </p>
             <ul className="list-disc pl-5 space-y-1 text-slate-400">
               <li>**Identitas Akun**: Nama Lengkap / Nama Bisnis, Alamat Email terdaftar.</li>
@@ -106,7 +98,7 @@ export const PrivacyView = ({ setActiveTab }) => {
               3.1. Seluruh data pengguna disimpan dalam infrastruktur basis data PostgreSQL Supabase yang dilengkapi dengan **Row Level Security (RLS)** dan enkripsi SSL/TLS.
             </p>
             <p>
-              3.2. Kami **tidak pernah menjual, menyewakan, atau memperjualbelikan** data pribadi Anda kepada pihak ketiga manapun di luar ekosistem Productify.
+              3.2. Kami **tidak pernah menjual, menyewakan, atau memperjualbelikan** data pribadi Anda kepada pihak ketiga manapun di luar ekosistem PRoductify.
             </p>
           </div>
         </div>
@@ -119,7 +111,7 @@ export const PrivacyView = ({ setActiveTab }) => {
           </h2>
           <div className="text-xs sm:text-sm text-slate-300 leading-relaxed space-y-2">
             <p>
-              Productify menggunakan `localStorage` browser dan cookie sesi aman untuk menyimpan token autentikasi (JWT) dan preferensi bahasa pengguna. Sesi ini otomatis kadaluarsa secara aman untuk mencegah akses tanpa izin.
+              PRoductify menggunakan `localStorage` browser dan cookie sesi aman untuk menyimpan token autentikasi (JWT) dan preferensi bahasa pengguna. Sesi ini otomatis kadaluarsa secara aman untuk mencegah akses tanpa izin.
             </p>
           </div>
         </div>

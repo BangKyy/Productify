@@ -3,6 +3,7 @@ import { Breadcrumb } from '../ui/Breadcrumb';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { dataService } from '../../lib/supabase';
+import { BottomSheetSelect } from '../ui/BottomSheetSelect';
 import { 
   Storefront, 
   Plus, 
@@ -22,6 +23,14 @@ const PRESET_IMAGES = [
   'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&q=80&w=600',
   'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=600',
   'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&q=80&w=600'
+];
+
+const SHOWCASE_CATEGORY_OPTIONS = [
+  { value: 'Sustainable Lifestyle', label: 'Sustainable Lifestyle' },
+  { value: 'Food & Beverage', label: 'Food & Beverage' },
+  { value: 'Beauty & Skincare', label: 'Beauty & Skincare' },
+  { value: 'Tech & Smart Gadget', label: 'Tech & Smart Gadget' },
+  { value: 'Fashion & Apparel', label: 'Fashion & Apparel' },
 ];
 
 export const ProductShowcaseView = ({ setActiveTab }) => {
@@ -391,7 +400,7 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
           />
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
+        <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 no-scrollbar">
           {categories.map(cat => (
             <button
               key={cat}
@@ -418,7 +427,7 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
           <p className="text-sm text-slate-400">Klik "Tambah Produk Baru" untuk mendaftarkan inovasi produk UMKM Anda.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map(product => {
             const ownerProfile = Array.isArray(profiles) ? profiles.find(p => p.id === product.owner_id) : null;
             const ownerName = ownerProfile?.full_name || product.owner_name || 'Brand UMKM';
@@ -534,17 +543,13 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">Kategori Produk</label>
-                <select
+                <BottomSheetSelect
+                  title="Pilih Kategori Produk"
+                  options={SHOWCASE_CATEGORY_OPTIONS}
                   value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-indigo-500"
-                >
-                  <option value="Sustainable Lifestyle">Sustainable Lifestyle</option>
-                  <option value="Food & Beverage">Food & Beverage</option>
-                  <option value="Beauty & Skincare">Beauty & Skincare</option>
-                  <option value="Tech & Smart Gadget">Tech & Smart Gadget</option>
-                  <option value="Fashion & Apparel">Fashion & Apparel</option>
-                </select>
+                  onChange={(val) => setFormData({ ...formData, category: val })}
+                  triggerClassName="w-full bg-slate-900 border-slate-700 text-white"
+                />
               </div>
 
               <div className="space-y-3">
@@ -794,17 +799,13 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
 
                   <div>
                     <label className="block text-xs font-semibold text-slate-300 mb-1.5">Kategori Produk</label>
-                    <select
+                    <BottomSheetSelect
+                      title="Pilih Kategori Produk"
+                      options={SHOWCASE_CATEGORY_OPTIONS}
                       value={editFormData.category}
-                      onChange={(e) => setEditFormData({ ...editFormData, category: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:outline-none focus:border-indigo-500"
-                    >
-                      <option value="Sustainable Lifestyle">Sustainable Lifestyle</option>
-                      <option value="Food & Beverage">Food & Beverage</option>
-                      <option value="Beauty & Skincare">Beauty & Skincare</option>
-                      <option value="Tech & Smart Gadget">Tech & Smart Gadget</option>
-                      <option value="Fashion & Apparel">Fashion & Apparel</option>
-                    </select>
+                      onChange={(val) => setEditFormData({ ...editFormData, category: val })}
+                      triggerClassName="w-full bg-slate-900 border-slate-700 text-white"
+                    />
                   </div>
 
                   <div className="space-y-3">

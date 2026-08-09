@@ -230,22 +230,22 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
       </div>
 
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-8 rounded-3xl glass-card border-slate-800">
-        <div className="space-y-2">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 sm:p-8 rounded-3xl glass-card border-slate-800">
+        <div className="space-y-1.5 sm:space-y-2">
           <div className="inline-flex items-center gap-2 text-xs font-bold text-indigo-400 uppercase tracking-wider">
             <Handshake className="w-4 h-4" /> Monitoring Status Kerjasama Realtime
           </div>
-          <h1 className="text-3xl font-extrabold text-white">Status Kolaborasi Ecosystem (/dashboard/collaborations)</h1>
-          <p className="text-sm text-slate-400 max-w-xl">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Status Kolaborasi Ecosystem</h1>
+          <p className="text-xs sm:text-sm text-slate-400 max-w-xl leading-relaxed">
             Pantau dan bedakan ajuan proyek yang Anda ajukan (Mengajak) serta tawaran yang Anda terima (Diajak).
           </p>
         </div>
 
         {/* Supabase Realtime Sync Badge Indicator */}
-        <div className={`flex items-center gap-3 px-4 py-2.5 rounded-2xl glass-card border transition-all ${
+        <div className={`flex items-center gap-3 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl glass-card border transition-all shrink-0 w-full sm:w-auto justify-center sm:justify-start ${
           realtimePulse ? 'border-emerald-400 bg-emerald-500/20 scale-105' : 'border-slate-700'
         }`}>
-          <div className="relative">
+          <div className="relative shrink-0">
             <Broadcast className="w-5 h-5 text-emerald-400 animate-pulse" />
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
           </div>
@@ -259,64 +259,64 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
       </div>
 
       {/* Main Direction Tabs: DIAJAK vs MENGAJAK */}
-      <div className="flex flex-wrap items-center gap-3 p-2 rounded-3xl glass-card border-slate-800">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 p-2 sm:p-2.5 rounded-3xl glass-card border-slate-800 shadow-lg">
         <button
           onClick={() => setTabDirection('ALL')}
-          className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer flex-1 sm:flex-none ${
             tabDirection === 'ALL'
               ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/20'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
           }`}
         >
-          <Handshake className="w-4 h-4" />
+          <Handshake className="w-4 h-4 shrink-0" />
           <span>Semua Proyek ({userCollaborations.length})</span>
         </button>
 
         <button
           onClick={() => setTabDirection('INCOMING')}
-          className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer relative ${
+          className={`flex items-center justify-center gap-2.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer relative flex-1 sm:flex-none ${
             tabDirection === 'INCOMING'
               ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
           }`}
         >
-          <Tray className="w-4 h-4 text-emerald-300" />
-          <span>Permintaan Masuk (Anda Diajak)</span>
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 font-extrabold">
+          <Tray className="w-4 h-4 text-emerald-300 shrink-0" />
+          <span>Permintaan Masuk (Diajak)</span>
+          <span className="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 font-extrabold shrink-0">
             {incomingList.length}
           </span>
           {pendingIncomingList.length > 0 && (
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] bg-rose-500 text-white font-black animate-pulse shadow-md flex items-center gap-1">
-              <Lightning className="w-3.5 h-3.5" />
-              <span>{pendingIncomingList.length} Perlu Tanggapan Anda</span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] bg-rose-500 text-white font-black animate-pulse shadow-md flex items-center gap-1 shrink-0">
+              <Lightning className="w-3 h-3" />
+              <span>{pendingIncomingList.length} Perlu Tanggapan</span>
             </span>
           )}
         </button>
 
         <button
           onClick={() => setTabDirection('OUTGOING')}
-          className={`flex items-center gap-2.5 px-5 py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+          className={`flex items-center justify-center gap-2.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer flex-1 sm:flex-none ${
             tabDirection === 'OUTGOING'
               ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
           }`}
         >
-          <PaperPlaneTilt className="w-4 h-4 text-indigo-300" />
-          <span>Pengajuan Keluar (Anda Mengajak)</span>
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] bg-indigo-950/60 text-indigo-300 border border-indigo-500/40 font-extrabold">
+          <PaperPlaneTilt className="w-4 h-4 text-indigo-300 shrink-0" />
+          <span>Pengajuan Keluar (Mengajak)</span>
+          <span className="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] bg-indigo-950/60 text-indigo-300 border border-indigo-500/40 font-extrabold shrink-0">
             {outgoingList.length}
           </span>
         </button>
       </div>
 
       {/* Status Filter Pills & User Role Label */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 no-scrollbar">
           {['ALL', 'pending', 'accepted', 'rejected', 'completed'].map(st => (
             <button
               key={st}
               onClick={() => setFilterStatus(st)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border cursor-pointer ${
+              className={`px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border cursor-pointer ${
                 filterStatus === st
                   ? 'bg-purple-600 text-white border-purple-400 shadow-md font-bold'
                   : 'glass-card text-slate-400 border-slate-800 hover:text-white'
@@ -327,7 +327,7 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
           ))}
         </div>
 
-        <div className="text-xs text-slate-400 font-medium">
+        <div className="text-xs text-slate-400 font-medium self-end sm:self-auto">
           Peran Pengguna Aktif: <strong className="text-purple-300 uppercase">{currentRole}</strong>
         </div>
       </div>
@@ -342,7 +342,7 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
           <p className="text-sm text-slate-400">Belum ada pengajuan kerja sama pada kategori filter ini.</p>
         </div>
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-4 sm:space-y-5">
           {filteredCollaborations.map(collab => {
             const stInfo = STATUS_MAP[collab.status] || STATUS_MAP.pending;
             const StatusIcon = stInfo.icon;
@@ -375,38 +375,38 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
             return (
               <Card 
                 key={collab.id} 
-                className={`p-6 space-y-5 transition-all ${
+                className={`p-4 sm:p-6 space-y-4 sm:space-y-5 transition-all rounded-3xl shadow-xl ${
                   isIncoming && collab.status === 'pending'
-                    ? 'border-amber-500/60 bg-gradient-to-r from-amber-950/20 via-slate-900/90 to-slate-900/90 shadow-xl shadow-amber-500/5'
+                    ? 'border-amber-500/60 bg-gradient-to-r from-amber-950/20 via-slate-900/90 to-slate-900/90 shadow-amber-500/5'
                     : isIncoming
                     ? 'border-emerald-500/40 hover:border-emerald-500/70'
                     : 'border-indigo-500/40 hover:border-indigo-500/70'
                 }`}
               >
                 {/* Distinct Direction Badge Header */}
-                <div className="flex flex-wrap items-center justify-between gap-3 text-xs pb-4 border-b border-slate-800/80">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs pb-3.5 border-b border-slate-800/80">
                   {isIncoming ? (
                     <div className="flex flex-wrap items-center gap-2">
-                      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs">
+                      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-extrabold text-[11px] sm:text-xs">
                         <ArrowDownLeft className="w-4 h-4 text-emerald-400 shrink-0" />
                         <span>PERMINTAAN MASUK (Anda Diajak Kerja Sama)</span>
                       </div>
                       {collab.status === 'pending' && (
-                        <span className="bg-rose-500 text-white font-black text-[11px] px-3 py-1 rounded-full animate-pulse shadow-md flex items-center gap-1">
-                          <Lightning className="w-3.5 h-3.5" />
-                          <span>Perlu Tanggapan & Persetujuan Anda</span>
+                        <span className="bg-rose-500 text-white font-black text-[10px] sm:text-[11px] px-2.5 py-0.5 rounded-full animate-pulse shadow-md flex items-center gap-1">
+                          <Lightning className="w-3 h-3" />
+                          <span>Perlu Tanggapan Anda</span>
                         </span>
                       )}
                     </div>
                   ) : (
-                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 font-extrabold text-xs">
+                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 font-extrabold text-[11px] sm:text-xs">
                       <ArrowUpRight className="w-4 h-4 text-indigo-400 shrink-0" />
                       <span>PENGAJUAN KELUAR (Anda Mengajak Kerja Sama)</span>
                     </div>
                   )}
 
-                  <Badge variant={stInfo.variant} className="gap-1.5 py-1 px-3">
-                    <StatusIcon className="w-4 h-4" />
+                  <Badge variant={stInfo.variant} className="gap-1.5 py-1 px-3 self-start sm:self-auto shrink-0">
+                    <StatusIcon className="w-3.5 h-3.5" />
                     <span>{stInfo.label}</span>
                   </Badge>
                 </div>
@@ -426,7 +426,7 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
                     )}
                   </div>
 
-                  <h3 className="text-xl font-black text-white">{collab.project_title}</h3>
+                  <h3 className="text-lg sm:text-xl font-black text-white tracking-tight">{collab.project_title}</h3>
 
                   {(() => {
                     const brandProf = Array.isArray(profiles) ? profiles.find(p => p.id === collab.brand_id) : null;
@@ -435,10 +435,10 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
                     const influencerName = infProf?.full_name || collab.influencer_name || 'Influencer KOL';
 
                     return (
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 pt-1 text-xs">
                         <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center gap-2">
                           <Storefront className="w-4 h-4 text-purple-400 shrink-0" />
-                          <div>
+                          <div className="min-w-0">
                             <p className="text-[10px] text-slate-400">Brand UMKM</p>
                             <p className="font-bold text-white truncate">{brandName}</p>
                           </div>
@@ -446,7 +446,7 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
 
                         <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center gap-2">
                           <User className="w-4 h-4 text-amber-400 shrink-0" />
-                          <div>
+                          <div className="min-w-0">
                             <p className="text-[10px] text-slate-400">Influencer KOL</p>
                             <p className="font-bold text-white truncate">{influencerName}</p>
                           </div>
@@ -454,9 +454,9 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
 
                         <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center gap-2">
                           <CurrencyDollar className="w-4 h-4 text-emerald-400 shrink-0" />
-                          <div>
+                          <div className="min-w-0">
                             <p className="text-[10px] text-slate-400">Budget Kampanye</p>
-                            <p className="font-bold text-emerald-400">Rp {Number(collab.budget || 0).toLocaleString('id-ID')}</p>
+                            <p className="font-bold text-emerald-400 truncate">Rp {Number(collab.budget || 0).toLocaleString('id-ID')}</p>
                           </div>
                         </div>
                       </div>
@@ -465,41 +465,41 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
 
                   {displayNotes && (
                     <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 text-xs text-slate-300 italic">
-                      "{displayNotes}"
+                      &quot;{displayNotes}&quot;
                     </div>
                   )}
                 </div>
 
                 {/* Differentiated Action Controls based on Initiator vs Target Recipient */}
-                <div className="flex flex-wrap items-center gap-2 shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-800">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 pt-3 border-t border-slate-800/80">
                   
                   {collab.status === 'pending' && (
                     <>
                       {/* Only the Target Recipient (the one being invited) or Admin gets Accept / Reject buttons */}
                       {isTargetRecipient ? (
-                        <>
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
                           <Button
                             size="sm"
-                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold cursor-pointer"
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold cursor-pointer flex-1 sm:flex-none justify-center"
                             onClick={() => handleStatusChange(collab, 'accepted')}
                           >
-                            <CheckCircle className="w-4 h-4" />
+                            <CheckCircle className="w-4 h-4 shrink-0" />
                             <span>Accept (Terima)</span>
                           </Button>
 
                           <Button
                             size="sm"
                             variant="destructive"
-                            className="cursor-pointer"
+                            className="cursor-pointer flex-1 sm:flex-none justify-center"
                             onClick={() => handleStatusChange(collab, 'rejected')}
                           >
-                            <XCircle className="w-4 h-4" />
+                            <XCircle className="w-4 h-4 shrink-0" />
                             <span>Reject (Tolak)</span>
                           </Button>
-                        </>
+                        </div>
                       ) : (
                         /* The Proposer (the one who initiated) only sees status indicator badge without buttons */
-                        <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 px-3.5 py-2 rounded-2xl text-xs text-amber-300 font-semibold">
+                        <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 px-3.5 py-2 rounded-2xl text-xs text-amber-300 font-semibold w-full sm:w-auto justify-center sm:justify-start">
                           <Clock className="w-4 h-4 text-amber-400 animate-pulse shrink-0" />
                           <span>Menunggu Tanggapan {targetRoleName}</span>
                         </div>
@@ -512,14 +512,14 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
                     isTargetRecipient ? (
                       <Button
                         size="sm"
-                        className="bg-blue-600 hover:bg-blue-500 text-white font-bold cursor-pointer"
+                        className="bg-blue-600 hover:bg-blue-500 text-white font-bold cursor-pointer w-full sm:w-auto justify-center"
                         onClick={() => handleStatusChange(collab, 'completed')}
                       >
-                        <Sparkle className="w-4 h-4" />
+                        <Sparkle className="w-4 h-4 shrink-0" />
                         <span>Tandai Selesai</span>
                       </Button>
                     ) : (
-                      <Badge variant="blue" className="py-1.5 px-3.5 text-xs gap-1.5 font-semibold">
+                      <Badge variant="blue" className="py-1.5 px-3.5 text-xs gap-1.5 font-semibold w-full sm:w-auto justify-center">
                         <Sparkle className="w-4 h-4 text-blue-300 animate-pulse shrink-0" />
                         <span>Proyek Berjalan (Menunggu Penyelesaian oleh {targetRoleName})</span>
                       </Badge>
@@ -527,14 +527,14 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
                   )}
 
                   {collab.status === 'completed' && (
-                    <Badge variant="emerald" className="py-1 px-3 text-xs gap-1.5">
-                      <CheckCircle className="w-4 h-4" /> Proyek Selesai
+                    <Badge variant="emerald" className="py-1 px-3 text-xs gap-1.5 w-full sm:w-auto justify-center">
+                      <CheckCircle className="w-4 h-4 shrink-0" /> Proyek Selesai
                     </Badge>
                   )}
 
                   {collab.status === 'rejected' && (
-                    <Badge variant="rose" className="py-1 px-3 text-xs gap-1.5">
-                      <XCircle className="w-4 h-4" /> Proyek Ditolak
+                    <Badge variant="rose" className="py-1 px-3 text-xs gap-1.5 w-full sm:w-auto justify-center">
+                      <XCircle className="w-4 h-4 shrink-0" /> Proyek Ditolak
                     </Badge>
                   )}
                 </div>

@@ -409,7 +409,7 @@ export const PressReleaseView = ({ setActiveTab }) => {
       {/* Modal Detail Viewer */}
       {selectedPR && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="glass-card max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-3xl p-6 sm:p-8 space-y-6 border-slate-700 relative">
+          <div className="glass-card max-w-2xl md:max-w-3xl w-full max-h-[90vh] overflow-y-auto rounded-3xl p-6 sm:p-8 space-y-6 border-slate-700 relative">
             <button
               onClick={() => setSelectedPR(null)}
               className="absolute top-6 right-6 p-2 rounded-full bg-slate-800 text-slate-400 hover:text-white"
@@ -489,7 +489,7 @@ export const PressReleaseView = ({ setActiveTab }) => {
                 Publikasi Siaran Pers Baru
               </h2>
               <p className="text-xs text-slate-400">
-                Siaran pers Anda akan langsung diterbitkan ke direktori Productify dan dapat diakses oleh jurnalis media.
+                Siaran pers Anda akan langsung diterbitkan ke direktori PRoductify dan dapat diakses oleh jurnalis media.
               </p>
             </div>
 

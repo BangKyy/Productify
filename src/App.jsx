@@ -87,6 +87,9 @@ function AppContent() {
 
     setActiveTabState(targetTab);
 
+    // Scroll page to top on every navigation action
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+
     let targetPath = TAB_TO_PATH[targetTab];
     if (!targetPath && targetTab.startsWith('influencer/detail/')) {
       targetPath = `/${targetTab}`;
@@ -102,6 +105,11 @@ function AppContent() {
     }
   };
 
+  // Scroll to top whenever activeTab changes (e.g. via browser back/forward or route change)
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [activeTab]);
+
   useEffect(() => {
     const currentPath = window.location.pathname;
     if (currentPath === '/') {
@@ -112,6 +120,7 @@ function AppContent() {
     const handlePopState = () => {
       const matchedTab = getTabFromPath(window.location.pathname);
       setActiveTabState(matchedTab);
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     };
 
     window.addEventListener('popstate', handlePopState);

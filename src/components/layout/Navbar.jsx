@@ -4,16 +4,16 @@ import { useLanguage } from '../../context/LanguageContext';
 import { dataService, getItemDedupeKey } from '../../lib/supabase';
 import { Button } from '../ui/Button';
 import LogoWhite from '../../assets/Logo_White.png';
-import { 
-  DropdownMenu, 
-  DropdownMenuTrigger, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel 
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel
 } from '../ui/DropdownMenu';
-import { 
-  List, 
-  X, 
+import {
+  List,
+  X,
   CaretDown,
   Globe,
   Check,
@@ -47,10 +47,10 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
   const [pendingNotificationCount, setPendingNotificationCount] = useState(0);
 
   const isFullyOnboarded = Boolean(
-    isAuthenticated && 
-    currentProfile && 
-    !pendingUser && 
-    activeTab !== 'onboarding' && 
+    isAuthenticated &&
+    currentProfile &&
+    !pendingUser &&
+    activeTab !== 'onboarding' &&
     activeTab !== 'role-selection'
   );
 
@@ -89,9 +89,9 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
         const myPendingCollabs = Array.from(uniqueMap.values()).filter(c => {
           if (!c || c.status !== 'pending') return false;
 
-          const isUserInvolved = 
-            c.influencer_id === currentProfile.id || 
-            c.brand_id === currentProfile.id || 
+          const isUserInvolved =
+            c.influencer_id === currentProfile.id ||
+            c.brand_id === currentProfile.id ||
             c.requester_id === currentProfile.id;
 
           return isUserInvolved;
@@ -109,29 +109,29 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
   }, [isAuthenticated, currentProfile]);
 
   const serviceSubItems = [
-    { 
-      id: 'products', 
-      label: t('nav.products'), 
+    {
+      id: 'products',
+      label: t('nav.products'),
       desc: 'Katalog produk unggulan UMKM & Brand',
-      icon: Package, 
+      icon: Package,
       color: 'text-amber-400',
-      bgColor: 'bg-amber-500/10 border-amber-500/20' 
+      bgColor: 'bg-amber-500/10 border-amber-500/20'
     },
-    { 
-      id: 'marketplace', 
-      label: 'Influencer', 
+    {
+      id: 'marketplace',
+      label: 'Influencer',
       desc: 'Direktori & pengajuan kolaborasi influencer',
-      icon: UsersThree, 
+      icon: UsersThree,
       color: 'text-purple-400',
-      bgColor: 'bg-purple-500/10 border-purple-500/20' 
+      bgColor: 'bg-purple-500/10 border-purple-500/20'
     },
-    { 
-      id: 'press-releases', 
-      label: t('nav.pressReleases'), 
+    {
+      id: 'press-releases',
+      label: t('nav.pressReleases'),
       desc: 'Publikasi & rilis berita pers digital',
-      icon: Newspaper, 
+      icon: Newspaper,
       color: 'text-blue-400',
-      bgColor: 'bg-blue-500/10 border-blue-500/20' 
+      bgColor: 'bg-blue-500/10 border-blue-500/20'
     }
   ];
 
@@ -147,29 +147,28 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
     <header className="sticky top-0 z-50 glass-nav">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          
+
           {/* Logo Brand */}
-          <div 
-            onClick={() => setActiveTab('overview')} 
+          <div
+            onClick={() => setActiveTab('overview')}
             className="flex items-center gap-3 cursor-pointer group"
           >
-            <img 
-              src={LogoWhite} 
-              alt="Productify Logo" 
-              className="h-10 w-auto object-contain group-hover:scale-105 transition-transform" 
+            <img
+              src={LogoWhite}
+              alt="PRoductify Logo"
+              className="h-10 w-auto object-contain group-hover:scale-105 transition-transform"
             />
           </div>
 
           {/* Clean Desktop Links Navigation */}
-          <nav className="hidden md:flex items-center gap-1.5 bg-slate-800/60 p-1.5 rounded-full border border-slate-700/60">
+          <nav className="hidden md:flex items-center gap-1 md:gap-1.5 bg-slate-800/60 p-1 md:p-1.5 rounded-full border border-slate-700/60">
             {/* 1. Beranda */}
             <button
               onClick={() => setActiveTab('overview')}
-              className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
-                activeTab === 'overview'
+              className={`px-2.5 lg:px-4 py-1.5 lg:py-2 rounded-full text-[11px] lg:text-xs font-semibold transition-all ${activeTab === 'overview'
                   ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md glow-purple'
                   : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-              }`}
+                }`}
             >
               <span>{t('nav.home')}</span>
             </button>
@@ -178,11 +177,10 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`px-4 py-2 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
-                    isServicesActive
+                  className={`px-2.5 lg:px-4 py-1.5 lg:py-2 rounded-full text-[11px] lg:text-xs font-semibold transition-all flex items-center gap-1 lg:gap-1.5 cursor-pointer ${isServicesActive
                       ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md glow-purple'
                       : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-                  }`}
+                    }`}
                 >
                   <span>{t('nav.featuresServices') || 'Fitur & Layanan'}</span>
                   <CaretDown className="w-3 h-3 text-slate-400" />
@@ -191,7 +189,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
 
               <DropdownMenuContent align="center" className="w-72 p-2 space-y-1 bg-slate-900/95 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl">
                 <DropdownMenuLabel className="px-3 py-1.5 text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
-                  Layanan Terpadu Productify
+                  Layanan Terpadu PRoductify
                 </DropdownMenuLabel>
 
                 {serviceSubItems.map((sub) => {
@@ -224,23 +222,21 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
             {/* 3. Aktivitas & Riwayat Kolaborasi Publik */}
             <button
               onClick={() => setActiveTab('collaboration-activity')}
-              className={`px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-                activeTab === 'collaboration-activity'
+              className={`px-2.5 lg:px-4 py-1.5 lg:py-2 rounded-full text-[11px] lg:text-xs font-semibold transition-all cursor-pointer ${activeTab === 'collaboration-activity'
                   ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md glow-purple'
                   : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-              }`}
+                }`}
             >
               <span>Aktivitas Kolaborasi</span>
             </button>
 
-            {/* 4. Tentang Productify (Tentang & Mengapa Memilih Productify) */}
+            {/* 4. Tentang PRoductify (Tentang & Mengapa Memilih PRoductify) */}
             <button
               onClick={() => setActiveTab('about')}
-              className={`px-4 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-                activeTab === 'about'
+              className={`px-2.5 lg:px-4 py-1.5 lg:py-2 rounded-full text-[11px] lg:text-xs font-semibold transition-all cursor-pointer ${activeTab === 'about'
                   ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md glow-purple'
                   : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-              }`}
+                }`}
             >
               <span>Tentang</span>
             </button>
@@ -249,11 +245,10 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
             {currentRole === 'admin' && (
               <button
                 onClick={() => setActiveTab('admin')}
-                className={`px-4 py-2 rounded-full text-xs font-semibold transition-all ${
-                  activeTab === 'admin'
+                className={`px-2.5 lg:px-4 py-1.5 lg:py-2 rounded-full text-[11px] lg:text-xs font-semibold transition-all ${activeTab === 'admin'
                     ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
                     : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-                }`}
+                  }`}
               >
                 <span>{t('nav.admin')}</span>
               </button>
@@ -262,7 +257,7 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
 
           {/* Right Side Controls: Language & Logged In User Dropdown Menu */}
           <div className="hidden md:flex items-center gap-3">
-            
+
             {/* Language Switcher */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -290,19 +285,19 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
             {/* Logged In User Profile - Dropdown Badge (Only displayed AFTER completing onboarding profile) */}
             {isFullyOnboarded ? (
               <div className="flex items-center gap-3 border-l border-slate-800 pl-3">
-                
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2.5 bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700/90 px-3.5 py-1.5 rounded-full shadow transition-all cursor-pointer group relative">
+                    <button className="flex items-center gap-2.5 bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700/90 px-4 py-2 rounded-full shadow-md transition-all cursor-pointer group relative">
                       {pendingNotificationCount > 0 && (
                         <span className="absolute -top-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-black text-white animate-pulse shadow-lg ring-2 ring-slate-950">
                           {pendingNotificationCount}
                         </span>
                       )}
 
-                      <div className="flex items-center gap-1.5">
-                        <User className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
-                        <p className="text-xs font-extrabold text-white max-w-[120px] truncate">
+                      <div className="flex items-center gap-2">
+                        {/* Icon username dihapus sesuai permintaan */}
+                        <p className="text-xs font-extrabold text-white max-w-[130px] truncate">
                           {currentProfile.full_name.split(' ')[0]}
                         </p>
                       </div>
@@ -315,57 +310,63 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                     </button>
                   </DropdownMenuTrigger>
 
-                  <DropdownMenuContent align="right" className="w-64 p-2 space-y-1">
-                    <DropdownMenuLabel className="pb-2 border-b border-slate-800">
-                      <p className="text-xs font-extrabold text-white truncate">{currentProfile.full_name}</p>
-                      <p className="text-[10px] text-slate-400 font-medium capitalize mt-0.5">Peran: {roleStyle.label}</p>
+                  <DropdownMenuContent align="right" className="w-72 sm:w-80 p-3.5 space-y-2 rounded-2xl shadow-2xl border-slate-800">
+                    <DropdownMenuLabel className="pb-3 border-b border-slate-800/80 space-y-1">
+                      <p className="text-sm font-black text-white truncate">{currentProfile.full_name}</p>
+                      <div className="flex items-center gap-2 pt-0.5">
+                        <span className="text-[11px] font-medium text-slate-400">Peran:</span>
+                        <span className={`text-[10px] px-2.5 py-0.5 rounded-full border font-extrabold uppercase tracking-wider ${roleStyle.bg}`}>
+                          {roleStyle.label}
+                        </span>
+                      </div>
                     </DropdownMenuLabel>
 
-                    {/* Manajemen Profil Saya Navigation */}
-                    <DropdownMenuItem 
-                      onClick={() => setActiveTab('profile')}
-                      active={activeTab === 'profile'}
-                      className="cursor-pointer font-semibold text-slate-200 hover:text-purple-300 py-2.5 flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-2">
-                        <User className="w-4.5 h-4.5 text-purple-400 shrink-0" />
-                        <span>Manajemen Profil Saya</span>
-                      </div>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
-                        Profil
-                      </span>
-                    </DropdownMenuItem>
-
-                    {/* Status Kolaborasi Navigation with Notification Badge */}
-                    <DropdownMenuItem 
-                      onClick={() => setActiveTab('dashboard/collaborations')}
-                      active={activeTab === 'dashboard/collaborations'}
-                      className="cursor-pointer font-semibold text-slate-200 hover:text-purple-300 py-2.5 flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Handshake className="w-4.5 h-4.5 text-purple-400 shrink-0" />
-                        <span>Status Kolaborasi</span>
-                      </div>
-
-                      {pendingNotificationCount > 0 ? (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500 text-white animate-pulse shadow-md">
-                          {pendingNotificationCount} Baru
+                    <div className="pt-1 space-y-1.5">
+                      {/* 1. Opsi Profil (Icon disebelah profil dihapus) */}
+                      <DropdownMenuItem
+                        onClick={() => setActiveTab('profile')}
+                        active={activeTab === 'profile'}
+                        className="cursor-pointer font-bold text-slate-200 hover:text-purple-300 py-3 px-3.5 rounded-xl flex items-center justify-between transition-all"
+                      >
+                        <span className="text-xs sm:text-sm font-bold">Manajemen Profil Saya</span>
+                        <span className="px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                          Profil
                         </span>
-                      ) : (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                          Dashboard
-                        </span>
-                      )}
-                    </DropdownMenuItem>
+                      </DropdownMenuItem>
 
-                    {/* Logout Option */}
-                    <DropdownMenuItem 
-                      onClick={handleLogout}
-                      className="cursor-pointer font-bold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 py-2.5 border-t border-slate-800/80 mt-1"
-                    >
-                      <SignOut className="w-4.5 h-4.5 text-rose-400 mr-2 shrink-0" />
-                      <span>Keluar (Logout)</span>
-                    </DropdownMenuItem>
+                      {/* 2. Opsi Status Kolaborasi */}
+                      <DropdownMenuItem
+                        onClick={() => setActiveTab('dashboard/collaborations')}
+                        active={activeTab === 'dashboard/collaborations'}
+                        className="cursor-pointer font-bold text-slate-200 hover:text-purple-300 py-3 px-3.5 rounded-xl flex items-center justify-between transition-all"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Handshake className="w-4.5 h-4.5 text-purple-400 shrink-0" />
+                          <span className="text-xs sm:text-sm font-bold">Status Kolaborasi</span>
+                        </div>
+
+                        {pendingNotificationCount > 0 ? (
+                          <span className="px-2.5 py-1 rounded-lg text-[10px] font-black bg-rose-500 text-white animate-pulse shadow-md">
+                            {pendingNotificationCount} Baru
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                            Dashboard
+                          </span>
+                        )}
+                      </DropdownMenuItem>
+
+                      {/* 3. Opsi Keluar (Logout) */}
+                      <DropdownMenuItem
+                        onClick={handleLogout}
+                        className="cursor-pointer font-bold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 py-3 px-3.5 rounded-xl flex items-center justify-between border-t border-slate-800/80 mt-2 pt-3 transition-all"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <SignOut className="w-4.5 h-4.5 text-rose-400 shrink-0" />
+                          <span className="text-xs sm:text-sm font-extrabold">Keluar (Logout)</span>
+                        </div>
+                      </DropdownMenuItem>
+                    </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
 
@@ -401,31 +402,41 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
 
           </div>
 
-          {/* Mobile Hamburger */}
+          {/* Mobile & Tablet Controls: Language Switcher & Hamburger Toggle */}
           <div className="flex md:hidden items-center gap-2">
+            {/* Quick Mobile Language Toggle Button */}
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
+              type="button"
+              onClick={() => setLang(lang === 'id' ? 'en' : 'id')}
+              className="flex items-center gap-1 px-3 py-2.5 rounded-xl bg-slate-800/90 border border-slate-700/90 text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer"
+              title="Ganti Bahasa / Switch Language"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <List className="w-6 h-6" />}
+              <Globe className="w-3.5 h-3.5 text-purple-400" />
+              <span className="uppercase text-[11px] font-extrabold">{lang}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 cursor-pointer"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <List className="w-5 h-5" />}
             </button>
           </div>
 
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile & Tablet Drawer */}
       {mobileMenuOpen && (
         <div className="md:hidden glass-card border-b border-slate-800 px-4 pt-3 pb-6 space-y-4 animate-fade-in">
-          
           {isFullyOnboarded ? (
-            <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-3">
+            <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <User className="w-5 h-5 text-purple-400" />
                   <div>
-                    <p className="text-xs font-extrabold text-white">{currentProfile.full_name}</p>
-                    <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full border font-bold uppercase mt-0.5 ${roleStyle.bg}`}>
+                    <p className="text-sm font-black text-white">{currentProfile.full_name}</p>
+                    <span className={`inline-block text-[10px] px-2.5 py-0.5 rounded-full border font-bold uppercase mt-1 ${roleStyle.bg}`}>
                       {currentRole}
                     </span>
                   </div>
@@ -433,14 +444,13 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
               </div>
 
               {/* Mobile quick actions for Profil, Status Kolaborasi and Logout */}
-              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-slate-800">
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={() => { setActiveTab('profile'); setMobileMenuOpen(false); }}
-                  className="text-xs font-bold gap-1 text-slate-200 border-slate-700"
+                  className="text-xs font-bold justify-center py-2.5 text-slate-200 border-slate-700 w-full"
                 >
-                  <User className="w-4 h-4 text-purple-400" />
                   <span>Profil</span>
                 </Button>
 
@@ -448,9 +458,9 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                   size="sm"
                   variant="outline"
                   onClick={() => { setActiveTab('dashboard/collaborations'); setMobileMenuOpen(false); }}
-                  className="text-xs font-bold gap-1 text-purple-300 border-purple-500/30 relative"
+                  className="text-xs font-bold justify-center gap-1.5 py-2.5 text-purple-300 border-purple-500/30 relative w-full"
                 >
-                  <Handshake className="w-4 h-4" />
+                  <Handshake className="w-4 h-4 shrink-0" />
                   <span>Kolaborasi</span>
                   {pendingNotificationCount > 0 && (
                     <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-rose-500 text-white animate-pulse">
@@ -463,9 +473,9 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                   size="sm"
                   variant="destructive"
                   onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
-                  className="text-xs font-bold gap-1"
+                  className="text-xs font-bold justify-center gap-1.5 py-2.5 w-full"
                 >
-                  <SignOut className="w-4 h-4" />
+                  <SignOut className="w-4 h-4 shrink-0" />
                   <span>Keluar</span>
                 </Button>
               </div>
@@ -494,9 +504,8 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                 setActiveTab('overview');
                 setMobileMenuOpen(false);
               }}
-              className={`w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium ${
-                activeTab === 'overview' ? 'bg-purple-600 text-white font-semibold' : 'text-slate-300 hover:bg-slate-800'
-              }`}
+              className={`w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium ${activeTab === 'overview' ? 'bg-purple-600 text-white font-semibold' : 'text-slate-300 hover:bg-slate-800'
+                }`}
             >
               <span>{t('nav.home')}</span>
             </button>
@@ -523,9 +532,8 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                           setActiveTab(sub.id);
                           setMobileMenuOpen(false);
                         }}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
-                          isSubActive ? 'bg-purple-600/30 text-purple-300 border border-purple-500/40' : 'text-slate-300 hover:bg-slate-800'
-                        }`}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${isSubActive ? 'bg-purple-600/30 text-purple-300 border border-purple-500/40' : 'text-slate-300 hover:bg-slate-800'
+                          }`}
                       >
                         <Icon className={`w-4 h-4 ${sub.color}`} />
                         <span>{sub.label}</span>
@@ -542,24 +550,22 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                 setActiveTab('collaboration-activity');
                 setMobileMenuOpen(false);
               }}
-              className={`w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium ${
-                activeTab === 'collaboration-activity' ? 'bg-purple-600 text-white font-semibold' : 'text-slate-300 hover:bg-slate-800'
-              }`}
+              className={`w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium ${activeTab === 'collaboration-activity' ? 'bg-purple-600 text-white font-semibold' : 'text-slate-300 hover:bg-slate-800'
+                }`}
             >
               <span>Aktivitas Kolaborasi</span>
             </button>
 
-            {/* 4. Mobile Tentang Productify */}
+            {/* 4. Mobile Tentang PRoductify */}
             <button
               onClick={() => {
                 setActiveTab('about');
                 setMobileMenuOpen(false);
               }}
-              className={`w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium ${
-                activeTab === 'about' ? 'bg-purple-600 text-white font-semibold' : 'text-slate-300 hover:bg-slate-800'
-              }`}
+              className={`w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium ${activeTab === 'about' ? 'bg-purple-600 text-white font-semibold' : 'text-slate-300 hover:bg-slate-800'
+                }`}
             >
-              <span>Tentang Productify</span>
+              <span>Tentang PRoductify</span>
             </button>
 
             {/* 5. Mobile Moderasi Admin */}
@@ -569,9 +575,8 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
                   setActiveTab('admin');
                   setMobileMenuOpen(false);
                 }}
-                className={`w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium ${
-                  activeTab === 'admin' ? 'bg-emerald-600 text-white font-semibold' : 'text-slate-300 hover:bg-slate-800'
-                }`}
+                className={`w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium ${activeTab === 'admin' ? 'bg-emerald-600 text-white font-semibold' : 'text-slate-300 hover:bg-slate-800'
+                  }`}
               >
                 <span>{t('nav.admin')}</span>
               </button>

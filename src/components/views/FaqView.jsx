@@ -18,14 +18,14 @@ const FAQ_ITEMS = [
     id: 'gen-1',
     category: 'umum',
     categoryLabel: 'Umum & Akun',
-    question: 'Apa itu Productify?',
-    answer: 'Productify adalah ekosistem Digital Public Relations terpadu di Indonesia yang memberdayakan UMKM, Startup, Content Creator/Influencer, dan Agency Media PR untuk berkolaborasi, mempublikasikan siaran pers, dan memamerkan produk secara transparan.'
+    question: 'Apa itu PRoductify?',
+    answer: 'PRoductify adalah ekosistem Digital Public Relations terpadu di Indonesia yang memberdayakan UMKM, Startup, Content Creator/Influencer, dan Agency Media PR untuk berkolaborasi, mempublikasikan siaran pers, dan memamerkan produk secara transparan.'
   },
   {
     id: 'gen-2',
     category: 'umum',
     categoryLabel: 'Umum & Akun',
-    question: 'Apakah pendaftaran akun di Productify gratis?',
+    question: 'Apakah pendaftaran akun di PRoductify gratis?',
     answer: 'Ya! Pendaftaran akun untuk seluruh peran (UMKM, Influencer, maupun Agency Media) sepenuhnya gratis tanpa biaya tersembunyi.'
   },
   {
@@ -80,7 +80,7 @@ const FAQ_ITEMS = [
     id: 'pr-2',
     category: 'pr',
     categoryLabel: 'Siaran Pers & PR',
-    question: 'Siapa saja yang dapat membaca siaran pers di Productify?',
+    question: 'Siapa saja yang dapat membaca siaran pers di PRoductify?',
     answer: 'Direktori Press Release bersifat publik dan diindeks secara cepat sehingga dapat dibaca oleh wartawan, jurnalis media agency, konsumen, dan calon investor secara terbuka.'
   }
 ];
@@ -110,16 +110,8 @@ export const FaqView = ({ setActiveTab }) => {
       
       {/* Breadcrumb Navigation & Header Banner */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
+        <div>
           <Breadcrumb items={[{ label: 'Pusat Bantuan & FAQ', icon: Question }]} setActiveTab={setActiveTab} />
-          
-          <button
-            onClick={() => setActiveTab('overview')}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-semibold text-slate-300 hover:text-white hover:border-slate-700 transition-all cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Kembali</span>
-          </button>
         </div>
 
         <div className="glass-card p-8 rounded-3xl border-slate-800 bg-gradient-to-r from-slate-950 via-slate-900 to-purple-950/30 relative overflow-hidden shadow-2xl">
@@ -133,7 +125,7 @@ export const FaqView = ({ setActiveTab }) => {
 
             <h1 className="text-3xl sm:text-4xl font-black text-white">Pertanyaan Sering Diajukan</h1>
             <p className="text-xs sm:text-sm text-slate-400 max-w-2xl leading-relaxed">
-              Temukan jawaban cepat mengenai penggunaan fitur Productify, publikasi siaran pers, kerja sama KOL, dan manajemen profil akun Anda.
+              Temukan jawaban cepat mengenai penggunaan fitur PRoductify, publikasi siaran pers, kerja sama KOL, dan manajemen profil akun Anda.
             </p>
 
             {/* Search Input Box */}
@@ -269,7 +261,7 @@ export const FaqView = ({ setActiveTab }) => {
           <h3 className="text-sm font-bold text-white flex items-center gap-2 justify-center sm:justify-start">
             <ChatCircleText className="w-4 h-4 text-purple-400" /> Belum Menemukan Jawaban yang Dicari?
           </h3>
-          <p className="text-xs text-slate-400">Tim bantuan resmi Productify siap membantu kebutuhan PR dan kolaborasi Anda.</p>
+          <p className="text-xs text-slate-400">Tim bantuan resmi PRoductify siap membantu kebutuhan PR dan kolaborasi Anda.</p>
         </div>
         <a
           href="mailto:support@productify.id"

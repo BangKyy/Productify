@@ -7,8 +7,8 @@ export function cn(...inputs) {
 }
 
 const buttonVariants = {
-  default: 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow hover:from-purple-500 hover:to-indigo-500 active:scale-95',
-  destructive: 'bg-rose-600 text-white shadow-sm hover:bg-rose-500 active:scale-95',
+  default: 'bg-[#5859DF] text-white shadow-md hover:bg-[#3334CC] active:bg-[#24248F] active:scale-95 transition-all glow-purple',
+  destructive: 'bg-[#F14141] text-white shadow-sm hover:bg-[#D93A61] active:bg-[#802A3F] active:scale-95',
   outline: 'border border-slate-700 bg-slate-900/60 text-slate-200 hover:bg-slate-800 hover:text-white',
   secondary: 'bg-slate-800 text-slate-100 shadow-sm hover:bg-slate-700',
   ghost: 'text-slate-300 hover:bg-slate-800 hover:text-white',

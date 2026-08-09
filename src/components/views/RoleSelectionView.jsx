@@ -129,7 +129,7 @@ export const RoleSelectionView = ({ setActiveTab }) => {
     try {
       await completeRoleOnboarding({
         role: selectedRole,
-        bio: bio || `Profil resmi ${selectedRole.toUpperCase()} di platform Productify.`,
+        bio: bio || `Profil resmi ${selectedRole.toUpperCase()} di platform PRoductify.`,
         phoneNumber: fullPhone,
         phone_number: fullPhone,
         address: address || 'Jakarta, Indonesia',
@@ -172,14 +172,14 @@ export const RoleSelectionView = ({ setActiveTab }) => {
           Selamat Datang, <span className="text-gradient">{pendingUser?.full_name || 'Pengguna Baru'}</span>!
         </h1>
         <p className="text-sm text-slate-300 max-w-xl mx-auto">
-          Pilih peran utama Anda dalam ekosistem Productify. Informasi profil Anda akan tersimpan dengan aman pada sistem kami.
+          Pilih peran utama Anda dalam ekosistem PRoductify. Informasi profil Anda akan tersimpan dengan aman pada sistem kami.
         </p>
       </div>
 
       <form onSubmit={handleComplete} className="space-y-8">
 
         {/* Role Selection Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 gap-6">
           {ROLE_CARDS.map(card => {
             const Icon = card.icon;
             const isSelected = selectedRole === card.id;

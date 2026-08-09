@@ -147,7 +147,7 @@ export const dataService = {
 
     const profilePayload = {
       id: id || updates?.id || targetId || `user-${Date.now()}`,
-      full_name: updates.full_name || 'Pengguna Productify',
+      full_name: updates.full_name || 'Pengguna PRoductify',
       role: assignedRole,
       avatar_url: updates.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250',
       bio: updates.bio || '',

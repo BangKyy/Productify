@@ -42,11 +42,11 @@ export const AboutView = ({ setActiveTab }) => {
           </div>
 
           <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-            Tentang <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-amber-300 to-indigo-400">Productify</span>
+            Tentang <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-amber-300 to-indigo-400">PRoductify</span>
           </h1>
 
           <p className="text-base sm:text-lg text-slate-300 leading-relaxed">
-            Productify adalah ekosistem digital perintis yang dirancang untuk menjembatani **Brand UMKM**, **Agency**, dan **Influencer** di seluruh Indonesia. Kami merevolusi cara kerja kolaborasi promosi menjadi lebih terstruktur, transparan, dan efisien.
+            PRoductify adalah ekosistem digital perintis yang dirancang untuk menjembatani **Brand UMKM**, **Agency**, dan **Influencer** di seluruh Indonesia. Kami merevolusi cara kerja kolaborasi promosi menjadi lebih terstruktur, transparan, dan efisien.
           </p>
 
           {/* Core Vision & Mission Cards */}
@@ -72,17 +72,17 @@ export const AboutView = ({ setActiveTab }) => {
         </div>
       </div>
 
-      {/* 🏛️ SECTION 1: Apa Itu Productify? (3 Pilar Utama) */}
+      {/* 🏛️ SECTION 1: Apa Itu PRoductify? (3 Pilar Utama) */}
       <div className="space-y-6">
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <span className="text-xs font-bold text-amber-400 uppercase tracking-widest block">Ekosistem 3-in-1</span>
-          <h2 className="text-3xl font-black text-white tracking-tight">Apa Saja yang Disediakan Productify?</h2>
+          <h2 className="text-3xl font-black text-white tracking-tight">Apa Saja yang Disediakan PRoductify?</h2>
           <p className="text-xs text-slate-400">
             Tiga pilar layanan utama yang terintegrasi secara lancar dalam satu sistem dashboard.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {/* Pilar 1: Showcase Produk UMKM */}
           <div className="glass-card p-7 rounded-3xl border-slate-800 space-y-4 hover:border-amber-500/40 transition-all bg-gradient-to-b from-slate-900/80 to-slate-950 group">
             <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
@@ -124,17 +124,17 @@ export const AboutView = ({ setActiveTab }) => {
         </div>
       </div>
 
-      {/* 🏆 SECTION 2: Mengapa Memilih Productify? (Keunggulan Utama) */}
+      {/* 🏆 SECTION 2: Mengapa Memilih PRoductify? (Keunggulan Utama) */}
       <div className="space-y-8 pt-4">
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <span className="text-xs font-bold text-purple-400 uppercase tracking-widest block">Keunggulan Platform</span>
-          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">Mengapa Memilih Productify?</h2>
+          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">Mengapa Memilih PRoductify?</h2>
           <p className="text-xs text-slate-400">
-            6 alasan utama mengapa ribuan Brand UMKM, Agency, dan Influencer memilih Productify sebagai mitra pertumbuhan bisnis.
+            6 alasan utama mengapa ribuan Brand UMKM, Agency, dan Influencer memilih PRoductify sebagai mitra pertumbuhan bisnis.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-5">
           
           {/* Alasan 1: Form Rate Card Pintar */}
           <div className="glass-card p-6 rounded-2xl border-slate-800 bg-slate-900/60 space-y-3 hover:border-purple-500/30 transition-all">
@@ -236,7 +236,7 @@ export const AboutView = ({ setActiveTab }) => {
       {/* 📣 Call-To-Action Banner Footer */}
       <div className="glass-card p-8 sm:p-10 rounded-3xl border-slate-800 bg-gradient-to-r from-purple-900/60 via-slate-900 to-indigo-900/60 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
         <div className="space-y-2 text-center md:text-left">
-          <h3 className="text-2xl font-black text-white">Siap Memulai Kolaborasi di Productify?</h3>
+          <h3 className="text-2xl font-black text-white">Siap Memulai Kolaborasi di PRoductify?</h3>
           <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
             Bergabunglah dengan komunitas pengusaha dan kreator konten Indonesia. Daftarkan akun Anda atau jelajahi marketplace sekarang!
           </p>

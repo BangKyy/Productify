@@ -53,7 +53,7 @@ export const AdminView = ({ setActiveTab }) => {
           <div className="inline-flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
             <ShieldCheck className="w-4 h-4" /> Moderasi Platform & Audit Keamanan
           </div>
-          <h1 className="text-3xl font-extrabold text-white">Konsol Admin Productify</h1>
+          <h1 className="text-3xl font-extrabold text-white">Konsol Admin PRoductify</h1>
           <p className="text-sm text-slate-400 max-w-xl">
             Kelola verifikasi akun pengguna, moderasi konten press release, serta pantau performa ekosistem PR digital.
           </p>
@@ -119,14 +119,14 @@ export const AdminView = ({ setActiveTab }) => {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-extrabold text-white">Daftar Pengguna & Verifikasi Peran (RBAC)</h2>
-            <p className="text-xs text-slate-400">Pengguna terdaftar dalam sistem verifikasi akun Productify.</p>
+            <p className="text-xs text-slate-400">Pengguna terdaftar dalam sistem verifikasi akun PRoductify.</p>
           </div>
           <span className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
             Live Audit
           </span>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto no-scrollbar">
           <table className="w-full text-left text-xs text-slate-300">
             <thead className="bg-slate-900/80 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
               <tr>

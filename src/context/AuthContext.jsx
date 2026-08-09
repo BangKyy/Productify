@@ -436,11 +436,11 @@ export const AuthProvider = ({ children }) => {
 
     const profileData = {
       id: userToSave.id,
-      full_name: userToSave.full_name || 'Pengguna Productify',
+      full_name: userToSave.full_name || 'Pengguna PRoductify',
       email: userToSave.email || '',
       role: targetRole,
       avatar_url: avatarUrl || avatar_url || userToSave.avatar_url || '',
-      bio: bio || `Profil resmi ${targetRole.toUpperCase()} di platform Productify.`,
+      bio: bio || `Profil resmi ${targetRole.toUpperCase()} di platform PRoductify.`,
       phone_number: phoneNumber || phone_number || userToSave.phone_number || '',
       address: address || userToSave.address || 'Indonesia',
       category: category || userToSave.category || '',
