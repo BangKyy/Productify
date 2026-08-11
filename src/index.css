@@ -280,3 +280,57 @@
   scrollbar-width: none !important;  /* Firefox */
 }
 
+/* ========================================================================= */
+/* HARDWARE ACCELERATION & CROSS-DEVICE ANIMATION UTILITIES                  */
+/* ========================================================================= */
+.gsap-hero-badge,
+.gsap-hero-title,
+.gsap-hero-sub,
+.gsap-hero-cta,
+.gsap-metric-card,
+.gsap-kol-card,
+.gsap-product-card,
+.gsap-marketplace-card,
+.gsap-collab-card,
+.gsap-pr-card {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Accessibility: Safe fallback for users/devices with prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .gsap-hero-badge,
+  .gsap-hero-title,
+  .gsap-hero-sub,
+  .gsap-hero-cta,
+  .gsap-metric-card,
+  .gsap-kol-card,
+  .gsap-product-card,
+  .gsap-marketplace-card,
+  .gsap-collab-card,
+  .gsap-pr-card {
+    transition: none !important;
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+

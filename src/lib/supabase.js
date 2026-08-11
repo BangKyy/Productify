@@ -19,19 +19,24 @@ export const getItemDedupeKey = (item) => {
     return `rcr:${matchRcId[1].trim()}`;
   }
 
+  if (item.isRateCardRequest && item.id) {
+    return `rcr:${String(item.id).trim()}`;
+  }
+
   const brand = item.brand_id || item.requester_id || '';
   const inf = item.influencer_id || '';
-  const title = (item.project_title || item.product_name || '').replace(/^Request Rate Card:\s*/i, '').toLowerCase().trim();
+  const rawTitle = item.project_title || item.product_name || item.title || '';
+  const cleanTitle = rawTitle.replace(/^Request Rate Card:\s*/i, '').toLowerCase().trim();
 
   // If this item is a Rate Card Request or linked synced collaboration, deduplicate by composite brand + influencer + product/title
   if (
     item.isRateCardRequest ||
-    title.includes('rate card') ||
+    cleanTitle.includes('rate card') ||
     notesStr.toLowerCase().includes('rate card') ||
     item.campaign_objective
   ) {
     if (brand && inf) {
-      return `rcr_composite:${brand}_${inf}_${title}`;
+      return `rcr_composite:${brand}_${inf}_${cleanTitle}`;
     }
   }
 
@@ -39,7 +44,7 @@ export const getItemDedupeKey = (item) => {
     return `id:${item.id}`;
   }
 
-  return `composite:${brand}_${inf}_${title}`;
+  return `composite:${brand}_${inf}_${cleanTitle}`;
 };
 
 export const dataService = {
@@ -197,12 +202,32 @@ export const dataService = {
           .from('products')
           .select('*')
           .order('created_at', { ascending: false });
-        if (!error && data && Array.isArray(data)) return data;
+        if (!error && data && Array.isArray(data)) {
+          const uniqueMap = new Map();
+          data.forEach(p => {
+            if (p) {
+              const cleanTitle = (p.title || '').toString().toLowerCase().trim();
+              const key = p.id ? `id:${p.id}` : `title:${cleanTitle}`;
+              if (!uniqueMap.has(key)) uniqueMap.set(key, p);
+            }
+          });
+          return Array.from(uniqueMap.values());
+        }
       } catch (err) {
         console.warn('Supabase fetch products warning:', err);
       }
     }
-    return mockEngine.getProducts();
+
+    const rawList = mockEngine.getProducts();
+    const uniqueMap = new Map();
+    (Array.isArray(rawList) ? rawList : []).forEach(p => {
+      if (p) {
+        const cleanTitle = (p.title || '').toString().toLowerCase().trim();
+        const key = p.id ? `id:${p.id}` : `title:${cleanTitle}`;
+        if (!uniqueMap.has(key)) uniqueMap.set(key, p);
+      }
+    });
+    return Array.from(uniqueMap.values());
   },
 
   async addProduct(product) {
@@ -297,17 +322,38 @@ export const dataService = {
           .from('press_releases')
           .select('*');
         if (!error && data && Array.isArray(data)) {
-          return data.map(item => ({
-            ...item,
-            owner_id: item.owner_id || item.author_id,
-            author_id: item.author_id || item.owner_id
-          }));
+          const uniqueMap = new Map();
+          data.forEach(item => {
+            if (item) {
+              const cleanTitle = (item.title || '').toString().toLowerCase().trim();
+              const key = item.id ? `id:${item.id}` : `title:${cleanTitle}`;
+              if (!uniqueMap.has(key)) {
+                uniqueMap.set(key, {
+                  ...item,
+                  owner_id: item.owner_id || item.author_id,
+                  author_id: item.author_id || item.owner_id,
+                  tags: typeof item.tags === 'string' ? item.tags.split(',').map(t => t.trim()).filter(Boolean) : (Array.isArray(item.tags) ? item.tags : [])
+                });
+              }
+            }
+          });
+          return Array.from(uniqueMap.values());
         }
       } catch (err) {
         console.warn('Supabase fetch press releases warning:', err);
       }
     }
-    return mockEngine.getPressReleases();
+
+    const rawList = mockEngine.getPressReleases();
+    const uniqueMap = new Map();
+    (Array.isArray(rawList) ? rawList : []).forEach(pr => {
+      if (pr) {
+        const cleanTitle = (pr.title || '').toString().toLowerCase().trim();
+        const key = pr.id ? `id:${pr.id}` : `title:${cleanTitle}`;
+        if (!uniqueMap.has(key)) uniqueMap.set(key, pr);
+      }
+    });
+    return Array.from(uniqueMap.values());
   },
 
   async addPressRelease(pr) {
@@ -411,7 +457,7 @@ export const dataService = {
       try {
         const { data, error } = await supabase
           .from('collaborations')
-          .select('id, brand_id, influencer_id, project_title, budget, status, notes, created_at')
+          .select('*')
           .order('created_at', { ascending: false });
         if (!error && data && Array.isArray(data)) return data;
       } catch (err) {
@@ -425,19 +471,25 @@ export const dataService = {
     const isUuid = (id) => typeof id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
     const brandUuid = isUuid(collab.brand_id) ? collab.brand_id : null;
     const influencerUuid = isUuid(collab.influencer_id) ? collab.influencer_id : null;
+    const requesterUuid = isUuid(collab.requester_id) ? collab.requester_id : null;
 
     const validStatuses = ['pending', 'accepted', 'rejected', 'completed'];
     const collabStatus = validStatuses.includes(collab.status) ? collab.status : 'pending';
 
-    const initiatorRole = ['agency', 'influencer', 'brand'].includes(collab.initiator) ? collab.initiator : 'brand';
-    const initiatorTag = `[Initiator: ${initiatorRole}]`;
-    let rawNotes = (collab.notes || '').trim();
+    const initiatorRole = ['agency', 'influencer', 'brand', 'umkm'].includes(collab.initiator) ? collab.initiator : 'agency';
+    const requesterName = collab.requester_name || '';
+    const brandName = collab.brand_name || '';
+    const influencerName = collab.influencer_name || '';
+
+    const metaTags = `[Initiator: ${initiatorRole}] ${requesterName ? `[RequesterName: ${requesterName}]` : ''} ${brandName ? `[BrandName: ${brandName}]` : ''} ${influencerName ? `[InfluencerName: ${influencerName}]` : ''}`.trim();
+
+    let rawNotes = (collab.notes || collab.description || '').trim();
     if (!rawNotes.includes('[Initiator:')) {
-      rawNotes = `${initiatorTag} ${rawNotes}`.trim();
+      rawNotes = `${metaTags} ${rawNotes}`.trim();
     }
 
     const collabPayload = {
-      project_title: collab.project_title,
+      project_title: collab.project_title || 'Pengajuan Kolaborasi Direct',
       budget: Number(collab.budget) || 0,
       status: collabStatus,
       notes: rawNotes
@@ -445,6 +497,7 @@ export const dataService = {
 
     if (brandUuid) collabPayload.brand_id = brandUuid;
     if (influencerUuid) collabPayload.influencer_id = influencerUuid;
+    if (requesterUuid) collabPayload.requester_id = requesterUuid;
 
     if (isSupabaseConfigured && supabase) {
       try {
@@ -568,16 +621,6 @@ export const dataService = {
     if (requesterUuid)   payload.requester_id  = requesterUuid;
     if (influencerUuid)  payload.influencer_id = influencerUuid;
 
-    // Sync payload for collaborations table so it displays in Dashboard Tracker
-    const collabSyncPayload = {
-      project_title: `Request Rate Card: ${req.product_name || req.brand_name || 'Kampanye Brand'}`,
-      budget: 0,
-      status: 'pending',
-      notes: `[Rate Card Request] [RateCardReqID: ${rcrBaseId}] Brand: ${req.brand_name || '-'}. Objektif: ${req.campaign_objective || '-'}. Platform: ${(req.platforms || []).join(', ') || '-'}. Anggaran: ${req.budget_range || '-'}. ${req.notes || ''}`.trim()
-    };
-    if (requesterUuid) collabSyncPayload.brand_id = requesterUuid;
-    if (influencerUuid) collabSyncPayload.influencer_id = influencerUuid;
-
     // Rich mock engine object ensuring both requester and influencer can match it
     const richMockObj = {
       ...req,
@@ -600,12 +643,6 @@ export const dataService = {
 
         if (data && data.length > 0) {
           const insertedRcr = data[0];
-          collabSyncPayload.notes = `[Rate Card Request] [RateCardReqID: ${insertedRcr.id}] Brand: ${req.brand_name || '-'}. Objektif: ${req.campaign_objective || '-'}. Platform: ${(req.platforms || []).join(', ') || '-'}. Anggaran: ${req.budget_range || '-'}. ${req.notes || ''}`.trim();
-          try {
-            await supabase.from('collaborations').insert([collabSyncPayload]);
-          } catch (collabErr) {
-            console.warn('Sync to collaborations warning:', collabErr);
-          }
           return { ...richMockObj, ...insertedRcr };
         }
 
@@ -618,12 +655,6 @@ export const dataService = {
     }
 
     const savedMockReq = mockEngine.addRateCardRequest(richMockObj);
-    mockEngine.addCollaboration({
-      ...collabSyncPayload,
-      ...richMockObj,
-      id: 'collab-sync-' + rcrBaseId
-    });
-
     return savedMockReq;
   },
 
@@ -653,7 +684,7 @@ export const dataService = {
       }
     }
 
-    const combined = (fetchedSupabaseSuccess && supabaseData.length > 0)
+    const combined = fetchedSupabaseSuccess
       ? supabaseData
       : (mockEngine.getRateCardRequests() || []);
 

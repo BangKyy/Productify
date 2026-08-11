@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import gsap from 'gsap';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { dataService } from '../../lib/supabase';
@@ -51,7 +52,14 @@ export const PressReleaseView = ({ setActiveTab }) => {
   const fetchPRs = async () => {
     setLoading(true);
     const data = await dataService.getPressReleases();
-    setPressReleases(data);
+    const uniqueMap = new Map();
+    (Array.isArray(data) ? data : []).forEach(pr => {
+      if (pr) {
+        const key = pr.id ? `id:${pr.id}` : `title:${(pr.title || '').toLowerCase().trim()}`;
+        if (!uniqueMap.has(key)) uniqueMap.set(key, pr);
+      }
+    });
+    setPressReleases(Array.from(uniqueMap.values()));
     setLoading(false);
   };
 
@@ -85,6 +93,38 @@ export const PressReleaseView = ({ setActiveTab }) => {
     const matchesTag = selectedTag === 'ALL' || cleanPRTags.includes(selectedTag);
     return matchesSearch && matchesTag;
   });
+
+  const gridRef = useRef(null);
+
+  useEffect(() => {
+    if (gridRef.current && filteredPRs.length > 0) {
+      const ctx = gsap.context(() => {
+        const mm = gsap.matchMedia();
+
+        mm.add({
+          isDesktop: "(min-width: 768px)",
+          isMobile: "(max-width: 767px)"
+        }, (context) => {
+          const { isMobile } = context.conditions;
+
+          gsap.fromTo(
+            '.gsap-pr-card',
+            { opacity: 0, y: isMobile ? 18 : 30, scale: isMobile ? 0.97 : 0.96 },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: isMobile ? 0.4 : 0.55,
+              stagger: isMobile ? 0.05 : 0.08,
+              ease: 'power2.out',
+              clearProps: 'transform,opacity'
+            }
+          );
+        });
+      }, gridRef);
+      return () => ctx.revert();
+    }
+  }, [filteredPRs]);
 
   const handleOpenCreateModal = () => {
     if (!isAuthenticated) {
@@ -326,7 +366,7 @@ export const PressReleaseView = ({ setActiveTab }) => {
           <p className="text-sm text-slate-400">Coba ubah filter tag atau kata kunci pencarian Anda.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredPRs.map(pr => {
             const ownerProfile = Array.isArray(profiles) ? profiles.find(p => p.id === (pr.owner_id || pr.author_id)) : null;
             const ownerName = ownerProfile?.full_name || pr.author_name || 'Official PR';
@@ -335,7 +375,7 @@ export const PressReleaseView = ({ setActiveTab }) => {
               <div
                 key={pr.id}
                 onClick={() => setSelectedPR(pr)}
-                className="glass-card p-6 rounded-2xl border-slate-800 hover:border-purple-500/50 transition-all cursor-pointer flex flex-col justify-between space-y-4 group"
+                className="gsap-pr-card glass-card p-6 rounded-2xl border-slate-800 hover:border-purple-500/50 transition-all cursor-pointer flex flex-col justify-between space-y-4 group"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-xs text-slate-400">

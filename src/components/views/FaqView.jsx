@@ -264,7 +264,7 @@ export const FaqView = ({ setActiveTab }) => {
           <p className="text-xs text-slate-400">Tim bantuan resmi PRoductify siap membantu kebutuhan PR dan kolaborasi Anda.</p>
         </div>
         <a
-          href="mailto:support@productify.id"
+          href="mailto:productify.pr@gmail.com"
           className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-xs hover:from-purple-500 hover:to-indigo-500 transition-all cursor-pointer shrink-0 shadow-lg"
         >
           Hubungi Tim Support

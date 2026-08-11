@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import gsap from 'gsap';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { dataService, isSupabaseConfigured, getItemDedupeKey } from '../../lib/supabase';
@@ -45,10 +46,29 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
   const fetchCollaborations = async () => {
     setLoading(true);
     try {
-      const data = await dataService.getCollaborations();
-      const rawList = Array.isArray(data) ? data : [];
+      const [collabs, rateRequests] = await Promise.all([
+        dataService.getCollaborations(),
+        dataService.getRateCardRequests()
+      ]);
+
+      const formattedRequests = (Array.isArray(rateRequests) ? rateRequests : []).map(r => ({
+        ...r,
+        project_title: `Request Rate Card: ${r.product_name || r.brand_name || 'Kampanye Brand'}`,
+        budget: r.budget_range || r.budget || 'Diskusi Lebih Lanjut',
+        brand_id: r.requester_id || r.brand_id,
+        isRateCardRequest: true
+      }));
+
+      const pureCollabs = (Array.isArray(collabs) ? collabs : []).filter(c => {
+        if (!c) return false;
+        const notesStr = String(c.notes || '').toLowerCase();
+        const titleStr = String(c.project_title || '').toLowerCase();
+        return !notesStr.includes('[ratecardreqid:') && !notesStr.includes('[rate card request]') && !titleStr.startsWith('request rate card:');
+      });
+
+      const combined = [...pureCollabs, ...formattedRequests];
       const uniqueMap = new Map();
-      rawList.forEach(item => {
+      combined.forEach(item => {
         if (item) {
           const key = getItemDedupeKey(item);
           if (key && !uniqueMap.has(key)) {
@@ -221,6 +241,37 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
     return matchesDirection && matchesStatus;
   });
 
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (containerRef.current && filteredCollaborations.length > 0) {
+      const ctx = gsap.context(() => {
+        const mm = gsap.matchMedia();
+
+        mm.add({
+          isDesktop: "(min-width: 768px)",
+          isMobile: "(max-width: 767px)"
+        }, (context) => {
+          const { isMobile } = context.conditions;
+
+          gsap.fromTo(
+            '.gsap-collab-card',
+            { opacity: 0, y: isMobile ? 15 : 25 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: isMobile ? 0.35 : 0.45,
+              stagger: isMobile ? 0.05 : 0.08,
+              ease: 'power2.out',
+              clearProps: 'transform,opacity'
+            }
+          );
+        });
+      }, containerRef);
+      return () => ctx.revert();
+    }
+  }, [filteredCollaborations, tabDirection, filterStatus]);
+
   return (
     <div className="space-y-8 pb-12">
       
@@ -342,7 +393,7 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
           <p className="text-sm text-slate-400">Belum ada pengajuan kerja sama pada kategori filter ini.</p>
         </div>
       ) : (
-        <div className="space-y-4 sm:space-y-5">
+        <div ref={containerRef} className="space-y-4 sm:space-y-5">
           {filteredCollaborations.map(collab => {
             const stInfo = STATUS_MAP[collab.status] || STATUS_MAP.pending;
             const StatusIcon = stInfo.icon;
@@ -375,7 +426,7 @@ export const DashboardCollaborationsView = ({ setActiveTab }) => {
             return (
               <Card 
                 key={collab.id} 
-                className={`p-4 sm:p-6 space-y-4 sm:space-y-5 transition-all rounded-3xl shadow-xl ${
+                className={`gsap-collab-card p-4 sm:p-6 space-y-4 sm:space-y-5 transition-all rounded-3xl shadow-xl ${
                   isIncoming && collab.status === 'pending'
                     ? 'border-amber-500/60 bg-gradient-to-r from-amber-950/20 via-slate-900/90 to-slate-900/90 shadow-amber-500/5'
                     : isIncoming

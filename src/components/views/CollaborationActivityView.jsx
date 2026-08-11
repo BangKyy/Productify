@@ -146,9 +146,57 @@ export const CollaborationActivityView = ({ setActiveTab }) => {
         };
       });
 
-      const combined = [...(Array.isArray(collabs) ? collabs : []), ...formattedRequests];
+      // Filter out any legacy synced rows from 'collaborations' table so rate_card_requests is pure single source of truth
+      const pureCollabs = (Array.isArray(collabs) ? collabs : []).filter(c => {
+        if (!c) return false;
+        const notesStr = String(c.notes || '').toLowerCase();
+        const titleStr = String(c.project_title || '').toLowerCase();
+        return !notesStr.includes('[ratecardreqid:') && !notesStr.includes('[rate card request]') && !titleStr.startsWith('request rate card:');
+      });
 
-      // Remove duplicates using getItemDedupeKey
+      const formattedCollabs = pureCollabs.map(c => {
+        const foundBrand = Array.isArray(profiles) ? profiles.find(p => p.id === c.brand_id) : null;
+        const foundInf = Array.isArray(profiles) ? profiles.find(p => p.id === c.influencer_id) : null;
+        const foundReq = Array.isArray(profiles) ? profiles.find(p => p.id === c.requester_id) : null;
+
+        const notesStr = String(c.notes || '');
+
+        const reqNameMatch = notesStr.match(/\[RequesterName:\s*([^\]]+)\]/i);
+        const brandNameMatch = notesStr.match(/\[BrandName:\s*([^\]]+)\]/i);
+        const infNameMatch = notesStr.match(/\[InfluencerName:\s*([^\]]+)\]/i);
+        const initiatorMatch = notesStr.match(/\[Initiator:\s*([^\]]+)\]/i);
+
+        const extractedReqName = reqNameMatch ? reqNameMatch[1].trim() : '';
+        const extractedBrandName = brandNameMatch ? brandNameMatch[1].trim() : '';
+        const extractedInfName = infNameMatch ? infNameMatch[1].trim() : '';
+        const initiatorRole = initiatorMatch ? initiatorMatch[1].trim() : 'agency';
+
+        const brandName = c.brand_name || foundBrand?.full_name || extractedBrandName || 'Brand UMKM';
+        const influencerName = c.influencer_name || foundInf?.full_name || extractedInfName || 'Influencer KOL';
+        const requesterName = c.requester_name || foundReq?.full_name || extractedReqName || (initiatorRole === 'agency' ? 'Agency PR' : brandName);
+
+        const cleanDescription = notesStr
+          .replace(/\[Initiator:\s*[^\]]+\]/gi, '')
+          .replace(/\[RequesterName:\s*[^\]]+\]/gi, '')
+          .replace(/\[BrandName:\s*[^\]]+\]/gi, '')
+          .replace(/\[InfluencerName:\s*[^\]]+\]/gi, '')
+          .replace(/\[Rate Card Request\]/gi, '')
+          .replace(/\[RateCardReqID:\s*[^\]]+\]/gi, '')
+          .trim();
+
+        return {
+          ...c,
+          brand_name: brandName,
+          influencer_name: influencerName,
+          requester_name: requesterName,
+          initiator_role: initiatorRole,
+          clean_description: cleanDescription || c.project_title,
+          isDirectCollaboration: true
+        };
+      });
+
+      const combined = [...formattedCollabs, ...formattedRequests];
+
       const uniqueMap = new Map();
       combined.forEach(item => {
         if (item) {
@@ -366,7 +414,7 @@ export const CollaborationActivityView = ({ setActiveTab }) => {
                     </span>
                     <span className="text-slate-500">•</span>
                     <span className="text-slate-400 font-medium">
-                      Diajukan oleh: <strong className="text-slate-200">{act.brand_name || 'Brand UMKM'}</strong>
+                      Diajukan oleh: <strong className="text-slate-200">{act.requester_name || act.brand_name || 'Agency PR / Brand'}</strong>
                     </span>
                     <span className="text-slate-500">•</span>
                     <span className="text-slate-400">
@@ -385,7 +433,7 @@ export const CollaborationActivityView = ({ setActiveTab }) => {
                   <h3 className="text-lg sm:text-xl font-black text-white tracking-tight">{act.project_title}</h3>
                 </div>
 
-                {/* SUB-CARDS GRID (6 Sub-Card Parameter Boxes) */}
+                {/* SUB-CARDS GRID (6 Sub-Cards for Rate Card vs 4 Sub-Cards for Direct Collaboration) */}
                 {rateDetails.isRateCard ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 pt-1">
                     
@@ -467,30 +515,61 @@ export const CollaborationActivityView = ({ setActiveTab }) => {
 
                   </div>
                 ) : (
-                  /* Standard Collaboration 3 Boxes Fallback */
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 pt-1">
-                    <div className="glass-card p-3 sm:p-3.5 rounded-2xl border-slate-800/90 bg-slate-900/60">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Brand UMKM</span>
-                      <strong className="text-xs sm:text-sm font-extrabold text-purple-300 truncate block">{act.brand_name || 'Brand UMKM'}</strong>
+                  /* Direct Collaboration 4 Boxes Layout */
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 pt-1">
+                    {/* Box 1: Brand UMKM */}
+                    <div className="glass-card p-3 sm:p-3.5 rounded-2xl border-slate-800/90 bg-slate-900/60 flex items-center gap-3">
+                      <div className="p-2 sm:p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 shrink-0">
+                        <Package className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Brand UMKM</span>
+                        <strong className="text-xs sm:text-sm font-extrabold text-purple-300 truncate block">{act.brand_name || 'Brand UMKM'}</strong>
+                      </div>
                     </div>
-                    <div className="glass-card p-3 sm:p-3.5 rounded-2xl border-slate-800/90 bg-slate-900/60">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Influencer KOL</span>
-                      <strong className="text-xs sm:text-sm font-extrabold text-amber-300 truncate block">{act.influencer_name}</strong>
+
+                    {/* Box 2: Influencer KOL */}
+                    <div className="glass-card p-3 sm:p-3.5 rounded-2xl border-slate-800/90 bg-slate-900/60 flex items-center gap-3">
+                      <div className="p-2 sm:p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 shrink-0">
+                        <User className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Influencer KOL</span>
+                        <strong className="text-xs sm:text-sm font-extrabold text-amber-300 truncate block">{act.influencer_name || 'Influencer KOL'}</strong>
+                      </div>
                     </div>
-                    <div className="glass-card p-3 sm:p-3.5 rounded-2xl border-slate-800/90 bg-slate-900/60">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Budget Kampanye</span>
-                      <strong className="text-xs sm:text-sm font-extrabold text-emerald-400 truncate block">{formatBudgetDisplay(act.budget)}</strong>
+
+                    {/* Box 3: Diajukan Oleh */}
+                    <div className="glass-card p-3 sm:p-3.5 rounded-2xl border-slate-800/90 bg-slate-900/60 flex items-center gap-3">
+                      <div className="p-2 sm:p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 shrink-0">
+                        <UsersThree className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Diajukan Oleh</span>
+                        <strong className="text-xs sm:text-sm font-extrabold text-blue-300 truncate block">{act.requester_name || act.brand_name || 'Agency / Non-UMKM'}</strong>
+                      </div>
+                    </div>
+
+                    {/* Box 4: Estimasi Budget */}
+                    <div className="glass-card p-3 sm:p-3.5 rounded-2xl border-slate-800/90 bg-slate-900/60 flex items-center gap-3">
+                      <div className="p-2 sm:p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0">
+                        <CurrencyDollar className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Estimasi Budget</span>
+                        <strong className="text-xs sm:text-sm font-extrabold text-emerald-400 truncate block">{formatBudgetDisplay(act.budget)}</strong>
+                      </div>
                     </div>
                   </div>
                 )}
 
-                {/* Catatan Masukan Box */}
-                {rateDetails.userNotes && (
+                {/* Deskripsi & Catatan Pengajuan Box */}
+                {(act.clean_description || rateDetails.userNotes) && (
                   <div className="p-3 sm:p-4 rounded-2xl bg-slate-900/80 border border-slate-800/90 space-y-1">
                     <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block flex items-center gap-1.5">
-                      <ChatCircleText className="w-3.5 h-3.5 text-amber-400 shrink-0" /> Catatan Masukan / Instruksi Khusus:
+                      <ChatCircleText className="w-3.5 h-3.5 text-amber-400 shrink-0" /> Deskripsi / Catatan Pengajuan Kolaborasi:
                     </span>
-                    <p className="text-xs text-slate-300 italic">&quot;{rateDetails.userNotes}&quot;</p>
+                    <p className="text-xs text-slate-300 italic">&quot;{act.clean_description || rateDetails.userNotes}&quot;</p>
                   </div>
                 )}
 

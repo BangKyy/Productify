@@ -74,7 +74,14 @@ export const Navbar = ({ activeTab, setActiveTab }) => {
           isRateCardRequest: true
         }));
 
-        const combined = [...(Array.isArray(collabs) ? collabs : []), ...formattedRequests];
+        const pureCollabs = (Array.isArray(collabs) ? collabs : []).filter(c => {
+          if (!c) return false;
+          const notesStr = String(c.notes || '').toLowerCase();
+          const titleStr = String(c.project_title || '').toLowerCase();
+          return !notesStr.includes('[ratecardreqid:') && !notesStr.includes('[rate card request]') && !titleStr.startsWith('request rate card:');
+        });
+
+        const combined = [...pureCollabs, ...formattedRequests];
 
         const uniqueMap = new Map();
         combined.forEach(p => {

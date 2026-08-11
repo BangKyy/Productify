@@ -1,8 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { dataService } from '../../lib/supabase';
 import { Button } from '../ui/Button';
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
 import { Avatar, AvatarFallback } from '../ui/Avatar';
 import { 
   Sparkle, 
@@ -114,6 +120,43 @@ const slugifyName = (name) => {
     .replace(/^-+|-+$/g, '');
 };
 
+const AnimatedCounter = ({ value, suffix = '', decimals = 0, duration = 1.8 }) => {
+  const [displayValue, setDisplayValue] = useState(0);
+  const countRef = useRef(null);
+  const numericValue = typeof value === 'number' ? value : (parseFloat(String(value).replace(/[^0-9.]/g, '')) || 0);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const obj = { val: 0 };
+      gsap.to(obj, {
+        val: numericValue,
+        duration,
+        ease: 'power2.out',
+        scrollTrigger: countRef.current ? {
+          trigger: countRef.current,
+          start: 'top 90%',
+          toggleActions: 'play none none none'
+        } : undefined,
+        onUpdate: () => {
+          setDisplayValue(obj.val);
+        }
+      });
+    }, countRef);
+
+    return () => ctx.revert();
+  }, [numericValue, duration]);
+
+  const formatted = decimals > 0 
+    ? displayValue.toFixed(decimals) 
+    : Math.round(displayValue).toLocaleString('id-ID');
+
+  return (
+    <span ref={countRef}>
+      {formatted}{suffix}
+    </span>
+  );
+};
+
 export const OverviewView = ({ setActiveTab }) => {
   const { t } = useLanguage();
   const { profiles, isAuthenticated } = useAuth();
@@ -124,6 +167,11 @@ export const OverviewView = ({ setActiveTab }) => {
   const [loading, setLoading] = useState(true);
   const [activeRoleWorkflow, setActiveRoleWorkflow] = useState('umkm');
 
+  // GSAP animation references
+  const heroRef = useRef(null);
+  const metricsRef = useRef(null);
+  const kolSectionRef = useRef(null);
+
   // Real-time landing statistics state
   const [stats, setStats] = useState({
     visitorCount: 1250,
@@ -132,6 +180,84 @@ export const OverviewView = ({ setActiveTab }) => {
     prCount: 0,
     collabSuccessRate: '98.4%'
   });
+
+  // GSAP Responsive Animation setup with matchMedia & context cleanup
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const mm = gsap.matchMedia();
+
+      // Hero Entrance Animation
+      if (heroRef.current) {
+        const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+        tl.fromTo('.gsap-hero-badge', { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.6, clearProps: 'transform,opacity' })
+          .fromTo('.gsap-hero-title', { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: 0.7, clearProps: 'transform,opacity' }, '-=0.3')
+          .fromTo('.gsap-hero-sub', { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, clearProps: 'transform,opacity' }, '-=0.4')
+          .fromTo('.gsap-hero-cta', { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.45, stagger: 0.1, clearProps: 'transform,opacity' }, '-=0.3');
+      }
+
+      // Responsive ScrollTrigger animations for cards across Laptop to Mobile
+      mm.add({
+        isDesktop: "(min-width: 768px)",
+        isMobile: "(max-width: 767px)"
+      }, (context) => {
+        const { isMobile } = context.conditions;
+
+        // Realtime metrics row entrance reveal
+        if (metricsRef.current) {
+          gsap.fromTo('.gsap-metric-card', 
+            { opacity: 0, y: isMobile ? 15 : 25, scale: isMobile ? 0.98 : 1 }, 
+            { 
+              opacity: 1, 
+              y: 0, 
+              scale: 1,
+              duration: isMobile ? 0.45 : 0.6, 
+              stagger: isMobile ? 0.05 : 0.08, 
+              ease: 'power2.out',
+              clearProps: 'transform,opacity',
+              scrollTrigger: {
+                trigger: metricsRef.current,
+                start: isMobile ? 'top 92%' : 'top 85%',
+                toggleActions: 'play none none none'
+              }
+            }
+          );
+        }
+
+        // KOL Preview cards entrance reveal
+        if (kolSectionRef.current && !loading && influencers.length > 0) {
+          gsap.fromTo('.gsap-kol-card',
+            { opacity: 0, y: isMobile ? 20 : 35, scale: isMobile ? 0.97 : 0.95 },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: isMobile ? 0.5 : 0.65,
+              stagger: isMobile ? 0.08 : 0.12,
+              ease: 'power3.out',
+              clearProps: 'transform,opacity',
+              scrollTrigger: {
+                trigger: kolSectionRef.current,
+                start: isMobile ? 'top 90%' : 'top 80%',
+                toggleActions: 'play none none none'
+              }
+            }
+          );
+        }
+      });
+    });
+
+    // Refresh ScrollTrigger calculations after dynamic layout updates
+    const timer = setTimeout(() => {
+      if (typeof ScrollTrigger !== 'undefined') {
+        ScrollTrigger.refresh();
+      }
+    }, 150);
+
+    return () => {
+      clearTimeout(timer);
+      ctx.revert();
+    };
+  }, [loading, influencers]);
 
   useEffect(() => {
     // Visitor counter logic (persisted in localStorage with auto-increment)
@@ -163,13 +289,37 @@ export const OverviewView = ({ setActiveTab }) => {
         const safeProfs = Array.isArray(profs) ? profs : [];
         const safePrs = Array.isArray(prs) ? prs : [];
         const safeCollabs = Array.isArray(collabs) ? collabs : [];
+        const safeProds = Array.isArray(prods) ? prods : [];
 
-        setProducts(Array.isArray(prods) ? prods.slice(0, 4) : []);
+        // Deduplicate products
+        const uniqueProdsMap = new Map();
+        safeProds.forEach(p => {
+          if (p) {
+            const key = p.id ? `id:${p.id}` : `title:${(p.title || '').toLowerCase().trim()}`;
+            if (!uniqueProdsMap.has(key)) uniqueProdsMap.set(key, p);
+          }
+        });
+        setProducts(Array.from(uniqueProdsMap.values()).slice(0, 4));
 
-        const kolList = safeProfs.filter(p => p && (p.role === 'influencer' || p.role === 'KOL'));
-        setInfluencers(kolList.slice(0, 3));
+        // Deduplicate influencers
+        const kolMap = new Map();
+        safeProfs.forEach(p => {
+          if (p && (p.role === 'influencer' || p.role === 'KOL')) {
+            const key = p.id ? `id:${p.id}` : `name:${(p.full_name || '').toLowerCase().trim()}`;
+            if (!kolMap.has(key)) kolMap.set(key, p);
+          }
+        });
+        setInfluencers(Array.from(kolMap.values()).slice(0, 3));
 
-        setPressReleases(safePrs.slice(0, 4));
+        // Deduplicate press releases
+        const prMap = new Map();
+        safePrs.forEach(pr => {
+          if (pr) {
+            const key = pr.id ? `id:${pr.id}` : `title:${(pr.title || '').toLowerCase().trim()}`;
+            if (!prMap.has(key)) prMap.set(key, pr);
+          }
+        });
+        setPressReleases(Array.from(prMap.values()).slice(0, 4));
 
         // Real-time statistics calculation
         const umkmList = safeProfs.filter(p => p && (p.role === 'umkm' || p.role === 'brand'));
@@ -245,22 +395,22 @@ export const OverviewView = ({ setActiveTab }) => {
     <div className="space-y-20 pb-16">
       
       {/* Hero Banner Section */}
-      <section className="relative py-10 sm:py-16 md:py-20 overflow-hidden rounded-3xl bg-gradient-glow border border-slate-800/80 px-4 sm:px-8 lg:px-12 text-center shadow-2xl">
+      <section ref={heroRef} className="relative py-10 sm:py-16 md:py-20 overflow-hidden rounded-3xl bg-gradient-glow border border-slate-800/80 px-4 sm:px-8 lg:px-12 text-center shadow-2xl">
         
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 sm:w-96 h-72 sm:h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute top-1/3 right-10 w-48 sm:w-72 h-48 sm:h-72 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="relative z-10 max-w-4xl mx-auto space-y-5 sm:space-y-6">
-          <div className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full glass-card border-purple-500/30 text-purple-300 text-xs sm:text-sm font-semibold tracking-wide shadow-md">
+          <div className="gsap-hero-badge inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full glass-card border-purple-500/30 text-purple-300 text-xs sm:text-sm font-semibold tracking-wide shadow-md">
             <Sparkle weight="fill" className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-400 shrink-0" />
             <span>{t('hero.badge')}</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight sm:leading-tight">
+          <h1 className="gsap-hero-title text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight sm:leading-tight">
             {t('hero.title1')} <span className="text-gradient">{t('hero.title2')}</span>, {t('hero.title3')} <span className="text-gradient">{t('hero.title4')}</span>
           </h1>
 
-          <p className="text-xs sm:text-base md:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed px-2">
+          <p className="gsap-hero-sub text-xs sm:text-base md:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed px-2">
             {t('hero.subtitle')}
           </p>
 
@@ -269,7 +419,7 @@ export const OverviewView = ({ setActiveTab }) => {
             <Button
               onClick={() => setActiveTab('press-releases')}
               size="lg"
-              className="glow-purple w-full sm:w-auto justify-center gap-2 text-xs sm:text-sm font-bold"
+              className="gsap-hero-cta glow-purple w-full sm:w-auto justify-center gap-2 text-xs sm:text-sm font-bold"
             >
               <Megaphone className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
               <span>{t('hero.publishBtn')}</span>
@@ -280,7 +430,7 @@ export const OverviewView = ({ setActiveTab }) => {
               onClick={() => setActiveTab('marketplace')}
               variant="outline"
               size="lg"
-              className="w-full sm:w-auto justify-center gap-2 text-xs sm:text-sm font-bold"
+              className="gsap-hero-cta w-full sm:w-auto justify-center gap-2 text-xs sm:text-sm font-bold"
             >
               <UsersThree className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-400 shrink-0" />
               <span>{t('hero.exploreKolBtn')}</span>
@@ -291,15 +441,17 @@ export const OverviewView = ({ setActiveTab }) => {
       </section>
 
       {/* Realtime Metrics Row (5 Cards) */}
-      <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+      <section ref={metricsRef} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         {/* 1. Total Pengunjung */}
-        <div className="glass-card p-4 sm:p-5 rounded-2xl border-slate-800 flex items-center gap-3 hover:border-purple-500/30 transition-all relative overflow-hidden group">
+        <div className="gsap-metric-card glass-card p-4 sm:p-5 rounded-2xl border-slate-800 flex items-center gap-3 hover:border-purple-500/30 transition-all relative overflow-hidden group">
           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0 group-hover:scale-110 transition-transform">
             <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <p className="text-lg sm:text-xl font-black text-white truncate">{stats.visitorCount.toLocaleString('id-ID')}</p>
+              <p className="text-lg sm:text-xl font-black text-white truncate">
+                <AnimatedCounter value={stats.visitorCount} duration={2} />
+              </p>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" title="Live Counter"></span>
             </div>
             <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate">Total Pengunjung</p>
@@ -307,45 +459,58 @@ export const OverviewView = ({ setActiveTab }) => {
         </div>
 
         {/* 2. Usaha Terdaftar */}
-        <div className="glass-card p-4 sm:p-5 rounded-2xl border-slate-800 flex items-center gap-3 hover:border-indigo-500/30 transition-all group">
+        <div className="gsap-metric-card glass-card p-4 sm:p-5 rounded-2xl border-slate-800 flex items-center gap-3 hover:border-indigo-500/30 transition-all group">
           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0 group-hover:scale-110 transition-transform">
             <Storefront className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div className="min-w-0">
-            <p className="text-lg sm:text-xl font-black text-white truncate">{stats.umkmCount.toLocaleString('id-ID')}</p>
+            <p className="text-lg sm:text-xl font-black text-white truncate">
+              <AnimatedCounter value={stats.umkmCount} duration={1.5} />
+            </p>
             <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate">Usaha Terdaftar</p>
           </div>
         </div>
 
         {/* 3. Influencer */}
-        <div className="glass-card p-4 sm:p-5 rounded-2xl border-slate-800 flex items-center gap-3 hover:border-amber-500/30 transition-all group">
+        <div className="gsap-metric-card glass-card p-4 sm:p-5 rounded-2xl border-slate-800 flex items-center gap-3 hover:border-amber-500/30 transition-all group">
           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0 group-hover:scale-110 transition-transform">
             <UsersThree className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div className="min-w-0">
-            <p className="text-lg sm:text-xl font-black text-white truncate">{stats.influencerCount.toLocaleString('id-ID')}</p>
+            <p className="text-lg sm:text-xl font-black text-white truncate">
+              <AnimatedCounter value={stats.influencerCount} duration={1.5} />
+            </p>
             <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate">Influencer</p>
           </div>
         </div>
 
         {/* 4. Siaran Press Releases */}
-        <div className="glass-card p-4 sm:p-5 rounded-2xl border-slate-800 flex items-center gap-3 hover:border-blue-500/30 transition-all group">
+        <div className="gsap-metric-card glass-card p-4 sm:p-5 rounded-2xl border-slate-800 flex items-center gap-3 hover:border-blue-500/30 transition-all group">
           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0 group-hover:scale-110 transition-transform">
             <Newspaper className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div className="min-w-0">
-            <p className="text-lg sm:text-xl font-black text-white truncate">{stats.prCount.toLocaleString('id-ID')}</p>
+            <p className="text-lg sm:text-xl font-black text-white truncate">
+              <AnimatedCounter value={stats.prCount} duration={1.5} />
+            </p>
             <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate">Press Releases</p>
           </div>
         </div>
 
         {/* 5. Tingkat Keberhasilan Kolaborasi */}
-        <div className="glass-card p-4 sm:p-5 rounded-2xl border-slate-800 flex items-center gap-3 hover:border-emerald-500/30 transition-all group col-span-2 sm:col-span-1 lg:col-span-1">
+        <div className="gsap-metric-card glass-card p-4 sm:p-5 rounded-2xl border-slate-800 flex items-center gap-3 hover:border-emerald-500/30 transition-all group col-span-2 sm:col-span-1 lg:col-span-1">
           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 group-hover:scale-110 transition-transform">
             <Handshake className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div className="min-w-0">
-            <p className="text-lg sm:text-xl font-black text-white truncate">{stats.collabSuccessRate}</p>
+            <p className="text-lg sm:text-xl font-black text-white truncate">
+              <AnimatedCounter 
+                value={parseFloat(stats.collabSuccessRate) || 98.4} 
+                suffix="%" 
+                decimals={1} 
+                duration={2} 
+              />
+            </p>
             <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate">Keberhasilan Kolaborasi</p>
           </div>
         </div>
@@ -399,6 +564,8 @@ export const OverviewView = ({ setActiveTab }) => {
                     <img
                       src={product.image_url || PRESET_IMAGES[idx % PRESET_IMAGES.length]}
                       alt={product.title}
+                      loading="lazy"
+                      decoding="async"
                       onError={(e) => {
                         e.target.onerror = null;
                         e.target.src = PRESET_IMAGES[idx % PRESET_IMAGES.length];
@@ -438,7 +605,7 @@ export const OverviewView = ({ setActiveTab }) => {
       {/* ========================================================================= */}
       {/* SECTION 2: MARKETPLACE KOL (Urutan Kedua)                                 */}
       {/* ========================================================================= */}
-      <section className="space-y-6">
+      <section ref={kolSectionRef} className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider">
@@ -475,7 +642,7 @@ export const OverviewView = ({ setActiveTab }) => {
                 <div
                   key={inf.id}
                   onClick={() => setActiveTab(`influencer/detail/${slug}`)}
-                  className="glass-card rounded-3xl p-5 sm:p-6 border-slate-800 hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-300 flex flex-col justify-between group cursor-pointer space-y-4"
+                  className="gsap-kol-card glass-card rounded-3xl p-5 sm:p-6 border-slate-800 hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-300 flex flex-col justify-between group cursor-pointer space-y-4"
                 >
                   <div className="space-y-3.5">
                     <div className="flex items-start justify-between gap-3">

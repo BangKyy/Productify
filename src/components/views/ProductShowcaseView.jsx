@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import gsap from 'gsap';
 import { Breadcrumb } from '../ui/Breadcrumb';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -113,7 +114,14 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
   const fetchProducts = async () => {
     setLoading(true);
     const data = await dataService.getProducts();
-    setProducts(data);
+    const uniqueMap = new Map();
+    (Array.isArray(data) ? data : []).forEach(p => {
+      if (p) {
+        const key = p.id ? `id:${p.id}` : `title:${(p.title || '').toLowerCase().trim()}`;
+        if (!uniqueMap.has(key)) uniqueMap.set(key, p);
+      }
+    });
+    setProducts(Array.from(uniqueMap.values()));
     setLoading(false);
   };
 
@@ -129,6 +137,38 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
     const matchesCategory = selectedCategory === 'ALL' || p.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const gridRef = useRef(null);
+
+  useEffect(() => {
+    if (gridRef.current && filteredProducts.length > 0) {
+      const ctx = gsap.context(() => {
+        const mm = gsap.matchMedia();
+
+        mm.add({
+          isDesktop: "(min-width: 768px)",
+          isMobile: "(max-width: 767px)"
+        }, (context) => {
+          const { isMobile } = context.conditions;
+
+          gsap.fromTo(
+            '.gsap-product-card',
+            { opacity: 0, y: isMobile ? 18 : 30, scale: isMobile ? 0.97 : 0.95 },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: isMobile ? 0.4 : 0.55,
+              stagger: isMobile ? 0.05 : 0.08,
+              ease: 'power2.out',
+              clearProps: 'transform,opacity'
+            }
+          );
+        });
+      }, gridRef);
+      return () => ctx.revert();
+    }
+  }, [filteredProducts]);
 
   const handleOpenAddModal = () => {
     if (!isAuthenticated) {
@@ -427,7 +467,7 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
           <p className="text-sm text-slate-400">Klik "Tambah Produk Baru" untuk mendaftarkan inovasi produk UMKM Anda.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map(product => {
             const ownerProfile = Array.isArray(profiles) ? profiles.find(p => p.id === product.owner_id) : null;
             const ownerName = ownerProfile?.full_name || product.owner_name || 'Brand UMKM';
@@ -435,13 +475,15 @@ export const ProductShowcaseView = ({ setActiveTab }) => {
             return (
               <div
                 key={product.id}
-                className="glass-card rounded-3xl overflow-hidden border-slate-800 hover:border-indigo-500/40 transition-all flex flex-col justify-between group"
+                className="gsap-product-card glass-card rounded-3xl overflow-hidden border-slate-800 hover:border-indigo-500/40 transition-all flex flex-col justify-between group"
               >
                 {/* Product Image */}
                 <div className="relative h-48 overflow-hidden bg-slate-900">
                   <img
                     src={product.image_url || PRESET_IMAGES[0]}
                     alt={product.title}
+                    loading="lazy"
+                    decoding="async"
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src = PRESET_IMAGES[0];

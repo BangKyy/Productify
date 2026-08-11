@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import gsap from 'gsap';
 import { Breadcrumb } from '../ui/Breadcrumb';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
@@ -428,6 +429,39 @@ export const MarketplaceView = ({ activeTab, setActiveTab }) => {
       }
       return 0;
     });
+
+  const gridRef = useRef(null);
+
+  // GSAP animation for staggered influencer cards entrance across laptop and mobile
+  useEffect(() => {
+    if (gridRef.current && filteredInfluencers.length > 0) {
+      const ctx = gsap.context(() => {
+        const mm = gsap.matchMedia();
+
+        mm.add({
+          isDesktop: "(min-width: 768px)",
+          isMobile: "(max-width: 767px)"
+        }, (context) => {
+          const { isMobile } = context.conditions;
+
+          gsap.fromTo(
+            '.gsap-marketplace-card',
+            { opacity: 0, y: isMobile ? 18 : 30, scale: isMobile ? 0.97 : 0.96 },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: isMobile ? 0.4 : 0.55,
+              stagger: isMobile ? 0.05 : 0.08,
+              ease: 'power2.out',
+              clearProps: 'transform,opacity'
+            }
+          );
+        });
+      }, gridRef);
+      return () => ctx.revert();
+    }
+  }, [filteredInfluencers]);
 
   const handleOpenPropose = (influencer) => {
     if (!isAuthenticated) {
@@ -1194,11 +1228,11 @@ export const MarketplaceView = ({ activeTab, setActiveTab }) => {
           <p className="text-xs sm:text-sm text-slate-400">Coba atur ulang kata kunci pencarian atau spesifikasi filter Anda.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {filteredInfluencers.map(inf => (
             <Card
               key={inf.id}
-              className="flex flex-col justify-between group hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-300 cursor-pointer p-4 sm:p-6 rounded-3xl"
+              className="gsap-marketplace-card flex flex-col justify-between group hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-300 cursor-pointer p-4 sm:p-6 rounded-3xl"
               onClick={() => handleOpenDetail(inf)}
             >
               

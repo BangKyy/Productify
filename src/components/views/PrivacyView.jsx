@@ -137,7 +137,7 @@ export const PrivacyView = ({ setActiveTab }) => {
           <h3 className="text-sm font-bold text-white flex items-center gap-2 justify-center sm:justify-start">
             <EnvelopeSimple className="w-4 h-4 text-indigo-400" /> Memiliki Pertanyaan Privasi Khusus?
           </h3>
-          <p className="text-xs text-slate-400">Hubungi Data Protection Officer kami melalui email <strong>privacy@productify.id</strong>.</p>
+          <p className="text-xs text-slate-400">Hubungi Data Protection Officer kami melalui email <strong>productify.pr@gmail.com</strong>.</p>
         </div>
         <button
           onClick={() => setActiveTab('faq')}
