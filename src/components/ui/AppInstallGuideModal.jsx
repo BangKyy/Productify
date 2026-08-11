@@ -33,20 +33,9 @@ export const AppInstallGuideModal = () => {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // Listen for custom trigger to re-open modal anytime (e.g. from footer/navbar)
+    // Listen for custom trigger to re-open modal anytime (e.g. from navbar/footer)
     const handleOpenCustom = () => setOpen(true);
     window.addEventListener('productify_open_install_modal', handleOpenCustom);
-
-    // Auto open modal on FIRST VISIT if not installed standalone and not previously dismissed
-    if (!inStandalone) {
-      const hasSeenGuide = localStorage.getItem('productify_app_install_guided_v1');
-      if (!hasSeenGuide) {
-        const timer = setTimeout(() => {
-          setOpen(true);
-        }, 900);
-        return () => clearTimeout(timer);
-      }
-    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);

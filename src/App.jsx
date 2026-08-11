@@ -22,6 +22,7 @@ import { PrivacyView } from './components/views/PrivacyView';
 import { FaqView } from './components/views/FaqView';
 import { CookieConsentToast } from './components/ui/CookieConsentToast';
 import { AppInstallGuideModal } from './components/ui/AppInstallGuideModal';
+import { InstallTopBanner } from './components/layout/InstallTopBanner';
 
 // Route path mappings
 const PATH_TO_TAB = {
@@ -186,6 +187,7 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-purple-500 selection:text-white font-sans">
       <div>
+        <InstallTopBanner />
         <Navbar activeTab={activeTab} setActiveTab={handleTabChange} />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
           {renderView()}

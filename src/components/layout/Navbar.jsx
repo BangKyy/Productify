@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useToast } from '../../context/ToastContext';
 import { dataService, getItemDedupeKey } from '../../lib/supabase';
 import { Button } from '../ui/Button';
 import LogoWhite from '../../assets/Logo_White.png';
@@ -29,7 +30,8 @@ import {
   ShieldCheck,
   Sparkle,
   ClockCounterClockwise,
-  Info
+  Info,
+  DownloadSimple
 } from '@phosphor-icons/react';
 
 const ROLE_BADGE_STYLE = {
@@ -42,9 +44,38 @@ const ROLE_BADGE_STYLE = {
 export const Navbar = ({ activeTab, setActiveTab }) => {
   const { currentProfile, currentRole, isAuthenticated, pendingUser, logoutUser } = useAuth();
   const { lang, setLang, t } = useLanguage();
+  const { toast } = useToast();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(true);
   const [pendingNotificationCount, setPendingNotificationCount] = useState(0);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    const inStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    setIsStandalone(inStandalone);
+
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        if (toast?.success) toast.success('Terima kasih telah mengunduh aplikasi PRoductify!');
+      }
+      setDeferredPrompt(null);
+    } else {
+      window.dispatchEvent(new CustomEvent('productify_open_install_modal'));
+    }
+  };
 
   const isFullyOnboarded = Boolean(
     isAuthenticated &&

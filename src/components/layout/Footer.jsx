@@ -84,9 +84,9 @@ export const Footer = ({ setActiveTab }) => {
               <li>
                 <button 
                   onClick={() => window.dispatchEvent(new CustomEvent('productify_open_install_modal'))} 
-                  className="text-purple-400 font-extrabold hover:text-purple-300 transition-colors cursor-pointer text-left flex items-center gap-1.5"
+                  className="hover:text-purple-400 transition-colors cursor-pointer text-left flex items-center gap-1.5"
                 >
-                  <span>⚡ Unduh / Install App</span>
+                  <span>Unduh / Install App</span>
                 </button>
               </li>
             </ul>
