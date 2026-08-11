@@ -21,7 +21,6 @@ import { TermsView } from './components/views/TermsView';
 import { PrivacyView } from './components/views/PrivacyView';
 import { FaqView } from './components/views/FaqView';
 import { CookieConsentToast } from './components/ui/CookieConsentToast';
-import { AppInstallGuideModal } from './components/ui/AppInstallGuideModal';
 import { InstallTopBanner } from './components/layout/InstallTopBanner';
 
 // Route path mappings
@@ -195,7 +194,6 @@ function AppContent() {
       </div>
       <Footer setActiveTab={handleTabChange} />
       <CookieConsentToast />
-      <AppInstallGuideModal />
     </div>
   );
 }

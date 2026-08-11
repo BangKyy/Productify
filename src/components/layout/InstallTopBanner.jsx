@@ -21,8 +21,17 @@ export const InstallTopBanner = () => {
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-  }, []);
+
+    const handleDirectTrigger = () => {
+      handleInstallApp();
+    };
+    window.addEventListener('productify_trigger_direct_install', handleDirectTrigger);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('productify_trigger_direct_install', handleDirectTrigger);
+    };
+  }, [deferredPrompt, toast]);
 
   const handleDismiss = () => {
     sessionStorage.setItem('productify_top_banner_dismissed', 'true');
@@ -34,12 +43,14 @@ export const InstallTopBanner = () => {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {
-        if (toast?.success) toast.success('Terima kasih telah memasang aplikasi PRoductify!');
+        if (toast?.success) toast.success('Terima kasih telah mengunduh & memasang aplikasi PRoductify!');
         setVisible(false);
       }
       setDeferredPrompt(null);
     } else {
-      window.dispatchEvent(new CustomEvent('productify_open_install_modal'));
+      if (toast?.info) {
+        toast.info('Permintaan unduh aplikasi telah dipicu langsung dari peramban Anda.');
+      }
     }
   };
 

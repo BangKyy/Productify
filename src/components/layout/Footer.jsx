@@ -83,7 +83,7 @@ export const Footer = ({ setActiveTab }) => {
               </li>
               <li>
                 <button 
-                  onClick={() => window.dispatchEvent(new CustomEvent('productify_open_install_modal'))} 
+                  onClick={() => window.dispatchEvent(new CustomEvent('productify_trigger_direct_install'))} 
                   className="hover:text-purple-400 transition-colors cursor-pointer text-left flex items-center gap-1.5"
                 >
                   <span>Unduh / Install App</span>
