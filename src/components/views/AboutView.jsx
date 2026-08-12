@@ -1,20 +1,20 @@
 import React from 'react';
-import { 
-  Sparkle, 
-  Target, 
-  RocketLaunch, 
-  ShieldCheck, 
-  UsersThree, 
-  Package, 
-  Newspaper, 
-  CurrencyDollar, 
-  Clock, 
-  Lightning, 
-  CheckCircle, 
-  TrendUp, 
-  Heart, 
-  Handshake, 
-  Globe, 
+import {
+  Sparkle,
+  Target,
+  RocketLaunch,
+  ShieldCheck,
+  UsersThree,
+  Package,
+  Newspaper,
+  CurrencyDollar,
+  Clock,
+  Lightning,
+  CheckCircle,
+  TrendUp,
+  Heart,
+  Handshake,
+  Globe,
   Quotes,
   Star,
   Info
@@ -25,7 +25,7 @@ import { Breadcrumb } from '../ui/Breadcrumb';
 export const AboutView = ({ setActiveTab }) => {
   return (
     <div className="space-y-12 max-w-7xl mx-auto pb-16">
-      
+
       {/* Breadcrumb Navigation */}
       <div>
         <Breadcrumb items={[{ label: 'Tentang Kami', icon: Info }]} setActiveTab={setActiveTab} />
@@ -46,7 +46,7 @@ export const AboutView = ({ setActiveTab }) => {
           </h1>
 
           <p className="text-base sm:text-lg text-slate-300 leading-relaxed">
-            PRoductify adalah ekosistem digital perintis yang dirancang untuk menjembatani Brand UMKM, Agency, dan Influencer di seluruh Indonesia. Kami merevolusi cara kerja kolaborasi promosi menjadi lebih terstruktur, transparan, dan efisien.
+            PRoductify adalah ekosistem digital perintis yang dirancang untuk menjembatani Brand UMKM, Agency dan Influencer di seluruh Indonesia. Kami merevolusi cara kerja kolaborasi promosi menjadi lebih terstruktur dan efisien.
           </p>
 
           {/* Core Vision & Mission Cards */}
@@ -135,7 +135,7 @@ export const AboutView = ({ setActiveTab }) => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          
+
           {/* Alasan 1: Form Rate Card Pintar */}
           <div className="glass-card p-6 rounded-2xl border-slate-800 bg-slate-900/60 space-y-3 hover:border-purple-500/30 transition-all">
             <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 w-fit">
@@ -208,7 +208,7 @@ export const AboutView = ({ setActiveTab }) => {
       {/* 👥 Keuntungan Berdasarkan Peran Pengguna */}
       <div className="glass-card p-8 rounded-3xl border-slate-800 bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 space-y-6">
         <h3 className="text-2xl font-extrabold text-white text-center">Manfaat Khusus untuk Setiap Peran</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="p-5 rounded-2xl bg-purple-500/10 border border-purple-500/20 space-y-2">
             <span className="text-xs font-bold text-purple-300 uppercase tracking-wider block">Untuk Brand UMKM</span>
