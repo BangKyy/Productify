@@ -856,7 +856,7 @@ export const MarketplaceView = ({ activeTab, setActiveTab }) => {
               {/* Brand & Produk */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-semibold text-amber-300 mb-1">Nama Brand / Perusahaan <span className="text-rose-400">*</span></label>
+                  <label className="block text-[11px] font-semibold text-amber-300 mb-1">Nama Brand / Perusahaan</label>
                   <input
                     type="text"
                     placeholder="Contoh: Kopi Nusantara"
@@ -880,7 +880,7 @@ export const MarketplaceView = ({ activeTab, setActiveTab }) => {
 
               {/* Tujuan Kampanye */}
               <div>
-                <label className="block text-[11px] font-semibold text-amber-300 mb-1">Tujuan / Objektif Kampanye <span className="text-rose-400">*</span></label>
+                <label className="block text-[11px] font-semibold text-amber-300 mb-1">Tujuan / Objektif Kampanye</label>
                 <select
                   value={rateCardForm.campaign_objective}
                   onChange={(e) => setRateCardForm(p => ({ ...p, campaign_objective: e.target.value }))}
@@ -1487,7 +1487,7 @@ export const MarketplaceView = ({ activeTab, setActiveTab }) => {
           <form onSubmit={handleSubmitRateCard} className="space-y-4 pt-1 max-h-[65vh] overflow-y-auto pr-1">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-semibold text-amber-300 mb-1">Nama Brand / Perusahaan <span className="text-rose-400">*</span></label>
+                <label className="block text-[11px] font-semibold text-amber-300 mb-1">Nama Brand / Perusahaan</label>
                 <input type="text" placeholder="Contoh: Kopi Nusantara" value={rateCardForm.brand_name}
                   onChange={(e) => setRateCardForm(p => ({ ...p, brand_name: e.target.value }))} required
                   className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-amber-500" />
@@ -1501,7 +1501,7 @@ export const MarketplaceView = ({ activeTab, setActiveTab }) => {
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-amber-300 mb-1">Tujuan Kampanye <span className="text-rose-400">*</span></label>
+              <label className="block text-[11px] font-semibold text-amber-300 mb-1">Tujuan Kampanye</label>
               <BottomSheetSelect
                 title="Pilih Tujuan / Objektif Kampanye"
                 options={CAMPAIGN_OBJECTIVE_OPTIONS}

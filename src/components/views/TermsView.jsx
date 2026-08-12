@@ -60,7 +60,7 @@ export const TermsView = ({ setActiveTab }) => {
           </h2>
           <div className="text-xs sm:text-sm text-slate-300 leading-relaxed space-y-2">
             <p>
-              1.1. Platform **PRoductify** merupakan ekosistem Digital Public Relations terpadu yang menghubungkan pemilik UMKM/Brand, Content Creator/Influencer, dan Agency Media PR di Indonesia.
+              1.1. Platform PRoductify merupakan ekosistem Digital Public Relations terpadu yang menghubungkan pemilik UMKM/Brand, Content Creator/Influencer, dan Agency Media PR di Indonesia.
             </p>
             <p>
               1.2. Pengguna wajib berusia minimal 17 tahun atau memiliki legalitas badan usaha/izin usaha resmi yang diakui di wilayah Hukum Republik Indonesia saat mendaftar akun.

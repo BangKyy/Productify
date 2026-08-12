@@ -46,7 +46,7 @@ export const AboutView = ({ setActiveTab }) => {
           </h1>
 
           <p className="text-base sm:text-lg text-slate-300 leading-relaxed">
-            PRoductify adalah ekosistem digital perintis yang dirancang untuk menjembatani **Brand UMKM**, **Agency**, dan **Influencer** di seluruh Indonesia. Kami merevolusi cara kerja kolaborasi promosi menjadi lebih terstruktur, transparan, dan efisien.
+            PRoductify adalah ekosistem digital perintis yang dirancang untuk menjembatani Brand UMKM, Agency, dan Influencer di seluruh Indonesia. Kami merevolusi cara kerja kolaborasi promosi menjadi lebih terstruktur, transparan, dan efisien.
           </p>
 
           {/* Core Vision & Mission Cards */}

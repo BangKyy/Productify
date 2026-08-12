@@ -60,10 +60,10 @@ export const PrivacyView = ({ setActiveTab }) => {
               Saat Anda mendaftar atau mengelola profil di PRoductify, kami mengumpulkan informasi terbatas yang diperlukan untuk pengoperasian platform:
             </p>
             <ul className="list-disc pl-5 space-y-1 text-slate-400">
-              <li>**Identitas Akun**: Nama Lengkap / Nama Bisnis, Alamat Email terdaftar.</li>
-              <li>**Informasi Kontak**: Nomor WhatsApp (terformat otomatis +62) dan Alamat / Kota Domisili.</li>
-              <li>**Informasi Peran & Spesialisasi**: Peran akun (UMKM, Influencer, Agency), Kategori spesialisasi, dan Estimasi Followers.</li>
-              <li>**Tautan Resmi Media Sosial**: Username TikTok, Instagram, YouTube, X, Threads, dan LinkedIn yang Anda inputkan secara sukarela.</li>
+              <li>Identitas Akun: Nama Lengkap / Nama Bisnis, Alamat Email terdaftar.</li>
+              <li>Informasi Kontak: Nomor WhatsApp (terformat otomatis +62) dan Alamat / Kota Domisili.</li>
+              <li>Informasi Peran & Spesialisasi: Peran akun (UMKM, Influencer, Agency), Kategori spesialisasi, dan Estimasi Followers.</li>
+              <li>Tautan Resmi Media Sosial: Username TikTok, Instagram, YouTube, X, Threads, dan LinkedIn yang Anda inputkan secara sukarela.</li>
             </ul>
           </div>
         </div>
@@ -95,10 +95,10 @@ export const PrivacyView = ({ setActiveTab }) => {
           </h2>
           <div className="text-xs sm:text-sm text-slate-300 leading-relaxed space-y-2">
             <p>
-              3.1. Seluruh data pengguna disimpan dalam infrastruktur basis data PostgreSQL Supabase yang dilengkapi dengan **Row Level Security (RLS)** dan enkripsi SSL/TLS.
+              3.1. Seluruh data pengguna disimpan dalam infrastruktur basis data PostgreSQL Supabase yang dilengkapi dengan Row Level Security (RLS) dan enkripsi SSL/TLS.
             </p>
             <p>
-              3.2. Kami **tidak pernah menjual, menyewakan, atau memperjualbelikan** data pribadi Anda kepada pihak ketiga manapun di luar ekosistem PRoductify.
+              3.2. Kami tidak pernah menjual, menyewakan, atau memperjualbelikan data pribadi Anda kepada pihak ketiga manapun di luar ekosistem PRoductify.
             </p>
           </div>
         </div>
@@ -124,7 +124,7 @@ export const PrivacyView = ({ setActiveTab }) => {
           </h2>
           <div className="text-xs sm:text-sm text-slate-300 leading-relaxed space-y-2">
             <p>
-              Anda berhak mengakses, memperbarui, atau menghapus informasi akun Anda kapan saja melalui halaman **Manajemen Profil Saya** (`/profile`). Jika Anda membutuhkan bantuan penghapusan total akun, Anda dapat menghubungi tim privasi kami.
+              Anda berhak mengakses, memperbarui, atau menghapus informasi akun Anda kapan saja melalui halaman Manajemen Profil Saya (`/profile`). Jika Anda membutuhkan bantuan penghapusan total akun, Anda dapat menghubungi tim privasi kami.
             </p>
           </div>
         </div>

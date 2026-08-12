@@ -255,7 +255,7 @@ export const RoleSelectionView = ({ setActiveTab }) => {
 
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Jenis Kelamin (Gender) <span className="text-purple-400">*</span>
+                Jenis Kelamin (Gender)
               </label>
               <select
                 value={gender}
@@ -300,7 +300,7 @@ export const RoleSelectionView = ({ setActiveTab }) => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-amber-200 mb-1.5">
-                  Kategori Spesialisasi KOL <span className="text-rose-400">*</span>
+                  Kategori Spesialisasi KOL
                 </label>
                 <select
                   value={category}
@@ -320,7 +320,7 @@ export const RoleSelectionView = ({ setActiveTab }) => {
 
               <div>
                 <label className="block text-xs font-semibold text-amber-200 mb-1.5">
-                  Jenis Kelamin (Gender) <span className="text-rose-400">*</span>
+                  Jenis Kelamin (Gender)
                 </label>
                 <select
                   value={gender}
